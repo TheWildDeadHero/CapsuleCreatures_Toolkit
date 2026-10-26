@@ -18,7 +18,7 @@ editor/             the CapsuleCreatures editor (Python; see editor/README.md)
                     plugins (extension host), extensions (the studio's own extensions)
 toolkit/            the toolkit's Python environment
   env.py            creates and updates .venv, runs the tools in it (standard library only)
-  requirements/     pinned packages per group: core (headless tools), ui (editors)
+  requirements/     pinned packages per group: core (headless tools), ui (editors), audio (playing sound in them)
 studio              starts the Studio, every editor in one window (studio.cmd on Windows)
 scene-editor        starts the scene editor (scene-editor.cmd on Windows)
 map-editor          starts the map editor (map-editor.cmd on Windows)
@@ -31,6 +31,7 @@ object-editor       starts the object editor (object-editor.cmd on Windows)
 location-editor     starts the location editor (location-editor.cmd on Windows)
 script-editor       starts the script editor (script-editor.cmd on Windows)
 project-settings    starts the project settings window (project-settings.cmd on Windows)
+audio-editor        starts the audio editor: songs, instruments, samples, MIDI import, sound effects (audio-editor.cmd)
 capsule-studio      the command-line tools (capsule-studio.cmd on Windows)
 Doxyfile            documentation rule for the Python sources (warnings are errors)
 ```
@@ -93,6 +94,7 @@ and the panel in `capsule_studio/ui/editors/`.
 ./location-editor path/to/world.json        # Windows: location-editor.cmd
 ./script-editor path/to/scripts.json        # Windows: script-editor.cmd
 ./project-settings path/to/reference/project.json   # Windows: project-settings.cmd
+./audio-editor path/to/audio.json           # Windows: audio-editor.cmd
 ./capsule-studio validate path/to/assets.json
 ```
 
@@ -116,6 +118,16 @@ python3 toolkit/env.py setup --core-only   # headless tools only (CI, containers
 
 It needs Python 3.10 or later; if `python3` is older, the toolkit looks for
 a newer one (`python3.12`, the Windows `py` launcher, ...) and uses that.
+
+The audio editor and the studio window also install the **audio** group
+(`PySide6-Addons`, Qt Multimedia, at the same version as PySide6), so
+**Play** sounds inside the editor; `setup` installs it too. It is optional:
+when it can't be installed (no wheel for the platform, a `wheels/` folder
+without it) the toolkit warns, the tools start anyway, and Play hands the WAV
+to the system's player, as it also does on a machine without an audio output
+device. A launch doesn't try a failed audio install again; `setup` does, and
+`status` shows it as "install failed (optional ...)" without failing
+`status --check`.
 
 **Machines without internet access.** On a connected machine, download the
 pinned packages as wheel files, for the target platform if it differs:

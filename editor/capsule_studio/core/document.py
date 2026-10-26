@@ -95,6 +95,9 @@ EMPTY = {
    # steps and transitions default to the engine's (screen_plans.empty() writes them out).
    "capsule.screen-plan/1": {"schema": "capsule.screen-plan/1", "name": "untitled", "assets": "../assets.json",
                              "mode": 0, "layers": [], "palettes": [], "windows": [], "sheets": [], "sprites": []},
+   # [S7] The audio manifest of a game (engine M4, D-34: tools/audio/format.py; core.audio.empty() writes the
+   # default mixer and players into a new one; no apostrophes here: Doxygen reads them as quotes).
+   "capsule.audio/1": {"schema": "capsule.audio/1", "players": [], "song_table": []},
 }
 ## Undo steps kept.
 HISTORY_LIMIT = 200

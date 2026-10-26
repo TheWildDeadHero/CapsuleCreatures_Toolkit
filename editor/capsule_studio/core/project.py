@@ -21,7 +21,9 @@ from .document import Document, DocumentError
 SCHEMA = "capsule.project/1"
 ## Data files a project manifest may name, as (key, what it is), in the Studio's page order.
 GAME_FILES = (("maps", "world (capsule.world/1)"), ("assets", "asset manifest (capsule.assets/1)"),
-              ("scripts", "scripts manifest (capsule.scripts/1)"), ("battle", "battle data (capsule.battle/1)"))
+              ("scripts", "scripts manifest (capsule.scripts/1)"), ("battle", "battle data (capsule.battle/1)"),
+              # [S7] engine M4: the audio manifest (the engine's capsule_audio_game() reads the same key)
+              ("audio", "audio manifest (capsule.audio/1)"))
 ## ROM wait states (first access, sequential access) the VRAM queue's cost table assumes (the engine's default WAITCNT).
 EXPECTED_ROM_WAIT_STATES = (3, 1)
 

@@ -36,7 +36,9 @@ COMMAND_MODULES = ["assets_cmds", "sprite_cmds", "text_cmds", "world_cmds", "fie
                    # [S6] engine UC / UM (D-33): screen graphics, screen plans, the GBA memory settings and report
                    "screen_cmds",
                    # [S6b] engine C13b: the world's cell interaction rules
-                   "interaction_cmds"]
+                   "interaction_cmds",
+                   # [S7] engine M4 (D-34): the audio manifest (songs, instruments, samples, MIDI, sounds)
+                   "audio_cmds"]
 ## Modules (relative to this package) that add actions to the `battle FILE` group (each has a
 ## register_actions(subparsers) function; battle_cmds calls them).
 BATTLE_ACTION_MODULES = ["structure_cmds", "tier_stage_cmds", "condition_cmds", "turn_progress_cmds", "logic_cmds",

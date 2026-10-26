@@ -12,7 +12,9 @@
             Build from the "MSYS2 UCRT64" shell.
    Toolkit: python.org's Python 3.12 (winget; MSYS2's Python can't load PySide6),
             then the editors' Python environment in .venv in this repository, with
-            the pinned packages from toolkit\requirements\. Nothing system-wide.
+            the pinned packages from toolkit\requirements\ (PySide6, and PySide6-Addons
+            for playing audio in the editors: optional, without it or without an audio
+            device Play uses the system's player). Nothing system-wide.
 
    Shows the plan and asks before changing anything, can be re-run safely, never
    upgrades MSYS2 as a whole, and ends by verifying every component.
@@ -84,6 +86,7 @@ if ($DoGba) {
 }
 if ($DoDesktop) {
    Note "Toolkit: create $StudioRoot\.venv and install the editors' pinned Python packages into it."
+   Note "     Audio playback in the editors (PySide6-Addons) is optional: if it can't be installed, Play uses the system's player."
 }
 Note 'Nothing else is upgraded.'
 if (-not (Confirm-Continue 'Continue?')) { Fail 'cancelled, nothing was changed' }

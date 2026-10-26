@@ -22,6 +22,12 @@ platform or for others (--platform, e.g. win_amd64, manylinux_2_28_x86_64,
 macosx_13_0_universal2). Only binary wheels are ever installed, so no package
 code runs at install time.
 
+The editors that play audio (audio-editor, studio) also install the optional
+"audio" group (Qt Multimedia from PySide6-Addons, toolkit/requirements/
+audio.txt), and so does `setup`. When it cannot be installed (no wheel for the
+platform, an offline wheel folder without it) the tools start anyway and Play
+uses the system's player; a launch does not try again, `setup` does.
+
 Uses only the standard library and starts on Python 3.7 or later; if the interpreter
 that started it is older than MIN_PYTHON, it looks for a newer one and hands
 over to it.
@@ -53,8 +59,14 @@ TOOLKIT = Path(__file__).resolve().parent
 ROOT = TOOLKIT.parent
 ## Pinned requirement files, one per dependency group.
 REQUIREMENTS = TOOLKIT / "requirements"
-## Dependency groups and their files. "core" is what headless tools need.
-GROUPS = {"core": REQUIREMENTS / "core.txt", "ui": REQUIREMENTS / "ui.txt"}
+## Dependency groups and their files. "core" is what headless tools need; "audio" (C14b) is Qt Multimedia for
+## playing audio inside the editors.
+GROUPS = {"core": REQUIREMENTS / "core.txt", "ui": REQUIREMENTS / "ui.txt", "audio": REQUIREMENTS / "audio.txt"}
+## Optional groups and what works without them: a failed install warns and the tools start anyway (a launch does
+## not retry it; `setup` does).
+OPTIONAL = {"audio": "audio plays in the system's player instead of inside the editor"}
+## The state file's mark of an optional group whose install failed (followed by the digest it was tried with).
+FAILED_MARK = "failed:"
 ## Tools: name -> (module run with -m, dependency groups it needs).
 TOOLS = {
    "capsule-studio": ("capsule_studio.cli", ["core"]),
@@ -69,7 +81,8 @@ TOOLS = {
    "event-editor": ("capsule_studio.ui.event_app", ["core", "ui"]),
    "object-editor": ("capsule_studio.ui.object_app", ["core", "ui"]),
    "location-editor": ("capsule_studio.ui.location_app", ["core", "ui"]),
-   "studio": ("capsule_studio.ui.studio_app", ["core", "ui"]),
+   "audio-editor": ("capsule_studio.ui.audio_app", ["core", "ui", "audio"]),
+   "studio": ("capsule_studio.ui.studio_app", ["core", "ui", "audio"]),
 }
 ## Source folders made importable inside the environment (through a .pth file).
 SOURCE_DIRS = [ROOT / "editor"]
@@ -275,38 +288,49 @@ def link_sources() -> None:
       pth.write_text(text, encoding="utf-8")
 
 
-def pip_install(group: str, wheels: Path | None = None, offline: bool = False) -> None:
+def pip_install(group: str, wheels: Path | None = None, offline: bool = False) -> bool:
    """!Installs one group's pinned packages into the environment.
    @param group    group name
    @param wheels   local wheel folder, or None
    @param offline  never use the network (needs @p wheels)
-   @return None
+   @return True when installed; False when an OPTIONAL group could not be (a required group stops instead)
    """
    packages = requirement_lines(group)
    if not packages:
-      return
+      return True
    cmd = [str(venv_python()), "-m", "pip", "install", "--disable-pip-version-check", "--no-input",
           "--only-binary=:all:", "-r", str(GROUPS[group])]
    if wheels is not None:
       cmd += ["--no-index", "--find-links", str(wheels)]
       say(f"installing {group} packages from {wheels}: {', '.join(packages)}")
    elif offline:
+      if group in OPTIONAL:
+         say(f"skipping the optional {group} packages (offline without a wheel folder): {OPTIONAL[group]}")
+         return False
       fail("offline install needs a wheel folder (wheels/, --wheels or CAPSULE_STUDIO_WHEELS)")
    else:
       say(f"installing {group} packages (first run, or the pins changed): {', '.join(packages)}")
    if subprocess.call(cmd) != 0:
       where = f"the wheels in {wheels}" if wheels else "the package index (network?)"
+      if group in OPTIONAL:
+         say(f"warning: the optional {group} packages could not be installed from {where}: {OPTIONAL[group]}. "
+             "Run 'toolkit/env.py setup' to try again (offline: add their wheels to wheels/, see 'fetch-wheels').")
+         return False
       fail(f"pip could not install the {group} packages from {where}; nothing else was changed. "
            "On machines without network access, copy the wheels into wheels/ (see 'fetch-wheels').")
+   return True
 
 
-def ensure(groups: list[str], wheels: Path | None = None, offline: bool = False, reset: bool = False) -> None:
+def ensure(groups: list[str], wheels: Path | None = None, offline: bool = False, reset: bool = False,
+           retry: bool = False) -> None:
    """!Makes sure the environment exists with these groups installed and
-   current; does nothing when it already is.
+   current; does nothing when it already is. An optional group whose install
+   failed for the current pins is not tried again unless @p retry.
    @param groups   group names
    @param wheels   local wheel folder, or None for wheels_dir()
    @param offline  never use the network
    @param reset    recreate the environment first
+   @param retry    try optional groups that failed before again (setup)
    @return None
    """
    create(reset)
@@ -314,10 +338,10 @@ def ensure(groups: list[str], wheels: Path | None = None, offline: bool = False,
    done = state.setdefault("groups", {})
    wheels = wheels or wheels_dir()
    for g in groups:
-      if done.get(g) != digest(g):
-         pip_install(g, wheels, offline)
-         done[g] = digest(g)
-         save_state(state)
+      if done.get(g) == digest(g) or (done.get(g) == FAILED_MARK + digest(g) and not retry):
+         continue
+      done[g] = digest(g) if pip_install(g, wheels, offline) else FAILED_MARK + digest(g)
+      save_state(state)
    link_sources()
 
 
@@ -329,8 +353,13 @@ def cmd_setup(args: argparse.Namespace) -> int:
    @return exit status
    """
    groups = ["core"] if args.core_only else list(GROUPS)
-   ensure(groups, Path(args.wheels).resolve() if args.wheels else None, args.offline, args.reset)
-   say(f"ready: {venv_dir()} ({', '.join(groups)})")
+   ensure(groups, Path(args.wheels).resolve() if args.wheels else None, args.offline, args.reset, retry=True)
+   done = load_state().get("groups", {})
+   ready = [g for g in groups if done.get(g) == digest(g)]
+   say(f"ready: {venv_dir()} ({', '.join(ready)})")
+   for g in groups:
+      if g not in ready:
+         say(f"without the optional {g} packages: {OPTIONAL[g]}")
    return 0
 
 
@@ -348,8 +377,15 @@ def cmd_status(args: argparse.Namespace) -> int:
    needed = ["core"] if args.core_only else list(GROUPS)
    for g in GROUPS:
       installed = state.get("groups", {}).get(g)
-      mark = "current" if installed == digest(g) else ("outdated" if installed else "not installed")
-      complete = complete and (mark == "current" or g not in needed)
+      if installed == digest(g):
+         mark = "current"
+      elif installed == FAILED_MARK + digest(g):
+         mark = "install failed"
+      else:
+         mark = "outdated" if installed else "not installed"
+      if g in OPTIONAL and mark != "current":
+         mark += f" (optional: {OPTIONAL[g]})"
+      complete = complete and (mark == "current" or g not in needed or g in OPTIONAL)
       print(f"{g + ':':12} {mark}  ({', '.join(requirement_lines(g)) or 'no packages'})")
    w = wheels_dir()
    print(f"wheels:      {w if w else 'none (installs use the package index)'}")
@@ -389,6 +425,9 @@ def cmd_fetch_wheels(args: argparse.Namespace) -> int:
       if args.platform:
          cmd += ["--implementation", "cp", "--python-version", args.python_version]
       if subprocess.call(cmd) != 0:
+         if g in OPTIONAL:
+            say(f"warning: could not download the optional {g} wheels ({OPTIONAL[g]} on the target machine)")
+            continue
          fail(f"could not download the {g} wheels")
    say(f"wheels in {dest}; copy them to wheels/ on the target machine")
    return 0
@@ -405,6 +444,7 @@ def main(argv: list[str] | None = None) -> int:
    sub.required = True
    q = sub.add_parser("setup", help="create or update the environment")
    q.add_argument("--core-only", action="store_true", help="headless tools only (no PySide6), e.g. CI")
+   # the optional groups (audio) are tried on every setup; a failure warns and leaves the rest installed
    q.add_argument("--wheels", metavar="DIR", help="install only from the wheel files in DIR")
    q.add_argument("--offline", action="store_true", help="never use the network")
    q.add_argument("--reset", action="store_true", help="delete and recreate the environment")

@@ -11,7 +11,9 @@ core.project.game_files()) and shows each part of it on a page:
   - Scripts: the script editor;
   - Battle: the battle editor, with its own navigator of Content, Structure
     and Logic pages (its Text page opens the Project page's code page);
-  - Project: the project settings (build settings, code page).
+  - Project: the project settings (build settings, code page);
+  - Audio: [S7] the audio editor (songs, instruments, samples, MIDI import, sound effects) on the manifest the
+    project names under "audio".
 
 Studio > New game... (and the start window's New game...) makes a game
 folder from a battle data template (ui/new_dialog.py, core.templates) and
@@ -25,7 +27,7 @@ page edits.
 Each page is the standalone tool's own window, embedded: the tools stay one
 code base and run by themselves too (map-editor, encounter-editor,
 event-editor, object-editor, location-editor, scene-editor, script-editor,
-battle-editor, project-settings). A page is created the first time it is
+battle-editor, project-settings, audio-editor). A page is created the first time it is
 shown or a file opens in it.
 
 The Studio's menu bar holds its Studio menu, the menus of the page in front
@@ -61,6 +63,7 @@ from . import json_view, profiler
 from .widgets import StartPage, remember_file, report_failure
 
 if TYPE_CHECKING:
+   from .audio_shell import AudioWindow
    from .battle_shell import BattleWindow
    from .project_shell import ProjectWindow
    from .script_shell import ScriptWindow
@@ -117,6 +120,14 @@ def _project_page() -> ProjectWindow:
    """
    from .project_shell import ProjectWindow
    return ProjectWindow()
+
+
+def _audio_page() -> AudioWindow:
+   """![S7] The Audio page: the audio editor's window.
+   @return AudioWindow
+   """
+   from .audio_shell import AudioWindow
+   return AudioWindow()
 
 
 def _opened_world(w: WorldWindow) -> Path | None:
@@ -186,6 +197,7 @@ PAGES = [
    Page("scripts", "Scripts", _scripts_page, "open_project", "scripts", _opened_scripts),
    Page("battle", "Battle", _battle_page, "open_battle", "battle", _opened_battle),
    Page("project", "Project", _project_page, "open_project", "project", _opened_document),
+   Page("audio", "Audio", _audio_page, "open_file", "audio", _opened_document),
 ]
 
 

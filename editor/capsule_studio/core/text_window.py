@@ -25,6 +25,12 @@ S5 (engine N3): the arrow image (Config arrow_kind kArrowImage: an 8-pixel-wide 
 while a wait shows it, step_image_arrow() / erase_image_arrow()) and the menu printing calls print_at() (a text at a
 pixel, nothing typed, waits skipped), fill() and set_colors() that core.menu_styles draws menus with.
 
+C14b (engine E1, M4): the sound controls as window.cpp's text::sound hooks see them: PLAY_SE / PLAY_BGM n (two bytes,
+low first) and PAUSE_MUSIC / RESUME_MUSIC go to the window's PreviewSound (recorded, by frame); WAIT_SE waits in
+PAUSE_SOUND (window::Pause::Sound) until the sound no longer plays: it ends the typed frame as a button wait does, and
+the frame that sees the sound ended still waits (the counter printer returns, the interval printer types nothing that
+frame). With no sound (PreviewSound's 0 frames, the engine's weak default) a WAIT_SE costs exactly those frames.
+
 Qt-free; core.text_boxes.preview() draws a Window's pixels inside the box.
 """
 from __future__ import annotations
@@ -58,8 +64,16 @@ TILE_SIDE = 8
 ESCAPE_HEAD = 2
 ## Control::Colors: where its background and shadow entries are (window.cpp kColorsBackgroundAt, kColorsShadowAt).
 COLORS_BACKGROUND_AT, COLORS_SHADOW_AT = ESCAPE_HEAD + 1, ESCAPE_HEAD + 2
-## The pauses a window waits in (window::Pause).
-PAUSE_NONE, PAUSE_PROMPT, PAUSE_PAGE, PAUSE_SCROLL, PAUSE_SCROLLING, PAUSE_BUTTON, PAUSE_FRAMES = range(7)
+## The pauses a window waits in (window::Pause; C14b: PAUSE_SOUND, window::Pause::Sound, WAIT_SE's).
+PAUSE_NONE, PAUSE_PROMPT, PAUSE_PAGE, PAUSE_SCROLL, PAUSE_SCROLLING, PAUSE_BUTTON, PAUSE_FRAMES, PAUSE_SOUND = range(8)
+## C14b: the pauses a control's code ends the typed frame with (counter typing; window.cpp counter_frame()).
+FRAME_ENDING_PAUSES = (PAUSE_BUTTON, PAUSE_SCROLL, PAUSE_SOUND)
+## C14b: the controls window.cpp hands to text::sound::control() (encode.h Control: Se, Bgm, PauseMusic, ResumeMusic).
+SOUND_CONTROLS = ("se", "bgm", "pause_music", "resume_music")
+## C14b: the controls among them that carry a 16-bit argument (low byte first).
+SOUND_ARGUMENT_CONTROLS = ("se", "bgm")
+## Bits of a byte (the second argument byte of a 16-bit control argument).
+BYTE_BITS = 8
 ## The pauses that wait for a button (window::waiting()).
 BUTTON_PAUSES = (PAUSE_PROMPT, PAUSE_PAGE, PAUSE_SCROLL, PAUSE_BUTTON)
 ## The pauses that blink the arrow (wait_with_arrow()).
@@ -259,16 +273,61 @@ def advance_in(font: CompiledFont, code: int) -> int:
    return text_render.advance(font, code)
 
 
+class PreviewSound:
+   """!C14b: the preview's stand-in for window.cpp's text::sound hooks (the game's sound system): records each sound
+   control with the frame it was read in, and makes a PLAY_SE play for se_frames frames (WAIT_SE waits that long).
+   The default 0 is the engine's weak default: nothing plays, nothing waits.
+   """
+
+   def __init__(self, se_frames: int = 0) -> None:
+      """!A silent sound system.
+      @param se_frames  frames a PLAY_SE plays in the preview
+      """
+      ## Frames a PLAY_SE plays.
+      self.se_frames = max(0, se_frames)
+      ## Frames the effect playing has left.
+      self.left = 0
+      ## The window's frames so far (update() calls).
+      self.frame = 0
+      ## The sound controls read: (frame, control name, argument).
+      self.calls: list[tuple[int, str, int]] = []
+
+   def control(self, name: str, argument: int) -> None:
+      """!text::sound::control(): a sound control was read.
+      @param name      its control name (SOUND_CONTROLS)
+      @param argument  its 16-bit argument (0 without one)
+      @return None
+      """
+      self.calls.append((self.frame, name, argument))
+      if name == SOUND_CONTROLS[0]:
+         self.left = self.se_frames
+
+   def waiting(self) -> bool:
+      """!text::sound::waiting(): whether WAIT_SE still waits.
+      @return True while the effect plays
+      """
+      return self.left > 0
+
+   def step(self) -> None:
+      """!One frame of the sound system (before the window's update reads it, as the vertical blank runs first).
+      @return None
+      """
+      self.frame += 1
+      if self.left > 0:
+         self.left -= 1
+
+
 class Window:
    """!One text window (window::Window): its pixels and its typing state, advanced one frame per update()."""
 
    def __init__(self, settings: Settings, font: CompiledFont, fonts: Mapping[int, CompiledFont] | None = None,
-                placeholders: Mapping[int, Sequence[int]] | None = None) -> None:
+                placeholders: Mapping[int, Sequence[int]] | None = None, sound: PreviewSound | None = None) -> None:
       """!Opens a window (window::open()): its pixels cleared to the background entry.
       @param settings      the window's settings (Config members; typing / speedup as numbers)
       @param font          the window's font
       @param fonts         the fonts Control::Font n selects, or None
       @param placeholders  a field placeholder's argument byte -> the codes it shows, or None (nothing)
+      @param sound         C14b: the sound controls' stand-in, or None (a silent PreviewSound)
       """
       te = text_render.encoder()
       hc = header_constants()
@@ -287,6 +346,8 @@ class Window:
       self.control_codes = {name: code for name, (code, _n) in _controls().items()}
       ## Argument bytes per control code.
       self.control_args = {code: n for code, n in _controls().values()}
+      ## C14b: the sound controls' codes -> their names.
+      self.sound_codes = {self.control_codes[n]: n for n in SOUND_CONTROLS if n in self.control_codes}
       ## window.h's typing / speed-up values.
       self.k = hc
       ## Frames the arrow shows (and hides).
@@ -361,6 +422,8 @@ class Window:
       self.start_y = self.c.get("top", 0)
       ## S6b (C13a): Control::MinSpacing's least advance, 0 when off (each text starts off).
       self.min_spacing = 0
+      ## C14b: the sound controls' stand-in (window.cpp's text::sound).
+      self.sound = sound if sound is not None else PreviewSound()
       if self.open:
          self._clear_all()
 
@@ -604,6 +667,13 @@ class Window:
             self.glyphs = self.fonts[a]
       elif k == c["reset_font"]:
          self.glyphs = self.font
+      elif k in self.sound_codes:
+         # C14b (E1): PLAY_SE / PLAY_BGM n (two bytes, low first), PAUSE_MUSIC / RESUME_MUSIC
+         name = self.sound_codes[k]
+         argument = a | self._code(ESCAPE_HEAD + 1) << BYTE_BITS if name in SOUND_ARGUMENT_CONTROLS else 0
+         self.sound.control(name, argument)
+      elif k == c["wait_se"]:
+         self.pause = PAUSE_SOUND   # C14b (E1): RENDER_STATE_WAIT_SE
       return False
 
    def _new_line(self) -> None:
@@ -809,6 +879,11 @@ class Window:
             if self._scroll_pixels():
                self._go_on()
             return
+         if pause == PAUSE_SOUND:
+            # C14b (E1): RENDER_STATE_WAIT_SE: the frame that sees the sound ended still waits
+            if not self.sound.waiting():
+               self._go_on()
+            return
          if self.src is None:
             return
          if speedup == k["kSpeedupPerFrame"] and held and self.sped_up:
@@ -834,9 +909,9 @@ class Window:
          if c in (te.CODE_CONTROL, te.CODE_PLACEHOLDER):
             drew = c == te.CODE_CONTROL and self._code(1) != te.CODE_END and self._control()
             self.i += self._escape_length()
-            if self.pause in (PAUSE_BUTTON, PAUSE_SCROLL):
+            if self.pause in FRAME_ENDING_PAUSES:
                self.blink = 0
-               return   # a wait ends the frame
+               return   # a wait ends the frame (C14b: WAIT_SE's too)
             if drew and not rush:
                return   # C13a: a Clear of a positive width types as a glyph (RENDER_PRINT)
             continue
@@ -861,10 +936,12 @@ class Window:
       """
       if not self.open:
          return
+      self.sound.step()   # C14b: the frame's sound first (the vertical blank), then the printer reads it
       if self.typing_mode() == self.k["kTypingCounter"]:
          self._counter_frame(pressed, held)
          return
       pause = self.pause   # a local alias (see _counter_frame())
+      sound_ended = False   # C14b (E1): the frame a WAIT_SE ends types nothing
       if pause in ARROW_PAUSES:
          self._wait_with_arrow(pressed)
       elif pause == PAUSE_BUTTON:
@@ -877,7 +954,11 @@ class Window:
             self.frames -= 1
          if self.frames == 0:
             self._go_on()
-      if self.reading():
+      elif pause == PAUSE_SOUND:
+         if not self.sound.waiting():
+            self._go_on()   # as the counter's printer, the next frame types on
+            sound_ended = True
+      if self.reading() and not sound_ended:
          if self.instant or held:
             self._type(True)   # the rest up to the next pause at once
          elif self.timer > 0:
@@ -1007,6 +1088,8 @@ class Run:
    done: int | None = None
    ## Frames that drew at least one new glyph pixel.
    typed: int = 0
+   ## C14b: the sound controls read: (frame, control name, argument) (PreviewSound.calls).
+   sounds: list[tuple[int, str, int]] = field(default_factory=list)
 
    def frame_at(self, n: int) -> bytes:
       """!The pixels after a frame (clamped to the run).
@@ -1053,7 +1136,7 @@ def key_policy(name: str, press_after: int = PRESS_AFTER) -> KeyPolicy:
 
 def run(settings: Settings, font: CompiledFont, codes: Sequence[int], keys: str | KeyPolicy = "advance",
         fonts: Mapping[int, CompiledFont] | None = None, placeholders: Mapping[int, Sequence[int]] | None = None,
-        limit: int = MAX_FRAMES) -> Run:
+        limit: int = MAX_FRAMES, se_frames: int = 0) -> Run:
    """!Types a text to its end, a frame at a time, keeping every frame's pixels.
    @param settings      the window's settings
    @param font          its font
@@ -1062,9 +1145,10 @@ def run(settings: Settings, font: CompiledFont, codes: Sequence[int], keys: str 
    @param fonts         the Font control's fonts, or None
    @param placeholders  what field placeholders show, or None
    @param limit         most frames
+   @param se_frames     C14b: frames a PLAY_SE plays (WAIT_SE waits for it; 0: nothing plays, as the engine alone)
    @return Run
    """
-   w = Window(settings, font, fonts, placeholders)
+   w = Window(settings, font, fonts, placeholders, PreviewSound(se_frames))
    policy = key_policy(keys) if isinstance(keys, str) else keys
    out = Run((w.width, w.height))
    if not w.open:
@@ -1095,4 +1179,5 @@ def run(settings: Settings, font: CompiledFont, codes: Sequence[int], keys: str 
          break   # nothing ever presses: the text stays at its first wait
    if not w.busy():
       out.done = frame
+   out.sounds = list(w.sound.calls)
    return out

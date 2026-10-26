@@ -176,7 +176,7 @@ class GameFileTests(ProjectData):
       self.assertEqual(project.game_folder(doc), self.root.resolve())
       self.assertEqual(files["maps"], (self.root / "data" / "world.json").resolve())
       self.assertEqual(set(files), {"maps", "assets", "scripts"})
-      self.assertEqual([k for k, _what in project.GAME_FILES], ["maps", "assets", "scripts", "battle"])
+      self.assertEqual([k for k, _what in project.GAME_FILES], ["maps", "assets", "scripts", "battle", "audio"])
 
    def test_bad_path(self) -> None:
       """!A key that is not a relative path is an error.

@@ -1,0 +1,11 @@
+#!/bin/sh
+# Starts the CapsuleCreatures audio editor. The first run sets up the toolkit's
+# Python environment (.venv in this folder); see toolkit/env.py.
+here=$(cd "$(dirname "$0")" && pwd)
+for py in python3 python; do
+   if command -v "$py" >/dev/null 2>&1; then
+      exec "$py" "$here/toolkit/env.py" run audio-editor "$@"
+   fi
+done
+echo "error: Python 3.10 or later is needed; run install/install.sh" >&2
+exit 1

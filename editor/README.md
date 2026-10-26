@@ -909,6 +909,99 @@ codepage import`).
 - The page has its own undo history (Undo / Redo on this tab); Save writes
   the project manifest and the page.
 
+## Audio editor
+
+```
+./audio-editor path/to/audio.json   # Windows: audio-editor.cmd
+```
+
+[S7] (engine M4, D-34.) The audio editor works on a game's audio manifest
+(`audio.json`, `capsule.audio/1`): the file a game's `reference/project.json`
+names under `"audio"` (the engine's `capsule_audio_game()` reads the same
+key). It is also the Studio's **Audio** page. The engine's
+`tools/audio/format.py` decides what is valid: every edit is checked with it
+before it becomes an undo step (an edit the build would refuse is refused,
+with the reason in the status bar), and the **Problems** list under the tabs
+shows what it finds in the whole manifest, unsaved edits included. The
+converters are the engine's own: `wav_sample.py` (WAV to sample), `dpcm.py`
+(compressed samples decoded for the waveform) and `midi_song.py` (MIDI to
+song).
+
+Sound comes from the engine. The editor builds the engine's `audio_render`
+for the project's table with `capsule_audio_render()` (CMake and a C++
+compiler; the first build compiles the audio core, a few seconds; later
+previews only regenerate the table and link) and renders headless through
+the real audio core: what you hear is what the GBA mixes, sample for sample
+(the optional **HQ** box uses the high-quality desktop mix instead). Previews
+play the editor's current data, unsaved edits included: the preview table
+holds the songs being played, the project's mixer, players, banks, sets,
+keymaps and waves, and only the samples those songs can reach. The build
+lives in `build/audio-studio` in the game folder (or a folder of the user's
+cache; `CAPSULE_STUDIO_AUDIO_CACHE` names another). **Audio > Build the
+renderer** builds it ahead; **Audio > Show the render folder** opens it.
+
+Playing: with Qt Multimedia (`PySide6-Addons`, the toolkit's optional audio
+group, installed with the audio editor and the studio) and an audio device,
+**Play** plays the WAV in the editor. Without it, without an audio output, or
+when Qt Multimedia reports an error while playing, **Play** hands the WAV to
+the system's player and runs the playhead at the real speed; **Open in player** and **Save WAV as...**
+work everywhere, so the editor stays usable without an audio device.
+
+- **Songs** (the player and viewer): the song list; the header (instrument
+  set, priority, reverb: "leave as it is" is `null`) edited with undo; the
+  player the preview plays on; the tracks with their notes, programs and end
+  (or loop) and **Mute** / **Solo** boxes (a muted track runs a copy of the
+  song whose `VOLUME` commands are 0: it keeps its timing and its channels,
+  as a mixer mute does). Views: **Timeline** (a piano roll per track colour,
+  muted tracks faded, loops dashed, the playhead; a click picks a tick),
+  **Commands** (the `.cseq` text form, or one track's commands with their
+  ticks), **Tempo** (each `TEMPO` with its frame and time), **Player state**
+  (after a render: one lane per channel, coloured by the track holding it,
+  the envelope as its height; a click lists that frame's channels: player,
+  track, key, velocity, priority, envelope) and **Output** (the rendered
+  waveform). **Export text form...** writes the `.cseq` text.
+- **Instruments**: the instrument sets (a window of 128 voices of a bank at
+  an offset, or a set with its own voices); the window's voices with the
+  other sets that share each one (a bank voice belongs to every window over
+  it, as the original layout did); one voice's form by kind (sampled with
+  fixed rate and reverse, square with sweep and duty, square, wave, noise,
+  key split, drum set) and **Kind** to make it another kind (what fits is
+  kept); its envelope's curve per frame for a note held so long; **Play
+  note** renders one note of it at a key. **Key split**: the keymap on a key
+  strip, its runs and what each plays; click a key, shift-click another, give
+  them an entry (**Set keys**). **Drum set**: each key's voice (double-click
+  to edit it). **Bank windows**: each bank with the windows over it and
+  their overlaps. Add a set, a window, a bank, a voice.
+- **Samples**: the header (pitch = rate x 1024 at key 60, loop, loop start,
+  length) with checks; the waveform with the loop start; **Render note**
+  plays it at a key. **Import a WAV**: PCM8 or DPCM4 (lookahead, whole
+  blocks), loop start, length, base key and tune; **Convert** shows the
+  result first; the data file is written beside the manifest when you save
+  (undo before saving leaves no file).
+- **MIDI import**: a MIDI file with the options of one conversion config
+  line (`-V` volume, `-G` instrument set, `-P` priority, `-R` reverb, `-X`
+  48 clocks per beat, `-E` exact gate times, `-N` no compression), written by
+  the form or typed. **Convert** reports each track's end tick or loop, the
+  frames to the song's end and the notes that come before a track's first
+  program change (they play the track's reset voice, near silent); the
+  commands with their ticks and the notes on a timeline; **Render** previews
+  it with the manifest's instruments. **Import** adds it as the MIDI file and
+  its options (the build converts it) or as the converted bytes, optionally
+  with a song table entry on a player.
+- **Sound effects**: the song table (each number's song, player, name key,
+  priority and the player's start check; double-click plays it on its
+  player, or from the whole saved table); the players (name, tracks, start
+  check; a rename follows into the table) and the mixer. **Two sounds at
+  once** starts two numbers a few frames apart in the C++ core
+  (`audio_render --sound A --then B@F`, on the render bar's worker) and
+  shows who holds each channel frame by frame, the channels the second took
+  from the first (marked) and whether its player's start check refused it;
+  the render's output plays like any other. Without a C++ toolchain it runs
+  at once on the engine's Python model of the core
+  (`tests/audio_reference.py`; the studio's tests hold both to the same
+  outcome), whose mix has the sampled channels only. **Clips** plays the saved table's clips with their parameters
+  (volume, pan, pitch, hold, release, chorus, priority).
+
 ## Command line
 
 The same editing works without a display, for scripts, CI and containers.
@@ -1285,6 +1378,40 @@ capsule-studio screen-plan add data/screens/menu.screen.json layers bg=3 screen_
 capsule-studio screen-plan check data/screens/menu.screen.json
 capsule-studio screen-plan export data/screens/menu.screen.json src/menu_screen.h
 capsule-studio gba-memory build-gba report
+```
+
+Audio [S7]: `audio MANIFEST ...` does what the audio editor does. Reading:
+`check` (format.py's problems; exit 1 when there are any), `info`, `songs`,
+`song KEY [--notes] [--tempo] [--commands] [--track N]`, `sets`, `set KEY`,
+`banks`, `voice SET N`, `envelope SET N [--held F]`, `keymaps`,
+`split SET N`, `drums SET`, `waves`, `samples`, `sample KEY [--png OUT]`,
+`sounds`, `players`. Editing (checked, then saved): `new`, `mixer-set`,
+`song-set`, `set-add`, `set-offset`, `bank-add`, `voice-set SET N F=V ...`
+(`kind=KIND` makes a new voice of that kind), `voice-add`, `keymap-add`,
+`keymap-set KEY FIRST LAST ENTRY`, `wave-add`, `sample-import WAV NAME
+[--dpcm --lookahead --no-pad --loop-start --length --key --tune --replace]`,
+`sample-set`, `midi-import MIDI NAME [--options=... --instruments --priority
+--reverb --volume --form midi|compiled --player --sound-name --report-only
+--listing]`, `sound-set`, `sound-add`, `sound-remove`, `player-set`,
+`player-add`, `remove KEY`. Playing (builds `audio_render` once): `render
+--song KEY [--player --mute 0,2 --solo 1] | --sound N|sound:NAME [--saved] |
+--clip N [--clip-pitch ...]` with `--seconds --tail --mono --hq --no-state
+--out DIR --state`, `play N`, `state FOLDER [--frame F]` (a render's player
+state), `build [--target preview|hq|table]`, `table` (the compiled table's
+listing) and `priority A B [--delay F --frames N --every K --wav OUT
+--model]` (two sounds at once in the C++ core, or on the reference model
+with `--model` or without a toolchain: channels taken, refusals). A
+render's summary gives `end_frame` (the frame whose ticks ran the last END)
+and `status_end_frame` (the first frame the player's status shows it ended,
+what a game's wait sees).
+
+```
+capsule-studio audio data/audio/audio.json song song:town --notes --tempo
+capsule-studio audio data/audio/audio.json render --song song:town --solo 1 --out renders/town
+capsule-studio audio data/audio/audio.json sample-import art/bell.wav bell --dpcm --key c5
+capsule-studio audio data/audio/audio.json midi-import music/town.mid town2 --options="-E -V100 -Gtown" --player music
+capsule-studio audio data/audio/audio.json voice-set instruments:town 3 attack=200 release=180
+capsule-studio audio data/audio/audio.json priority sound:SELECT sound:JINGLE --delay 4
 ```
 
 Credits text files: pages separated by blank lines, the first line of each

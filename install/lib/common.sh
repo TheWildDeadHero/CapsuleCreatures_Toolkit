@@ -146,6 +146,7 @@ toolkit_args() {   # $1 = os
 toolkit_plan() {   # $1 = os
    note "Toolkit: create $STUDIO_ROOT/.venv and install the editors' pinned Python packages"
    note "     (toolkit/requirements/) into it; nothing is installed system-wide."
+   [ "$1" = haiku ] || note "     Audio playback in the editors (PySide6-Addons) is optional: if it can't be installed, Play uses the system's player."
    [ "$1" != haiku ] || note "     Haiku: command-line tools only (no PySide6 for Haiku, so no editor window)."
 }
 

@@ -8,7 +8,12 @@ files and mGBA, plus the toolkit environment: `.venv/` in this repository with
 the editors' pinned Python packages (see the main README). On Windows that
 environment uses python.org's Python 3.12 from winget, because MSYS2's Python
 can't load PySide6; on Haiku it holds the command-line tools only, as there
-are no PySide6 builds for Haiku.
+are no PySide6 builds for Haiku. The environment also gets PySide6-Addons (Qt
+Multimedia: the audio editor plays sound inside the window). That part is
+optional: when its wheel can't be installed (no build for the platform, an
+offline `wheels/` folder without it) the installer warns and finishes, and
+`toolkit/env.py setup` tries again later; without it, or on a machine with no
+audio output device, **Play** hands the WAV to the system's player instead.
 
 | OS | Installer | GBA toolchain from | Desktop tools from | Checked so far |
 |---|---|---|---|---|
@@ -59,3 +64,9 @@ devkitARM for Redox. Worth revisiting.
   MSYS2 picks one that isn't Ninja or MinGW Makefiles, pass `-G Ninja`.
 - macOS: devkitPro recommends a reboot after its `.pkg` installs so its
   environment variables are set. The engine's makefile doesn't need them.
+- Audio in the editors (PySide6-Addons) has been installed only from stand-in
+  wheels with the pinned names (offline, with and without the Addons wheel);
+  real Qt Multimedia playback hasn't been checked on any OS yet. On Linux Qt
+  Multimedia plays through the desktop's sound server (PulseAudio or
+  PipeWire's PulseAudio service); without one the editor falls back to the
+  system's player.
