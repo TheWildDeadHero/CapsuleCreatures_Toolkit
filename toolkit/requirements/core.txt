@@ -1,0 +1,3 @@
+# Packages the headless tools (capsule-studio command, CI, containers) need.
+# None yet: the core and the command line use only the standard library.
+# Pin exact versions (name==x.y.z); toolkit/env.py installs binary wheels only.

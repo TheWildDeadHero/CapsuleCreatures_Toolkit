@@ -1,0 +1,4 @@
+# Packages the graphical editors need, pinned exactly so every machine gets
+# the same build. Bumping a pin here makes the next launch update .venv.
+PySide6-Essentials==6.11.2
+shiboken6==6.11.2

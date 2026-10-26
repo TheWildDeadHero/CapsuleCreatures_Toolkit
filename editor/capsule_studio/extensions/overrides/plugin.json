@@ -1,0 +1,13 @@
+{
+  "schema": "capsule.plugin/1",
+  "id": "studio.overrides",
+  "title": "Cell override sets editor",
+  "version": "2026.10.23.1230",
+  "api": 1,
+  "requires": {"capsule_studio": ">=2026.10.17.0000"},
+  "extension": {"module": "override_editor.extension"},
+  "cli": "overrides",
+  "editor": {
+    "notes": "S3 (D-30 section 2, engine DS1): a map's cell override sets: the Override sets panel (a tab of the map editor and the Studio's World page: create / rename / remove, persistence through a flag or variable of the scripts manifest, the chosen set previewed applied or cleared), the Override sets map tool (paint a set's cells on a layer, or take them out), the Override sets overlay and hover text in the Map tab, a validator, and the overrides command group. A built-in extension, loaded through the same plugin host as project plugins (capsule_studio.plugins)."
+  }
+}
