@@ -5,7 +5,7 @@ boxes, their budget and the save image, a test save's boxed creatures), core.ai'
 follow, and the `battle FILE recruit|storage|ai rule --items|testsave box ...` commands. No Qt.
 
 Uses a copy of the engine's Starter sample (test_battle.BattleTestCase): its recruit section (3 checks, the
-recruit_rate field), its 8 boxes of 30 and the Strategist's Tonic rule are read from the sample. The Gen-3 class runs
+recruit_rate field), its 8 boxes of 30 and the Strategist's Tonic rule are read from the sample. The classic class runs
 on the reference repo's sample (skipped without it).
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ from capsule_studio.cli.main import main as cli  # noqa: E402
 from capsule_studio.core import ai, battle, engine, inventory, messages  # noqa: E402
 from capsule_studio.core.document import DocumentError  # noqa: E402
 from capsule_studio.core.structure import conditions, recruit, species_fields, storage  # noqa: E402
-from sample_data import gen3_data, needs_gen3  # noqa: E402
+from sample_data import classic_data, needs_classic  # noqa: E402
 from test_battle import BattleTestCase  # noqa: E402
 
 
@@ -348,20 +348,20 @@ class RecruitCommandTests(BattleTestCase):
       self.assertNotEqual(code, 0)
 
 
-@needs_gen3
-class Gen3RecruitTests(BattleTestCase):
-   """!The reference repo's Gen-3 sample: 4 checks and the Gen-3 catch formula through the studio's preview."""
+@needs_classic
+class ClassicRecruitTests(BattleTestCase):
+   """!The reference repo's classic sample: 4 checks and the classic catch formula through the studio's preview."""
 
    def sample(self) -> Path:
-      """!The Gen-3 sample.
+      """!The classic sample.
       @return its folder
       """
-      found = gen3_data()
+      found = classic_data()
       assert found is not None
       return found
 
-   def test_gen3_odds(self) -> None:
-      """!A catch rate 45 creature at full HP with a Capture Ball: the public Gen-3 shake odds.
+   def test_classic_odds(self) -> None:
+      """!A catch rate 45 creature at full HP with a Capture Ball: the public classic shake odds.
       @return None
       """
       p = self.project

@@ -23,7 +23,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core.structure import resources as res_model
 from ....core.structure import stats as stat_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel
 
 if TYPE_CHECKING:
@@ -227,7 +227,7 @@ class ResourcesPanel(BattlePanel):
             self.table.selectRow(names.index(self.selected))
       finally:
          self._filling = False
-      self.table.setEnabled(doc is not None)
+      set_enabled(self.table, doc is not None)   # read-only, still scrolling
       self.show_errors()
 
    # -- editing ------------------------------------------------------------------------

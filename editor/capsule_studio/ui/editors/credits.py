@@ -9,7 +9,7 @@ from PySide6 import QtWidgets
 from ...core import engine, preview, texts
 from ..panel import EditorPanel
 from ..qtimage import screen_qimage
-from ..widgets import DEBOUNCE_MS, Debounce, PixelView, button
+from ..widgets import DEBOUNCE_MS, Debounce, PixelView, button, set_enabled
 
 if TYPE_CHECKING:
    from ..panel import PanelHost
@@ -145,7 +145,7 @@ class CreditsPanel(EditorPanel):
       i = self.current()
       has = 0 <= i < len(self.pages)
       self.heading.setEnabled(has)
-      self.names.setEnabled(has)
+      set_enabled(self.names, has)   # read-only, still scrolls
       h, n = self.pages[i] if has else ("", "")
       was = self._filling
       self._filling = True

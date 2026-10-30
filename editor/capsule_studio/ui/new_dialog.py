@@ -4,8 +4,9 @@ engine's samples such as Starter, the reference repo's and the plugins'),
 see what it gives, and create:
 
   - a game (GAME mode, the Studio's Studio > New game...): a new folder with
-    the template's files in data/ and reference/project.json naming the
-    battle and asset manifests (core.templates.new_game());
+    the template's files in data/, a world (data/world.json: one
+    simple-shape tileset and the map "start") and reference/project.json
+    naming the world, battle and asset manifests (core.templates.new_game());
   - battle data (BATTLE mode, the battle editor's File > New battle
     data...): the template's files, or only some of its parts, copied into a
     folder with their relative paths (core.templates.apply()).

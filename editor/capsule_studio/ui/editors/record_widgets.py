@@ -15,7 +15,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import holders
 from ...core.structure import conditions as cond_model
-from ..widgets import button
+from ..widgets import button, set_contents_enabled
 from .battle_common import set_combo
 
 ## Rows a name list shows before it scrolls.
@@ -379,7 +379,7 @@ class PointHandlersBox(QtWidgets.QGroupBox):
             cell.setToolTip(code)
             self.table.setItem(r, CODE_COLUMN, cell)
          self.table.resizeColumnToContents(POINT_COLUMN)
-         self.setEnabled(owner is not None)
+         set_contents_enabled(self, owner is not None)   # the table goes read-only and keeps its scroll bars
       finally:
          self._filling = False
 

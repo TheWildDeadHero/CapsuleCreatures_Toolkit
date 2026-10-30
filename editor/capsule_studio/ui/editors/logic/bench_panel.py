@@ -36,7 +36,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core import bench, logic
 from ....core.document import Document, DocumentError
-from ...widgets import DEBOUNCE_MS, button, report_failure
+from ...widgets import DEBOUNCE_MS, button, is_enabled, report_failure, set_enabled
 from ..battle_common import BattlePanel, set_check, set_combo, set_spin
 
 if TYPE_CHECKING:
@@ -832,7 +832,7 @@ class BenchPanel(BattlePanel):
       """
       doc = self.scenario_doc()
       d = doc.data if doc is not None else {}
-      self.form_area.widget().setEnabled(doc is not None)
+      set_enabled(self.form_area, doc is not None)   # greyed, read-only; the form and its tables still scroll
       self.name_edit.setText(str(d.get("name", "")))
       self.description_edit.setText(str(d.get("description", "")))
       fmt = d.get("format")
@@ -889,7 +889,7 @@ class BenchPanel(BattlePanel):
          except (DocumentError, KeyError):
             members = []
       self._fill_table(self.member_table, members if isinstance(members, list) else [], bench.MEMBER_COLUMNS)
-      self.member_table.setEnabled(own)
+      set_enabled(self.member_table, own)   # a data party's members: read-only, still scrolling
       if party is None:
          self.member_label.setText("Members: pick a party")
       elif own:
@@ -1014,7 +1014,7 @@ class BenchPanel(BattlePanel):
       for i, party in enumerate(parties):
          if "data" in party:
             party.pop("members", None)
-         elif i == row and self.member_table.isEnabled():
+         elif i == row and is_enabled(self.member_table):   # not locked (set_enabled())
             base = party.get("members") if isinstance(party.get("members"), list) else []
             party["members"] = self._table_rows(self.member_table, bench.MEMBER_COLUMNS, base)
          elif "members" not in party:

@@ -9,7 +9,7 @@ position); a party member names the slot its creature has ("passive": the
 slot's index or name; default the first); the generation entry
 {"role": "passive_selector", "random_range": [0, "last"]} rolls one of the
 rolled slots ("rolled": false is a slot only data or logic gives, such as a
-Gen-3-style hidden one). A structure without the list has the engine's
+Classic-style hidden one). A structure without the list has the engine's
 DEFAULT_PASSIVE_SLOTS (one rolled slot); the first edit writes the list.
 
 The engine's battlec/content.py is the one authority: compile_passive_slots()

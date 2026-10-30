@@ -19,7 +19,7 @@ from PySide6 import QtWidgets
 
 from ....core import battle, logic
 from ....core.structure import encounter_rules as rules_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, set_combo
 
 if TYPE_CHECKING:
@@ -37,6 +37,10 @@ HANDLER_COLUMNS = ["Owner", "Hook", "Source"]
 class EncounterRulesPanel(BattlePanel):
    """!The lead rule, the encounter pipelines and the logic running the encounter hooks.
 
+   @var errors
+   Compile result line.
+   @var refs
+   The handler rows' owner references ("kind:name").
    @var _filling
    True while the panel fills its own widgets.
    """
@@ -153,7 +157,7 @@ class EncounterRulesPanel(BattlePanel):
       finally:
          self._filling = False
       self._fill_lead_preview()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_lead_preview(self) -> None:

@@ -17,7 +17,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core.document import DocumentError
 from ....core.structure import flags as flag_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel
 
 if TYPE_CHECKING:
@@ -152,7 +152,7 @@ class NameListBox(QtWidgets.QGroupBox):
          self.suppress.setCurrentText(current if current in names else SUPPRESS_NONE)
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
 
    def _counts(self) -> dict[str, int]:
       """!Each name's use count.

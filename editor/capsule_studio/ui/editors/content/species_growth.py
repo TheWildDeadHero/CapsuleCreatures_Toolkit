@@ -28,7 +28,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core import battle, species_growth
 from ....core.document import DocumentError
 from ....core.structure import transformation
-from ...widgets import ask, button
+from ...widgets import ask, button, set_contents_enabled
 from ..battle_common import NONE_TEXT, combo, set_check, set_combo, set_spin, spin
 
 if TYPE_CHECKING:
@@ -338,7 +338,7 @@ class SpeciesGrowthTabs(QtWidgets.QTabWidget):
          self._fill_combine_moves(p, name)
       finally:
          self._filling = False
-      self.setEnabled(name is not None)
+      set_contents_enabled(self, name is not None)   # the tables go read-only and keep their scroll bars
       self.update_preview()
       self.update_training()
 

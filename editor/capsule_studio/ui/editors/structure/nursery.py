@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtCore, QtWidgets
 
 from ....core.structure import nursery as nursery_model
+from ...widgets import set_enabled
 from ..battle_common import NONE_TEXT, STRUCTURE, BattlePanel, set_check, set_combo, set_spin
 
 if TYPE_CHECKING:
@@ -190,7 +191,7 @@ class NurseryPanel(BattlePanel):
                    nursery_model.transfer_eggs(doc) if doc is not None else nursery_model.transfer_choices()[0])
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_eggs(self, doc: object) -> None:

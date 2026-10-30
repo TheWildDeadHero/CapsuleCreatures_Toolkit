@@ -30,7 +30,7 @@ from ...core import engine, screen_graphics as sg, screen_plans as sp
 from ...core.document import Document
 from ..panel import EditorPanel, PanelHost
 from ..qtimage import to_qimage
-from ..widgets import PixelView, button
+from ..widgets import PixelView, button, set_enabled
 
 ## A parsed JSON object.
 JsonDict = dict[str, Any]
@@ -424,7 +424,7 @@ class ScreenPlanPanel(EditorPanel):
          has = self.plan is not None
          for w in (self.name, self.mode, self.tree, self.steps, self.transitions, self.form_box, self.exit_call,
                    self.exit_next):
-            w.setEnabled(has)
+            set_enabled(w, has)   # the tree and tables go read-only and keep their scroll bars
          self._fill_exit(files)
          if has:
             data = self.plan.data

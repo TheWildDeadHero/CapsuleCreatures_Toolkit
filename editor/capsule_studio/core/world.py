@@ -5,7 +5,7 @@ demand, compiles them with the engine's map compiler (unsaved edits included,
 through the compiler's in-memory sources) and saves them together. Nothing
 here depends on a user interface.
 
-Large worlds (I2: the imported Emerald world, 539 maps and 76 fixed tilesets)
+Large worlds (I2: an imported world of hundreds of maps and dozens of fixed tilesets)
 need the editor to compile only what it shows: compiled_map() and
 compiled_tileset() compile one map against the tilesets it draws from, with
 each tileset compiled once per change (_tileset_cache), and check_events()

@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtWidgets
 
 from ....core import battle
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import FORM_STRETCH, LIST_STRETCH, BattlePanel
 from .json_edit import JsonEdit
 
@@ -124,7 +124,7 @@ class DataPanel(BattlePanel):
             self.entry_list.addItems(p.names(k))
             n = self.entry_list.count()
             self.entry_list.setCurrentRow(min(max(row, 0), n - 1) if n else -1)
-         self.entry_list.setEnabled(k in JSON_LISTS)
+         set_enabled(self.entry_list, k in JSON_LISTS)   # read-only lists still scroll
       finally:
          self._filling = False
       self._fill_json()

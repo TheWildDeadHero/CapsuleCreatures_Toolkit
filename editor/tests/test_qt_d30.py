@@ -98,12 +98,13 @@ class QtD30Tests(unittest.TestCase):
       self.assertEqual((dp.map_box.currentText(), dp.cell_x.value(), dp.cell_y.value()), ("showcase", *HUT_CELL))
       self.assertIsNotNone(dp.view.image)
       self.assertEqual(dp.entries.rowCount(), 2)
-      self.assertFalse(dp.steps["close"].isEnabled())   # close: the open reversed
+      from capsule_studio.ui.widgets import is_enabled
+      self.assertFalse(is_enabled(dp.steps["close"]))   # close: the open reversed (read-only; it still scrolls)
       dp.reverse.setChecked(False)
       dp._reverse_toggled(False)
       self.settle()
       self.assertIn("close", e.document.get(HUT))
-      self.assertTrue(dp.steps["close"].isEnabled())
+      self.assertTrue(is_enabled(dp.steps["close"]))
       dp.steps["open"].item(1, 1).setText("6")
       self.settle()
       self.assertEqual(doors.steps(e.document.get(HUT), "open")[1], [0, 6])

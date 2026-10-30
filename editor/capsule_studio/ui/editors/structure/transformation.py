@@ -23,7 +23,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core import battle
 from ....core.structure import species_fields
 from ....core.structure import transformation as model
-from ...widgets import ask, button
+from ...widgets import ask, button, set_enabled
 from ..battle_common import NONE_TEXT, STRUCTURE, BattlePanel, combo, set_check, set_combo, set_spin, spin
 
 if TYPE_CHECKING:
@@ -183,7 +183,7 @@ class TransformationPanel(BattlePanel):
             self._fill_rules(doc)
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_transformation(self, doc: Any) -> None:

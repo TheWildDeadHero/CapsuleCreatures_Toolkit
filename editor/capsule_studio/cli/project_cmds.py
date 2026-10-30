@@ -1,11 +1,12 @@
 """!`capsule-studio project ...`: a game's project manifest, its build
-settings (A-2, A-5), the same operations as the project settings window, and
-the data files it names (what the Studio opens for the game)."""
+settings (A-2, A-5), the same operations as the project settings window, the
+data files it names (what the Studio opens for the game), and adding a world
+to it (core.game_world, as the Studio's Add world to game...)."""
 from __future__ import annotations
 
 import argparse
 
-from ..core import project
+from ..core import game_world, project
 from ..core.document import DocumentError
 from .main import CommandError
 
@@ -28,6 +29,62 @@ def register(sub: argparse._SubParsersAction) -> None:
    q = s.add_parser("files", help="list the data files the project names (what the Studio opens)")
    q.add_argument("manifest", help="reference/project.json")
    q.set_defaults(run=cmd_files)
+   q = s.add_parser("add-world", help="name a world in the project (a world outside the game is imported first)")
+   q.add_argument("manifest", help="reference/project.json")
+   q.add_argument("world", nargs="?", help="the world's world.json (default with --sandbox: the engine's map sandbox)")
+   q.add_argument("--sandbox", action="store_true", help="the engine's map sandbox world")
+   q.add_argument("--import", dest="do_import", action="store_true",
+                  help="import a world from outside the game into the game's own world first (without it, only "
+                       "a world inside the game folder is accepted)")
+   q.add_argument("--map", action="append", default=None, metavar="NAME",
+                  help="a map to import (repeat it; default: every map of the world)")
+   q.add_argument("--dry-run", action="store_true", help="say what would happen, change nothing")
+   q.set_defaults(run=cmd_add_world)
+
+
+def cmd_add_world(args: argparse.Namespace) -> int:
+   """!project add-world: names a world in the project manifest, importing it first when it is outside the game.
+   @param args  parsed arguments
+   @return exit status
+   """
+   source = args.world
+   if args.sandbox:
+      if source is not None:
+         raise CommandError("give a world file or --sandbox, not both")
+      source = game_world.sandbox_world()
+      if source is None:
+         raise CommandError("the engine's map sandbox world was not found (see --engine)")
+   if source is None:
+      raise CommandError("give the world's world.json, or --sandbox")
+   try:
+      doc = project.open_project(args.manifest)
+      add = game_world.plan(doc, source)
+      if add.action == game_world.IMPORT and not args.do_import and not args.dry_run:
+         raise CommandError(f"{add.source} is not in the game folder; --import copies its maps into "
+                            f"{add.rel} first")
+      if args.dry_run:
+         print(_describe(add))
+         return 0
+      lines = game_world.run(doc, source, args.map)
+   except DocumentError as e:
+      raise CommandError(str(e)) from e
+   for line in lines:
+      print(line)
+   return 0
+
+
+def _describe(add: game_world.AddWorldPlan) -> str:
+   """!What a plan would do, in one line.
+   @param add  game_world.AddWorldPlan
+   @return str
+   """
+   if add.action == game_world.LINKED:
+      return f"the game names this world already ({add.rel})"
+   was = f" (instead of {add.replaces})" if add.replaces else ""
+   if add.action == game_world.LINK:
+      return f"would name {add.rel}{was}"
+   into = "a new world" if add.creates else "the world"
+   return f"would import {add.source} into {into} {add.rel}, then name it{was}"
 
 
 def cmd_files(args: argparse.Namespace) -> int:

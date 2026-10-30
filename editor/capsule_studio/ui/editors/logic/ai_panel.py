@@ -19,7 +19,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core import ai as ai_model
 from ....core.document import DocumentError
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import CONTENT, BattlePanel
 
 if TYPE_CHECKING:
@@ -53,6 +53,8 @@ DEFAULT_MARK = " (default)"
 class RuleListBox(QtWidgets.QGroupBox):
    """!One rule list of the selected profile: the table, the rule picker and the selected rule's numbers.
 
+   @var numbers
+   The selected rule's numbers: name -> (spin, reset button).
    @var _filling
    True while the box fills its own widgets.
    """
@@ -260,6 +262,8 @@ class RuleListBox(QtWidgets.QGroupBox):
 class AiPanel(BattlePanel):
    """!The AI profiles.
 
+   @var errors
+   Compile result line.
    @var _filling
    True while the panel fills its own widgets.
    """
@@ -355,7 +359,7 @@ class AiPanel(BattlePanel):
       self.hook.setText(f"Hook {h['name']}: {h['binds']}. Verdicts: {', '.join(sorted(h['results'])) or 'none'}; "
                         f"pure: reads, modify and block only.")
       self.migrate.setVisible(doc is not None and bool(ai_model.flag_parties(doc)))
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_selected(self) -> None:

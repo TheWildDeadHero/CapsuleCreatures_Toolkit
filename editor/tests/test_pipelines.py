@@ -4,9 +4,9 @@ and points, their analysed ranges, damage_trace()), the named formulas of
 core.battle, the neutral new ruleset, and the `battle FILE pipeline / point /
 damage / formula / rule` commands. No Qt.
 
-Uses a copy of the engine's Starter sample. GenThreeGridTests check
-damage_trace() against the WP-2 damage grid of the reference repo's Gen-3
-sample (gen3/golden/damage_grid.txt, written by its C++ golden program
+Uses a copy of the engine's Starter sample. ClassicGridTests check
+damage_trace() against the WP-2 damage grid of the reference repo's classic
+sample (classic/golden/damage_grid.txt, written by its C++ golden program
 through battle::damage_preview()) on sampled lines of each section; they are
 skipped without the reference repo.
 """
@@ -28,10 +28,10 @@ from capsule_studio.core import battle, engine, pipelines  # noqa: E402
 from capsule_studio.core.battle import BattleProject  # noqa: E402
 from capsule_studio.core.document import DocumentError  # noqa: E402
 from capsule_studio.core.structure import chart, stages  # noqa: E402
-from sample_data import needs_gen3, reference_root  # noqa: E402
-from test_battle import BattleTestCase, GenThreeTestCase  # noqa: E402
+from sample_data import CLASSIC, needs_classic, reference_root  # noqa: E402
+from test_battle import BattleTestCase, ClassicTestCase  # noqa: E402
 
-## Genes and training of every golden grid creature (the reference repo's gen3/tests/battle_golden_tests.cpp).
+## Genes and training of every golden grid creature (the reference repo's classic/tests/battle_golden_tests.cpp).
 GRID_GENES = 20
 ## Training values of every golden grid creature.
 GRID_TRAINING = 100
@@ -43,7 +43,7 @@ STARTER_GENES = 12
 Q8_SHIFT = 8
 ## Raw speed of the speed pipeline trace.
 SPEED_RAW = 100
-## Highest damage roll index of the Gen-3 ruleset (its span is 16; the Starter's comes from its ROLL_SPAN).
+## Highest damage roll index of the classic ruleset (its span is 16; the Starter's comes from its ROLL_SPAN).
 ROLL_HIGH = 15
 ## Every how many grid lines one is checked.
 SAMPLE_EVERY = 97
@@ -52,12 +52,12 @@ FIELD = re.compile(r"(\w+)=(.*?)(?= \w+=|$)")
 
 
 def golden_lines() -> list[str]:
-   """!The Gen-3 damage grid's value lines (section headers dropped; needs_gen3 tests only).
+   """!The classic damage grid's value lines (section headers dropped; needs_classic tests only).
    @return lines
    """
    ref = reference_root()
-   assert ref is not None, "decorate Gen-3 tests with needs_gen3"
-   path = ref / "gen3" / "golden" / "damage_grid.txt"
+   assert ref is not None, "decorate classic tests with needs_classic"
+   path = ref / CLASSIC / "golden" / "damage_grid.txt"
    return [ln for ln in path.read_text(encoding="utf-8").splitlines() if not ln.startswith("--")]
 
 
@@ -307,9 +307,9 @@ class DamageTraceTests(BattleTestCase):
          pipelines.pipeline_trace(self.project, "speed", {"speed_raw": 100})
 
 
-@needs_gen3
-class GenThreeGridTests(GenThreeTestCase):
-   """!damage_trace() equals the WP-2 damage grid of the reference repo's Gen-3 sample (skipped without it)."""
+@needs_classic
+class ClassicGridTests(ClassicTestCase):
+   """!damage_trace() equals the WP-2 damage grid of the reference repo's classic sample (skipped without it)."""
 
    def line(self, **kw: object) -> str:
       """!One grid line's values, as damage_line() of the reference repo's golden program writes them.

@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Any
 from PySide6 import QtCore, QtWidgets
 
 from ...core import placeholders as model
-from ..widgets import button
+from ..widgets import button, set_enabled
 
 if TYPE_CHECKING:
    from ..script_shell import ScriptWindow
@@ -97,7 +97,7 @@ class PlaceholdersPanel(QtWidgets.QWidget):
       @return None
       """
       p = self.editor.project
-      self.setEnabled(p is not None)
+      set_enabled(self, p is not None)
       if p is None:
          return
       self._filling = True

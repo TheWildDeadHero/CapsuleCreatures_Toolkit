@@ -25,7 +25,7 @@ from PySide6 import QtWidgets
 from capsule_studio.core import engine, locations
 from capsule_studio.core.document import DocumentError
 from capsule_studio.ui.panel import EditorPanel
-from capsule_studio.ui.widgets import button
+from capsule_studio.ui.widgets import button, set_enabled
 
 if TYPE_CHECKING:
    from PySide6 import QtGui
@@ -351,7 +351,7 @@ class LocationsPanel(EditorPanel):
       p = self.project()
       self._filling = True
       try:
-         self.setEnabled(p is not None)
+         set_enabled(self, p is not None)
          if p is None:
             return
          if self.map_name not in p.map_names():
@@ -401,7 +401,7 @@ class LocationsPanel(EditorPanel):
       name = self.chosen_style()
       st = locations.styles(p).get(name) if name is not None else None
       for w in self.style_widgets:
-         w.setEnabled(isinstance(st, dict))
+         set_enabled(w, isinstance(st, dict))   # lists go read-only and keep their scroll bars (also below)
       st = st if isinstance(st, dict) else {}
       self.style_name.setText(name or "")
       self.style_frame.setText(str(st.get("frame", "")))
@@ -424,7 +424,7 @@ class LocationsPanel(EditorPanel):
       key = self.chosen_location()
       loc = locations.locations(p).get(key) if key is not None else None
       for w in self.loc_widgets:
-         w.setEnabled(isinstance(loc, dict))
+         set_enabled(w, isinstance(loc, dict))
       loc = loc if isinstance(loc, dict) else {}
       self.loc_key.setText(key or "")
       self.loc_name.setText(str(loc.get("name", "")))
@@ -450,7 +450,7 @@ class LocationsPanel(EditorPanel):
       """
       e = self._sequence()
       for w in (self.seq_path, self.seq_when):
-         w.setEnabled(e is not None)
+         set_enabled(w, e is not None)
       e = e or {}
       self.seq_path.setText(str(e.get("sequence", "")))
       when = e.get("when") or []
@@ -584,6 +584,7 @@ class LocationsPanel(EditorPanel):
       """
       p = self.project()
       if p is None or self.chosen_style() is None:
+         self.explain("Banner frame", "banner style")
          return
       path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Banner frame (24x24)", str(p.base),
                                                       "PNG images (*.png);;All files (*)")
@@ -597,6 +598,7 @@ class LocationsPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
+         self.explain("Add banner style")
          return
       if name is None:
          name, ok = QtWidgets.QInputDialog.getText(self, "Banner style", "Name:")
@@ -611,7 +613,9 @@ class LocationsPanel(EditorPanel):
       @return None
       """
       name = self.chosen_style()
-      if name is not None:
+      if name is None:
+         self.explain("Remove banner style", "banner style")
+      else:
          self._world_edit("Remove banner style", lambda p: locations.remove_style(p, name))
 
    def _set_location(self, **fields: str | None) -> None:
@@ -668,6 +672,7 @@ class LocationsPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
+         self.explain("Add location")
          return
       if key is None:
          key, ok = QtWidgets.QInputDialog.getText(self, "Location", "Key (what maps name):")
@@ -688,7 +693,9 @@ class LocationsPanel(EditorPanel):
       """
       p = self.project()
       key = self.chosen_location()
-      if p is not None and key is not None:
+      if p is None or key is None:
+         self.explain("Remove location", "location")
+      else:
          self._multi("Remove location", lambda: locations.remove_location(p, key))
 
    def _preview_chosen(self) -> None:
@@ -710,6 +717,7 @@ class LocationsPanel(EditorPanel):
       p = self.project()
       key = self.chosen_location()
       if p is None or key is None:
+         self.explain("Add preview sequence", "location")
          return
       if path is None:
          path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Preview sequence", str(p.base),
@@ -724,7 +732,9 @@ class LocationsPanel(EditorPanel):
       """
       key = self.chosen_location()
       row = self.seq_list.currentRow()
-      if key is not None and self._sequence() is not None:
+      if key is None or self._sequence() is None:
+         self.explain("Remove preview sequence", "preview sequence")
+      else:
          self._world_edit("Remove preview sequence", lambda p: locations.remove_sequence(p, key, row))
 
    def _when_text(self) -> list[str] | None:

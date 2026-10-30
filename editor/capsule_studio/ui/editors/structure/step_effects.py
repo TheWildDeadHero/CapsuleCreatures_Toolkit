@@ -20,7 +20,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core import logic
 from ....core.structure import step_effects as step_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, set_combo, set_spin
 
 if TYPE_CHECKING:
@@ -179,7 +179,7 @@ class StepEffectsPanel(BattlePanel):
          self.handlers.resizeColumnsToContents()
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_form(self) -> None:

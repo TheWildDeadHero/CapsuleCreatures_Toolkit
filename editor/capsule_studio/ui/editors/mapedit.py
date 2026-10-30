@@ -1449,7 +1449,7 @@ class MapPanel(EditorPanel):
       """
       doc = self.map_doc()
       if doc is None:
-         self.host.show_status("Open or create a map first")
+         self.explain("Add layer", "map")
          return
       free = maps.free_bgs(doc.data)
       if not free:
@@ -1469,7 +1469,10 @@ class MapPanel(EditorPanel):
       @return None
       """
       doc, k = self.map_doc(), self.layer_index()
-      if doc is None or k is None:
+      if doc is None:
+         self.explain("Remove layer", "map")
+         return
+      if k is None:
          self.host.show_status("Pick a tile layer (not Attributes) to remove")
          return
       # Anything painted on layer k in any chunk (a chunk may hold fewer layers).
@@ -1680,7 +1683,7 @@ class MapPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
-         self.host.show_status("Open or create a world first")
+         self.explain("New group")
          return
       name, ok = QtWidgets.QInputDialog.getText(self, "New group", "Group name:")
       if ok and name.strip():
@@ -1718,6 +1721,7 @@ class MapPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
+         self.explain("Move")
          return
       if node[0] == "map":
          self._run_edit("Move map", lambda: mapgroups.move_map(p.world, node[1], tuple(parent), index), p.world)
@@ -1732,6 +1736,7 @@ class MapPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
+         self.explain("New map")
          return
       name, ok = QtWidgets.QInputDialog.getText(self, "New map", "Name:")
       if not ok or not name.strip():
@@ -1756,7 +1761,7 @@ class MapPanel(EditorPanel):
       """
       p, doc = self.project(), self.map_doc()
       if doc is None:
-         self.host.show_status("Open or create a map first")
+         self.explain("Tilesets", "map")
          return
       if not p.tileset_names():
          self.host.show_status("The world has no tilesets yet (Tileset tab: New tileset...)")
@@ -1861,6 +1866,7 @@ class MapPanel(EditorPanel):
       """
       doc = self.map_doc()
       if doc is None:
+         self.explain("Backdrop color", "map")
          return
       old = doc.data.get("backdrop", "#000000")
       c = QtWidgets.QColorDialog.getColor(QtGui.QColor(old), self, "Backdrop")
@@ -1873,7 +1879,9 @@ class MapPanel(EditorPanel):
       @return None
       """
       doc = self.map_doc()
-      if doc is not None:
+      if doc is None:
+         self.explain("Remove empty chunks", "map")
+      else:
          self._run_edit("Remove empty chunks", lambda: maps.trim(doc), doc)
 
 

@@ -19,7 +19,7 @@ from PySide6 import QtWidgets
 from capsule_studio.core import engine, events, maps, override_sets
 from capsule_studio.ui.panel import EditorPanel
 from capsule_studio.ui.qtimage import to_qimage
-from capsule_studio.ui.widgets import PixelView, button
+from capsule_studio.ui.widgets import PixelView, button, set_enabled
 
 from . import maptools
 
@@ -246,7 +246,7 @@ class OverrideSetsPanel(EditorPanel):
       @return None
       """
       p = self.project()
-      self.setEnabled(p is not None)
+      set_enabled(self, p is not None)
       if p is None:
          return
       self._filling = True
@@ -298,7 +298,7 @@ class OverrideSetsPanel(EditorPanel):
       if doc is not None and self.chosen is not None:
          s = override_sets.find(doc, self.chosen)
       for w in (self.persist, self.which, self.value, self.cells):
-         w.setEnabled(s is not None)
+         set_enabled(w, s is not None)   # the cell table goes read-only and keeps its scroll bars
       self.cells.setRowCount(0)
       if s is None:
          return
@@ -389,7 +389,7 @@ class OverrideSetsPanel(EditorPanel):
       """
       p = self.project()
       if p is None or self.map_doc() is None:
-         return False
+         return self.explain("Add override set", "map")
       if name is None:
          text, ok = QtWidgets.QInputDialog.getText(self, "Add override set", "Name (unique in the world):")
          if not ok or not text.strip():
@@ -410,7 +410,7 @@ class OverrideSetsPanel(EditorPanel):
       """
       p = self.project()
       if p is None or self.chosen is None:
-         return False
+         return self.explain("Rename override set", "override set")
       if new is None:
          text, ok = QtWidgets.QInputDialog.getText(self, "Rename override set", "New name:", text=self.chosen)
          if not ok or not text.strip():
@@ -437,7 +437,7 @@ class OverrideSetsPanel(EditorPanel):
       p = self.project()
       name = self.chosen
       if p is None or name is None:
-         return False
+         return self.explain("Remove override set", "override set")
       if self._edit("Remove override set", lambda: override_sets.remove_set(p, self.map_name, name)):
          self.chosen = None
          self.refresh()
@@ -479,7 +479,7 @@ class OverrideSetsPanel(EditorPanel):
       """
       doc, name, picked = self.map_doc(), self.chosen, self._selected_cells()
       if doc is None or not picked:
-         return False
+         return self.explain("Take out", "cell")
 
       def run() -> None:
          for at, layer in picked:
@@ -494,7 +494,7 @@ class OverrideSetsPanel(EditorPanel):
       """
       doc, name, picked = self.map_doc(), self.chosen, self._selected_cells()
       if doc is None or not picked:
-         return False
+         return self.explain("Repaint", "cell")
       mt = self.metatile.currentText()
       layer = self.layer.value()
 

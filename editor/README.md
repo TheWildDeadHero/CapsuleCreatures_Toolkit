@@ -105,8 +105,8 @@ From the repository root:
 ./scene-editor [path/to/assets.json]        # Windows: scene-editor.cmd
 ```
 
-It runs in the toolkit environment (`.venv/` in the repository root, see
-the main README): the installers set it up, and if they haven't, the first
+It runs in the toolkit environment (`.venv/` in the toolkit's folder, see
+the toolkit README): the installers set it up, and if they haven't, the first
 launch does, installing the pinned PySide6 into it. Nothing is installed
 system-wide.
 
@@ -125,19 +125,20 @@ Save all writes every changed file.
 
 The editor needs a capsule-engine checkout for the compiler, the font and
 the VRAM limits. It looks in `$CAPSULE_ENGINE`, then `../engine` (the
-engine submodule beside this toolkit in the `CapsuleCreatures` umbrella),
-then `../CapsuleCreatures_Engine-work` and `../CapsuleCreatures_Engine` (a
-standalone engine clone beside a standalone toolkit clone; D-37).
+engine submodule beside this toolkit in the `CapsuleCreatures` umbrella;
+in a prebuilt Studio download, the engine copy it ships), then
+`../CapsuleCreatures_Engine` (a standalone engine clone beside a standalone
+toolkit clone).
 
 ## Studio
 
 ```
-./studio [path/to/reference/project.json] [--page world|assets|scripts|battle|project]
+./studio [path/to/reference/project.json] [--page world|assets|scripts|battle|project|audio]
                                             # Windows: studio.cmd
 ```
 
 The Studio opens a game through its project manifest: each file the
-manifest names (`maps`, `assets`, `scripts`, `battle`, relative to the game
+manifest names (`maps`, `assets`, `scripts`, `battle`, `audio`, relative to the game
 folder; `capsule-studio project files` lists them) opens on its page, and
 the manifest itself on the Project page:
 
@@ -145,10 +146,12 @@ the manifest itself on the Project page:
   tabs (Encounters, Events, Locations, Objects, and the panels of the
   game's plugins), which follow the map chosen in the Map tab;
 - **Assets**: the scene editor; **Scripts**: the script editor;
-  **Battle**: the battle editor; **Project**: the project settings.
+  **Battle**: the battle editor; **Project**: the project settings;
+  **Audio**: the audio editor, on the manifest the project names under
+  `audio`.
 
 The page list on the left marks a page with unsaved changes (`*`); its
-tooltip names the file the page has open. Ctrl+1 to Ctrl+5 go to a page.
+tooltip names the file the page has open. Ctrl+1 to Ctrl+6 go to a page.
 The menu bar holds the **Studio** menu (Open project..., the pages, Quit),
 the menus of the page in front, whose toolbar and status bar stay on the
 page, and **Help** (Record performance records the whole Studio). Only the
@@ -173,7 +176,18 @@ the maps the other changed. The Studio's World page holds the map and the
 world tools in one window, so they share the same documents.
 
 Started without a project, it opens a small start window (Open project...,
-New game..., recent projects, Continue without a project).
+New game..., Open a sample..., recent projects, Continue without a project).
+
+**Open a sample...** (Studio menu and start window; D-40 RP) copies one of
+the engine's sample projects, the apps with a `sample.json` (Starter Battle,
+Map Sandbox; `core/samples.py`), into a new (or empty) folder as a game of
+its own and opens it: on the World page when it has a world, else on the
+Battle page. The copy gets the app's files and its own copy of the engine
+data the app shares (the Starter's template files in `data/starter`, with
+every manifest path pointed at them), New game's build-safe `"name"` and
+ROM header, and `editor.sample {id, version}`; it is refused inside the
+engine or the Studio's own folder, and `capsule-studio sample check`
+confirms nothing in it leads out of its folder.
 
 **New game...** (Studio menu and start window) makes a game from a battle
 data template and opens it: pick a template, see what it gives and its
@@ -186,16 +200,25 @@ Guard and Speed, physical and support moves, one type and one trait, no
 condition records and no logic), the engine's samples (**Starter**, the
 engine's `samples/starter`: nine stats with HP, MP and EP pools, effect
 odds by Intelligence, nine types, creatures, rivals and shape art), the
-reference rules' `templates/` (the private `CapsuleCreatures_PocketProject`'s
-`rules/`, found like the engine: `CAPSULE_REFERENCE`, or
-`CapsuleCreatures_PocketProject-work/rules` / `CapsuleCreatures_PocketProject/rules`
-in the workspace folder)
+reference rules' `templates/` (a private reference-ruleset repository, not
+part of this release, named by `CAPSULE_REFERENCE`)
 and plugins (`ctx.add_battle_template()`). Every JSON manifest copied
 records the template it came from (`editor.template {id, version}`, which
 the compilers ignore), so a newer template version can be compared later.
 The battle editor's **New battle data...** opens the same dialog for battle
 data alone, into any folder, with only the parts you tick. Nothing is
 overwritten.
+
+**Add world to game...** (Studio menu, and the World page's File menu in the
+Studio) names a world in the open game's `reference/project.json`
+(`core/game_world.py`): the engine's map sandbox world (Map sandbox) or a
+chosen `world.json`. A world inside the game folder is named as it is; one
+outside it is imported first (the import dialog, every map ticked) into the
+game's own world, which is `data/world.json` when the game has none
+(`data/world_2.json`, ... when that name holds something else). A world
+that names no battle data, or battle data outside the game, then uses the
+game's `battle` file. The world files are saved, then the manifest (through
+the manifest writer), and the game opens again on its World page.
 
 ## Map editor
 
@@ -220,7 +243,7 @@ editor, the Events and Objects tools place and remove; moving needs an
 event or object chosen in its tab, so it moves only the one you placed
 last (the Studio's World page has the tabs).
 
-- **Map** tab, laid out like PoryMap's: the map list fills the left side,
+- **Map** tab, laid out like common tile-map editors: the map list fills the left side,
   the map in the middle, and on the right the layers, the border and then
   the palette of the map's tilesets. The map list shows the world's map
   groups as folders (stored in world.json as `map_groups`; maps in no group
@@ -327,12 +350,12 @@ changed file; new sheet images go to `sheets/` next to their tileset.
   period at map entry; auto: the compiler spreads them), **start from the
   sheet's own tiles** (I3 `from_sheet`) and what a seamless map shift does
   (I3 `on_shift`: keep, reload, restart).
-- **Large worlds** (the imported Emerald world: 539 maps, 76 fixed
-  tilesets) open in a few seconds: a map compiles against its own tilesets
+- **Large worlds** (an imported world of hundreds of maps and dozens of
+  fixed tilesets) open in a few seconds: a map compiles against its own tilesets
   (each compiled once per change), the event check runs again only when an
   event, object or the cells they stand on changed. A world of more than
   64 maps is not compiled whole when it opens; World > Validate compiles it
-  in the background (about 15 s on Emerald; the editor is slower meanwhile)
+  in the background (about 15 s for 500 maps; the editor is slower meanwhile)
   and the status bar shows its result.
 
 ### World settings: behaviors and movement modes
@@ -761,7 +784,7 @@ both, except in a source changed after it.
   `compat/generators.json` (`capsule.generators/1`, each a source file
   defining `capsule::rng::next16()`, read by the engine's
   `bench_scenario.load_generators()`; with the reference repo, `method1`
-  replays its Gen-3 goldens); a scenario's `"rng"` picks it. A scenario that
+  replays its classic goldens); a scenario's `"rng"` picks it. A scenario that
   still writes a poke key the bench retired (C1: `status_turns` is
   `status_counter`, `escalation` is `status_aux`) shows **Migrate
   scenarios**, which renames them in every scenario (one Undo step; Save all
@@ -795,7 +818,7 @@ categories, one type and one trait, neutral messages, stats equal to the
 base values, no stages, condition records, move flags or logic
 (`rules.self_hit` names the self-hit's power and category); a game's rules
 come from its own data or a template (the engine's Starter, the reference
-repo's Gen-3 reference).
+repo's classic reference).
 
 The Categories page lists the move categories (the stats a damaging one
 uses, how many moves take each) and where a damaging move's category comes
@@ -1121,6 +1144,16 @@ status 1 when a value is invalid):
 ./capsule-studio project build reference/project.json --waitcnt ws0_first=4 --waitcnt prefetch=on
 ```
 
+Adding a world to a game (as Add world to game...; a world outside the game
+folder needs `--import`, and every map comes along unless `--map` names
+some):
+
+```
+./capsule-studio project add-world reference/project.json --sandbox --dry-run
+./capsule-studio project add-world reference/project.json --sandbox --import --map meadow
+./capsule-studio project add-world reference/project.json data/world.json   # a world inside the game
+```
+
 Map events (the events extension's commands; they save only when the
 world compiles; `-` removes a field):
 
@@ -1200,10 +1233,13 @@ Battle data (editing commands save only when the result compiles):
 ./capsule-studio battle data/battle.json new
 ./capsule-studio battle data/battle.json new --template starter     # copy a template here instead
 ./capsule-studio new ../MyGame --template starter    # a new game: MyGame/data/ + MyGame/reference/project.json
-./capsule-studio template list                       # blank, starter, the reference repo's (gen3), plugins'
+./capsule-studio template list                       # blank, starter, the reference repo's (classic), plugins'
 ./capsule-studio template show starter
 ./capsule-studio template apply blank data/blank --part structure
 ./capsule-studio template recorded data/battle.json  # "starter version 1"
+./capsule-studio sample list                         # the engine's sample projects (starter_battle, sandbox_map)
+./capsule-studio sample copy sandbox_map ../MyWorld  # a sample as a game of your own (data/starter copied along)
+./capsule-studio sample check ../MyWorld             # exit 1 when a path leads out of the game folder
 ./capsule-studio battle data/battle.json validate
 ./capsule-studio battle data/battle.json info
 ./capsule-studio battle data/battle.json stats Emberkit 50 --genes 15 --trait Fierce
@@ -1541,12 +1577,22 @@ python3 -m unittest discover -s tests
 
 The `test_qt_*` files need PySide6, so run them in the toolkit environment
 (`../.venv/bin/python -m unittest discover -s tests`); they use Qt's
-offscreen platform and need no display. The bench tests that build and run
+offscreen platform and need no display. In one process the whole suite
+needs several GB of memory (more than 4.5 GB has been measured: memory is not
+given back between test files). To run it on a smaller machine, run one test
+file per process, as CI does:
+
+```
+cd editor
+../.venv/bin/python ../.github/scripts/run_unit_suites.py
+```
+
+The bench tests that build and run
 the real bench (CMake and a C++ compiler needed) run only with
 `CAPSULE_BENCH_BUILD=1`; the others use a stand-in. The tests of an
-imported world (`test_content_emerald`, and the content class of
-`test_qt_world_format`) run only with `CAPSULE_CONTENT_EMERALD` naming an
-imported content folder (`assets-imported/emerald`, private, never part of
+imported world (`test_content_imported_world`, and the content class of
+`test_qt_world_format`) run only with `CAPSULE_IMPORTED_CONTENT` naming an
+imported content folder (`assets-imported/<game>`, private, never part of
 this repository); they print how long opening and compiling it took.
 
 ## Known limits

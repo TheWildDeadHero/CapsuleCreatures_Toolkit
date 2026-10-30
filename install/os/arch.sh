@@ -13,7 +13,8 @@ os_plan() {
       note "     those, then 'sudo pacman -S --needed gba-dev'."
    }
    [ "${SKIP_DESKTOP:-0}" -eq 1 ] || {
-      note "Desktop: 'sudo pacman -S --needed base-devel cmake python git pkgconf <sdl2> mgba-qt'"
+      note "Desktop: 'sudo pacman -S --needed base-devel cmake python git pkgconf <sdl2> mgba-qt"
+      note "     xcb-util-cursor'"
       note "     from the official repos, using your current package databases."
    }
    note "Nothing else on your system is upgraded."
@@ -32,7 +33,8 @@ os_install() {
       pacman -Si sdl2-compat >/dev/null 2>&1 || sdl=sdl2
       local flags=(-S --needed)
       [ "$ASSUME_YES" -eq 1 ] && flags+=(--noconfirm)
-      run sudo pacman "${flags[@]}" base-devel cmake python git pkgconf "$sdl" mgba-qt \
+      # xcb-util-cursor: Qt 6's X11 platform plugin needs it for the studio (Wayland sessions do not).
+      run sudo pacman "${flags[@]}" base-devel cmake python git pkgconf "$sdl" mgba-qt xcb-util-cursor \
          || pacman_failed "could not install the desktop dependencies"
    fi
 }

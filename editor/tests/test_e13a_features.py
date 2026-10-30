@@ -12,7 +12,7 @@
   import_rederived()).
 
 The Starter (neutral) tests run everywhere; the ones on the reference repo's
-compat/gen3/record data set (an unstored role, species fields, bit operators,
+compat/classic/record data set (an unstored role, species fields, bit operators,
 a low-first wide draw) are skipped without the reference repo. Expected values
 come from the data or the engine's own mirrors, not written down.
 """
@@ -35,10 +35,11 @@ from capsule_studio.core import battle, engine, expressions  # noqa: E402
 from capsule_studio.core.battle import BattleProject  # noqa: E402
 from capsule_studio.core.document import DocumentError  # noqa: E402
 from capsule_studio.core.structure import progression, record, record_preview, species_fields  # noqa: E402
-from sample_data import copy_battle_data, gen3_data, gen3_record_data, needs_gen3, needs_gen3_record  # noqa: E402
+from sample_data import (classic_data, classic_record_data, copy_battle_data, needs_classic,  # noqa: E402
+                         needs_classic_record)
 from test_battle import BattleTestCase  # noqa: E402
 
-## The Gen-3 record data set's unstored role (computed on read).
+## The classic record data set's unstored role (computed on read).
 UNSTORED = "shiny"
 ## A stored custom role of the data set without a generation entry.
 PLAIN_CUSTOM = "friendship"
@@ -68,7 +69,7 @@ class ExpressionLanguageTests(unittest.TestCase):
    """!core.expressions reads the language from the engine."""
 
    def test_levels_spans_check(self) -> None:
-      """!Bit operators bind tighter than the comparisons; spans classify a Gen-3 style expression; the engine's
+      """!Bit operators bind tighter than the comparisons; spans classify a classic-style expression; the engine's
       parser refuses an unknown name; dotted input names are refused for ruleset inputs.
       @return None
       """
@@ -100,9 +101,9 @@ class ExpressionLanguageTests(unittest.TestCase):
 
 
 class SpeciesFieldLogicTests(unittest.TestCase):
-   """!C5: species fields effect logic reads (the Gen-3 sample's Trip Kick: `target.species_field(weight)`)."""
+   """!C5: species fields effect logic reads (the classic sample's Trip Kick: `target.species_field(weight)`)."""
 
-   @needs_gen3
+   @needs_classic
    def test_rename_and_remove_follow_logic(self) -> None:
       """!The field's readers list the logic owner; a rename rewrites the logic too (it compiles after, one undo step
       takes it back); a removal is refused while the logic reads it (review3 probe p_rename).
@@ -110,7 +111,7 @@ class SpeciesFieldLogicTests(unittest.TestCase):
       """
       with tempfile.TemporaryDirectory() as tmp:
          folder = Path(tmp)
-         copy_battle_data(gen3_data() / "battle.json", folder)
+         copy_battle_data(classic_data() / "battle.json", folder)
          p = BattleProject.open(folder / "battle.json")
          doc = p.structure
          self.assertIsNone(p.error_now())
@@ -225,15 +226,15 @@ class FormulaArgumentTests(BattleTestCase):
       self.assertEqual(doc.data["formulas"]["share"]["args"], ["amount"])
 
 
-@needs_gen3_record
-class Gen3RecordTests(BattleTestCase):
-   """!The reference repo's compat/gen3/record data set: everything E13a added."""
+@needs_classic_record
+class ClassicRecordTests(BattleTestCase):
+   """!The reference repo's compat/classic/record data set: everything E13a added."""
 
    def sample(self) -> Path:
       """!The reference repo's record data set.
       @return folder
       """
-      folder = gen3_record_data()
+      folder = classic_record_data()
       assert folder is not None
       return folder
 

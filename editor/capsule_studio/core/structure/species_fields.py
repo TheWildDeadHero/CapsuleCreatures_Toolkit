@@ -9,7 +9,7 @@ A species field is a numeric data column every species has (its "fields"
 value, else the field's default, 0 when none is given), up to
 MAX_SPECIES_FIELD_BITS bits wide and at most MAX_SPECIES_FIELDS of them.
 The generation list's derived expressions read it as species.NAME (the
-engine's species_inputs(); a Gen-3 gender from gender_ratio and the seed).
+engine's species_inputs(); a classic gender from gender_ratio and the seed).
 The engine's battlec/content.py is the one authority: compile_species_fields()
 checks the list, compile_species() each species' values against it.
 

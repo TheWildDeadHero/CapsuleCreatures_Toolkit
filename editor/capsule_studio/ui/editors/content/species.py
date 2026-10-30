@@ -28,7 +28,7 @@ from ....core import battle, engine
 from ....core.structure import chart, passive_slots, record, species_fields
 from ....core.structure import nursery as nursery_model
 from ....core.structure import stats as stat_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import (NONE_TEXT, TERM_SLOT, EntryPanel, combo, set_combo, set_spin, set_spin_max,
                              spin)
 from ..structure.turn import mark_default
@@ -474,7 +474,7 @@ class SpeciesPanel(EntryPanel):
       self.teachable.setText(", ".join(taught) if taught else "(none listed: any move while no species lists any)")
       for w in self.types + self.base + self.passives + [self.growth, self.exp_yield, self.front, self.back,
                                                           self.learnset, self.learn_move]:
-         w.setEnabled(on)
+         set_enabled(w, on)   # the learnset goes read-only and keeps its scroll bars
       self.update_preview()
       self.growth_tabs.fill(e.get("name") if on and isinstance(e.get("name"), str) else None)
 

@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "toolkit"))
 import check_style  # noqa: E402
 
 ## What is checked: folders, and the launchers in the root.
-CHECKED = ["editor", "toolkit", "install"] + sorted(
+CHECKED = ["editor", "toolkit", "install", "packaging"] + sorted(
    p.name for p in ROOT.iterdir() if p.is_file() and check_style.kind_of(p) is not None)
 
 

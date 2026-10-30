@@ -142,7 +142,11 @@ def _names(text: str) -> list[str]:
 
 
 class EncounterPanel(EditorPanel):
-   """!Edits encounter tables (core.encounters)."""
+   """!Edits encounter tables (core.encounters).
+
+   @var _filling
+   True while widgets are being filled.
+   """
 
    ## See EditorPanel.panel_id.
    panel_id = "encounters"
@@ -668,6 +672,7 @@ class EncounterPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
+         self.explain("Battle data")
          return
       path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Battle data", str(p.base),
                                                       "Battle data (*.json);;All files (*)")
@@ -693,6 +698,7 @@ class EncounterPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
+         self.explain("Add method")
          return
       name = self._ask("Add method", "Method name (e.g. walk, swim, lure):")
       if name is None:
@@ -745,7 +751,10 @@ class EncounterPanel(EditorPanel):
       @return None
       """
       p = self.project()
-      name = self._ask("Add condition", "Condition name (e.g. night, rain, swarm):") if p else None
+      if p is None:
+         self.explain("Add condition")
+         return
+      name = self._ask("Add condition", "Condition name (e.g. night, rain, swarm):")
       if name is not None:
          self._edit("Add condition", lambda: enc.add_condition(p.world, name), p.world)
 
@@ -814,6 +823,7 @@ class EncounterPanel(EditorPanel):
       """
       p = self.project()
       if p is None or self.key in (None, SHARED):
+         self.explain("Add table", "map")   # a map's tables (shared tables: Add shared table)
          return
       method = self.method.currentText() or enc.method_names(p)[0]
       doc0 = enc.map_doc(p, self.key)
@@ -834,7 +844,9 @@ class EncounterPanel(EditorPanel):
       @return None
       """
       doc, i, t = self.current_table()
-      if t is not None:
+      if t is None:
+         self.explain("Remove table", "table")
+      else:
          self._edit("Remove table", lambda: enc.remove_table(doc, i), doc)
 
    def link_shared(self) -> None:
@@ -873,7 +885,10 @@ class EncounterPanel(EditorPanel):
       @return None
       """
       p = self.project()
-      name = self._ask("Add shared table", "Name (maps refer to it by name):") if p else None
+      if p is None:
+         self.explain("Add shared table")
+         return
+      name = self._ask("Add shared table", "Name (maps refer to it by name):")
       if name is None:
          return
       doc = enc.shared_doc(p, create=True)
@@ -886,6 +901,7 @@ class EncounterPanel(EditorPanel):
       """
       _doc, _i, t = self.current_table()
       if t is None or "name" not in t:
+         self.explain("Rename shared table", "shared table")
          return
       new = self._ask("Rename shared table", f"New name for {t['name']}:", t["name"])
       if new is not None and new != t["name"]:
@@ -897,7 +913,9 @@ class EncounterPanel(EditorPanel):
       @return None
       """
       _doc, _i, t = self.current_table()
-      if t is not None and "name" in t:
+      if t is None or "name" not in t:
+         self.explain("Remove shared table", "shared table")
+      else:
          name = t["name"]
          self._project_step(lambda p: enc.remove(p, "shared", name))
 
@@ -907,6 +925,7 @@ class EncounterPanel(EditorPanel):
       """
       sel = getattr(self.host, "select_map", None)
       if self.key in (None, SHARED):
+         self.explain("Show on map", "map")
          return
       if not (callable(sel) and sel(self.key)):
          self.host.show_status("The map editor shows maps (this app edits encounters only)")
@@ -951,7 +970,9 @@ class EncounterPanel(EditorPanel):
       @return None
       """
       doc, i, r = self._entry_row()
-      if doc is not None:
+      if doc is None:
+         self.explain("Remove entry", "entry")
+      else:
          self._edit("Remove entry", lambda: enc.remove_entry(doc, i, r), doc)
 
    def move_entry(self, delta: int) -> None:
@@ -961,6 +982,7 @@ class EncounterPanel(EditorPanel):
       """
       doc, i, r = self._entry_row()
       if doc is None:
+         self.explain("Move entry", "entry")
          return
       if self._edit("Move entry", lambda: enc.move_entry(doc, i, r, delta), doc):
          QtCore.QTimer.singleShot(0, lambda: self.entry_list.selectRow(r + delta))

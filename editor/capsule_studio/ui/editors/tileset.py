@@ -993,6 +993,7 @@ class TilesetPanel(EditorPanel):
       """
       doc, name = self.ts_doc(), self.sheet_name
       if doc is None or name is None:
+         self.explain("Transparent color", "sheet" if doc is not None else "tileset")
          return
       if self._edit("Transparent color", lambda: tilesets.set_transparent(doc, name, color)):
          self.host.show_status(f"Transparent color of {name}: {color or 'none'}")
@@ -1057,6 +1058,7 @@ class TilesetPanel(EditorPanel):
       """
       doc = self.ts_doc()
       if doc is None:
+         self.explain("Import indexed sheet", "tileset")
          return
       path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Import indexed sheet", "", INDEXED_FILTER)
       if path:
@@ -1069,7 +1071,7 @@ class TilesetPanel(EditorPanel):
       """
       doc, result = self.ts_doc(), []
       if doc is None:
-         return False
+         return self.explain("Import indexed sheet", "tileset")
       if self._edit("Import indexed sheet", lambda: result.append(tilesets.add_indexed_sheet(doc, Path(path).stem,
                                                                                               path))):
          self.sheet_name = result[0]
@@ -1288,6 +1290,7 @@ class TilesetPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
+         self.explain("New tileset")
          return
       name, ok = QtWidgets.QInputDialog.getText(self, "New tileset", "Name:")
       if not ok or not name.strip():
@@ -1306,6 +1309,7 @@ class TilesetPanel(EditorPanel):
       """
       doc = self.ts_doc()
       if doc is None:
+         self.explain("Import sheet image", "tileset")
          return
       path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Import sheet", "", SHEET_FILTER)
       if not path:
@@ -1326,6 +1330,7 @@ class TilesetPanel(EditorPanel):
       """
       doc, ts = self.ts_doc(), self._compiled[0]
       if doc is None or ts is None or self.sheet_name not in ts.sheets:
+         self.explain("Metatiles from sheet blocks", "sheet" if doc is not None else "tileset")
          return
       if tilesets.is_fixed(doc):
          self.host.show_status("A fixed tileset's metatiles are raw entries: make them in the maker")
@@ -1341,6 +1346,7 @@ class TilesetPanel(EditorPanel):
       """
       doc = self.ts_doc()
       if doc is None:
+         self.explain("New metatile", "tileset")
          return
       result = []
       fixed = tilesets.is_fixed(doc)   # I2: raw entries
@@ -1356,6 +1362,7 @@ class TilesetPanel(EditorPanel):
       """
       p, name = self.project(), self.mt_name
       if p is None or name is None:
+         self.explain("Rename metatile", "metatile")
          return
       new, ok = QtWidgets.QInputDialog.getText(self, "Rename metatile", "Name:", text=name)
       if not ok or not new.strip() or new.strip() == name:
@@ -1374,10 +1381,11 @@ class TilesetPanel(EditorPanel):
       @return None
       """
       doc, name = self.ts_doc(), self.mt_name
-      if doc is not None and name is not None:
-         if self._edit("Delete metatile", lambda: tilesets.remove_metatile(doc, name)):
-            self.mt_name = None
-            self.host.changed()
+      if doc is None or name is None:
+         self.explain("Delete metatile", "metatile")
+      elif self._edit("Delete metatile", lambda: tilesets.remove_metatile(doc, name)):
+         self.mt_name = None
+         self.host.changed()
 
    def stop(self) -> None:
       """!Nothing pending: edits apply immediately.

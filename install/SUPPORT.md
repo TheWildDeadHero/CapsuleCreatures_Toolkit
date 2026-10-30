@@ -60,10 +60,11 @@ devkitARM for Redox. Worth revisiting.
 
 ## Known gaps
 
-- Windows: the engine's CMake presets don't name a generator. If CMake in
-  MSYS2 picks one that isn't Ninja or MinGW Makefiles, pass `-G Ninja`.
+- Windows: build from the "MSYS2 UCRT64" shell; the engine's `windows-*`
+  CMake presets use Ninja, which the installer adds to that environment.
 - macOS: devkitPro recommends a reboot after its `.pkg` installs so its
-  environment variables are set. The engine's makefile doesn't need them.
+  environment variables are set. The engine's GBA toolchain file (the `gba-*`
+  presets) doesn't need them: it defaults to `/opt/devkitpro`.
 - Audio in the editors (PySide6-Addons) has been installed only from stand-in
   wheels with the pinned names (offline, with and without the Addons wheel);
   real Qt Multimedia playback hasn't been checked on any OS yet. On Linux Qt

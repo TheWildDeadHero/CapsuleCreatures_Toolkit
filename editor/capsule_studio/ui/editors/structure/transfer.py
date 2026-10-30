@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core.structure import record as model
+from ...widgets import set_enabled
 
 if TYPE_CHECKING:
    from ..battle_common import BattlePanel
@@ -86,7 +87,7 @@ class TransferDefaultsBox(QtWidgets.QGroupBox):
          self.table.resizeColumnsToContents()
       finally:
          self._filling = False
-      self.table.setEnabled(doc is not None)
+      set_enabled(self.table, doc is not None)   # read-only, still scrolling
 
    def _changed(self, item: QtWidgets.QTableWidgetItem) -> None:
       """!A value was typed: sets (or drops) it.

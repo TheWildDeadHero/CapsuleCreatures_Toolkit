@@ -31,7 +31,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core.document import DocumentError
 from ....core.structure import progression as model
 from ....core.structure import record
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import NONE_TEXT, STRUCTURE, BattlePanel, set_combo, set_spin
 from ..logic.expression_edit import FormulaEdit
 from .turn import mark_default
@@ -253,7 +253,7 @@ class ProgressionPanel(BattlePanel):
       finally:
          self._filling = False
       self._fill_form()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_table(self, doc: Any) -> None:
@@ -306,7 +306,7 @@ class ProgressionPanel(BattlePanel):
       self.order.setEnabled(row is not None and bool(row["wide"]))
       self.constant.setEnabled(way == model.CONSTANT_WAY)
       for w in (self.expr, self.expr_range, self.inputs, self.element, self.species):
-         w.setEnabled(way == model.DERIVED_WAY)
+         set_enabled(w, way == model.DERIVED_WAY)   # the inputs table goes read-only and keeps its scroll bar
       blocked = [self.role, self.way, self.lo, self.hi, self.order, self.constant, self.expr, self.expr_range]
       for w in blocked:
          w.blockSignals(True)

@@ -5,8 +5,8 @@ and the `battle FILE bench` commands (no Qt needed).
 Without a toolchain the tests use a stand-in bench (a script that prints recorded output) and a mocked PATH.
 With CAPSULE_BENCH_BUILD=1 the slow tests build the real bench for a copy of the Starter sample (CMake and a C++
 compiler needed; a first build takes a minute or two), run the engine's Starter golden scenario unowned_single with the
-default generator, check its expected transcript and rebuild without configuring again. GenThreeBuildTests (also
-needing the reference repo) build the Gen-3 sample's bench with the reference repo's Method-1 generator and replay
+default generator, check its expected transcript and rebuild without configuring again. ClassicBuildTests (also
+needing the reference repo) build the classic sample's bench with the reference repo's Method-1 generator and replay
 its WP-2 golden wild_single.
 """
 from __future__ import annotations
@@ -31,7 +31,8 @@ from capsule_studio.cli import bench_cmds  # noqa: E402
 from capsule_studio.cli.main import main as cli  # noqa: E402
 from capsule_studio.core import bench, engine  # noqa: E402
 from capsule_studio.core.battle import BattleProject  # noqa: E402
-from sample_data import make_game, make_gen3_game, method1_source, needs_gen3, reference_root  # noqa: E402
+from sample_data import (CLASSIC, make_classic_game, make_game, method1_source, needs_classic,  # noqa: E402
+                         reference_root)
 
 ## The slow tests run only when this is "1".
 BUILD_ENV = "CAPSULE_BENCH_BUILD"
@@ -393,9 +394,9 @@ class GeneratorTests(BenchTestCase):
          with self.assertRaisesRegex(bench.BenchError, "does not exist"):
             bench.generators(self.project)
 
-   @needs_gen3
+   @needs_classic
    def test_reference_method1(self) -> None:
-      """!With the real reference repo, method1 is its compat/gen3 generator (skipped without the repo).
+      """!With the real reference repo, method1 is its compat/classic generator (skipped without the repo).
       @return None
       """
       self.assertEqual(bench.generator_source(self.project, "method1"), method1_source().resolve())
@@ -669,10 +670,10 @@ class BuildTests(unittest.TestCase):
       self.assertEqual(bench.build(self.project, self.rng), self.exe)
 
 
-@needs_gen3
+@needs_classic
 @unittest.skipUnless(os.environ.get(BUILD_ENV) == "1", f"set {BUILD_ENV}=1 to build and run the real bench")
-class GenThreeBuildTests(BuildTests):
-   """!The real bench of the reference repo's Gen-3 sample with its Method-1 generator (compat/gen3, found by
+class ClassicBuildTests(BuildTests):
+   """!The real bench of the reference repo's classic sample with its Method-1 generator (compat/classic, found by
    core.bench.generators()): the WP-2 golden wild_single replays (slow; skipped without the reference repo)."""
 
    ## The reference repo's generator.
@@ -680,23 +681,23 @@ class GenThreeBuildTests(BuildTests):
 
    @classmethod
    def make(cls, root: Path) -> Path:
-      """!The Gen-3 sandbox as a game.
+      """!The classic sandbox as a game.
       @param root  the game folder
       @return its battle.json
       """
-      return make_gen3_game(root)
+      return make_classic_game(root)
 
    def golden_scenario(self) -> Path:
       """!The WP-2 golden scenario.
-      @return the reference repo's gen3/bench/wild_single.json
+      @return the reference repo's classic/bench/wild_single.json
       """
-      return reference_root() / "gen3" / "bench" / "wild_single.json"
+      return reference_root() / CLASSIC / "bench" / "wild_single.json"
 
    def trace_scenario(self) -> Path:
-      """!A scenario of the Gen-3 sample for the VM trace test (run with the vm trace).
-      @return the reference repo's gen3/bench/rival_ana.json
+      """!A scenario of the classic sample for the VM trace test (run with the vm trace).
+      @return the reference repo's classic/bench/rival_ana.json
       """
-      return reference_root() / "gen3" / "bench" / "rival_ana.json"
+      return reference_root() / CLASSIC / "bench" / "rival_ana.json"
 
 
 if __name__ == "__main__":

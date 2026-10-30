@@ -17,7 +17,29 @@ core.project.game_files()) and shows each part of it on a page:
 
 Studio > New game... (and the start window's New game...) makes a game
 folder from a battle data template (ui/new_dialog.py, core.templates) and
-opens it.
+opens it on its World page, showing its first map: every new game has a
+world (D-40 RN: data/world.json with one simple-shape tileset and the map
+"start", core.starter_world).
+
+Studio > Open a sample... (and the start window's Open a sample...) copies
+one of the engine's sample projects (the Starter Battle, the Map Sandbox;
+ui/sample_dialog.py, core.samples) into a new folder of the user's as a game
+of their own, and opens it: on its World page when it has a world, else on
+its Battle page (D-40 RP).
+
+Studio > Add world to game... (also in the World page's File menu) names a
+world in the open game's project manifest (core.game_world): the map
+sandbox's or a chosen world.json. A world outside the game folder is
+imported first, into the game's own world (data/world.json when it has
+none), with the import dialog's maps all ticked; the game then opens again
+with its World page.
+
+A game without a world (its project manifest names no "maps", as a game made
+before D-40 RN) shows an empty state on its World page instead of
+the map editor's panels: "This game has no world yet", with Create a new world
+(core.game_world.create(): an empty data/world.json, named in the manifest)
+and Add an existing world... (Add world to game...). With no game open the
+World page offers Open project... and New game... instead.
 
 Studio > Open data file (read-only)... shows any JSON file as a tree
 (ui/json_view.py, S5): an imported game's importer data such as
@@ -56,13 +78,16 @@ from typing import TYPE_CHECKING
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
+from ..core import game_world
 from ..core import project as project_core
 from ..core.document import DocumentError
+from ..core.world import Project
 from ..plugins import registry
 from . import json_view, profiler
-from .widgets import StartPage, remember_file, report_failure
+from .widgets import StartPage, headless, remember_file, report_failure
 
 if TYPE_CHECKING:
+   from ..core.document import Document
    from .audio_shell import AudioWindow
    from .battle_shell import BattleWindow
    from .project_shell import ProjectWindow
@@ -72,6 +97,22 @@ if TYPE_CHECKING:
 
 ## File dialog filter for project manifests.
 PROJECT_FILTER = "Project manifest (project.json *.json);;All files (*)"
+## File dialog filter for world manifests (Add world to game...).
+WORLD_FILTER = "Worlds (world.json *.json);;All files (*)"
+## Title of the Add world to game... action and its dialogs.
+ADD_WORLD = "Add world to game"
+## Title of the World page's Create a new world button and its messages.
+CREATE_WORLD = "Create a new world"
+## The World page's empty state while the game names no world: heading, text, why its panels' actions do nothing.
+GAME_WITHOUT_WORLD = ("This game has no world yet",
+                      "A world holds the game's maps and tilesets. Create a new, empty one in the game (data/"
+                      "world.json), or add an existing world: the engine's map sandbox or another world file, "
+                      "imported into the game when it is outside it.",
+                      "this game has no world yet (World page: Create a new world or Add an existing world)")
+## The same while no game is open in the Studio.
+NO_GAME = ("No game is open",
+           "Open a game's project manifest (its reference/project.json) or make a new game; its world shows here.",
+           "no game is open (Studio > Open project... or New game...)")
 ## Application title.
 TITLE = "CapsuleCreatures Studio"
 ## Width of the page list, pixels.
@@ -260,7 +301,8 @@ class StudioWindow(QtWidgets.QMainWindow):
          TITLE,
          "Open a game's project manifest (its reference/project.json) to edit its world, assets, scripts, "
          "battle data, build settings and code page in one window.",
-         [("Open project...", lambda: self.open_game()), ("New game...", lambda: self.new_game())],
+         [("Open project...", lambda: self.open_game()), ("New game...", lambda: self.new_game()),
+          ("Open a sample...", lambda: self.open_sample())],
          "studio", lambda p: self.open_game(p),
          skip=("Continue without a project", lambda: self.show_editor()), recent_title="Recent projects")
       self.nav.currentRowChanged.connect(lambda row: self._show_row(row))
@@ -327,6 +369,9 @@ class StudioWindow(QtWidgets.QMainWindow):
             a.triggered.disconnect()
             a.triggered.connect(lambda _c=False: self.open_game())
             a.setToolTip("Open another game in the Studio (Studio > Open project...)")
+      if page.page_id == "world":   # the World page's File menu offers the Studio's Add world to game... too
+         self._add_world_to_file_menu(w)
+         self._set_world_empty_state(w)
       for a in w.menuBar().actions():   # one Record performance: the Studio's
          if a.menu() is not None and a.text().replace("&", "") == "Help":
             self._skipped_menus.add(a)
@@ -494,6 +539,18 @@ class StudioWindow(QtWidgets.QMainWindow):
       a.setToolTip("A new game folder from a battle data template (Blank, Starter, ...)")
       a.triggered.connect(lambda _c=False: self.new_game())
       self.studio_menu.addAction(a)
+      # D-40 RP: a copy of one of the engine's sample projects, as a game of your own
+      a = QtGui.QAction("Open a &sample...", self)
+      a.setToolTip("Copy one of the engine's sample projects (Starter Battle, Map Sandbox) into a new folder and "
+                   "open it as your own game")
+      a.triggered.connect(lambda _c=False: self.open_sample())
+      self.studio_menu.addAction(a)
+      ## Studio > Add world to game... (the World page's File menu shows it too).
+      self.add_world_action = QtGui.QAction("Add &world to game...", self)
+      self.add_world_action.setToolTip("Name a world in the open game (the map sandbox's or a world file); a world "
+                                       "from outside the game is imported into it first")
+      self.add_world_action.triggered.connect(lambda _c=False: self.add_world_to_game())
+      self.studio_menu.addAction(self.add_world_action)
       # S5: any JSON file read-only (an imported game's importer / tier-3 data the studio has no editor for)
       a = QtGui.QAction("Open data file (read-&only)...", self)
       a.setToolTip("Show a JSON file as a tree without editing it (e.g. world/scripts/story.json, ui/menus.json)")
@@ -595,11 +652,219 @@ class StudioWindow(QtWidgets.QMainWindow):
             return False
       elif dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted or dialog.created is None:
          return False
-      return self.open_game(dialog.created)
+      if not self.open_game(dialog.created):
+         return False
+      self._show_start_map()
+      return True
 
-   def open_game(self, path: str | Path | None = None) -> bool:
+   def open_sample(self, sample: str | None = None, folder: str | Path | None = None, name: str | None = None) -> bool:
+      """!A copy of one of the engine's sample projects (ui/sample_dialog.py SampleDialog, core.samples.copy()), then
+      opened: on its World page with the map its world starts on, or on its Battle page when it has no world. With a
+      sample and a folder nothing is asked (tests, scripts).
+      @param sample  sample id, or None to ask
+      @param folder  the copy's folder (new or empty), or None to ask
+      @param name    the game's name, or None (the folder's)
+      @return True when the copy was made and opened
+      """
+      from .sample_dialog import TITLE, SampleDialog   # local: only this action needs it
+
+      dialog = SampleDialog(folder, self.dialog_parent())
+      if name:
+         dialog.name.setText(name)
+      if sample is not None and folder is not None:
+         if not dialog.select(sample) or dialog.copy_sample() is None:
+            report_failure(self, TITLE, dialog.message.text() or f"no sample {sample!r}")
+            return False
+      elif dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted or dialog.created is None:
+         return False
+      project = dialog.created
+      if not self.open_game(project):
+         return False
+      game = project.parent.parent
+      build = f"build it with ./build gba-release --game {game}"
+      if getattr(self.windows.get("world"), "project", None) is not None:
+         self._show_start_map()
+         self.show_status(f"{TITLE}: copied {dialog.sample().name} into {game}; {build}")
+      else:
+         self.show_page("battle")
+         self.show_status(f"{TITLE}: copied {dialog.sample().name} into {game} (battle data in data/starter); {build}")
+      return True
+
+   def _show_start_map(self) -> None:
+      """!Shows the World page with the map the game's world starts on (a new game's "start"), and says so.
+      @return None
+      """
+      w = self.windows.get("world")
+      world = getattr(w, "project", None) if w is not None else None
+      if world is None:
+         return
+      start = world.world.data.get("start")
+      name = start.get("map") if isinstance(start, dict) else None
+      if name not in world.map_names():
+         names = world.map_names()
+         name = names[0] if names else None
+      self.show_page("world")
+      if name is not None and w.select_map(name):
+         self.show_status(f"New game: the world starts on the map {name}; paint it on the Map tab, add tiles on "
+                          "the Tileset tab")
+
+   def _add_world_to_file_menu(self, window: QtWidgets.QMainWindow) -> None:
+      """!Puts Add world to game... into the World page's File menu, after its Import from another world....
+      @param window  the World page's window
+      @return None
+      """
+      for top in window.menuBar().actions():
+         menu = top.menu()
+         if menu is None or top.text().replace("&", "") != "File":
+            continue
+         items = menu.actions()
+         after = next((i for i, a in enumerate(items) if a.text().replace("&", "").startswith("Import from")), None)
+         if after is None or after + 1 >= len(items):
+            menu.addAction(self.add_world_action)
+         else:
+            menu.insertAction(items[after + 1], self.add_world_action)
+         return
+
+   def _set_world_empty_state(self, window: WorldWindow) -> None:
+      """!What the World page shows while it has no world: for the open game, Create a new world and Add an
+      existing world...; with no game open, Open project... and New game....
+      @param window  the World page's window
+      @return None
+      """
+      if self._project_path is None:
+         heading, text, reason = NO_GAME
+         actions = [("Open project...", lambda: self.open_game()), ("New game...", lambda: self.new_game())]
+      else:
+         heading, text, reason = GAME_WITHOUT_WORLD
+         actions = [(CREATE_WORLD, lambda: self.create_world()),
+                    ("Add an existing world...", lambda: self.add_world_to_game())]
+      window.set_empty_state(heading, text, actions, reason)
+
+   def create_world(self) -> bool:
+      """!Makes a new, empty world for the open game (core.game_world.create(): data/world.json, named in its
+      project manifest), then opens the game again on its World page with that world.
+      @return True when the game names the new world afterwards
+      """
+      if self._project_path is None:
+         report_failure(self, CREATE_WORLD, "Open or make a game first (Studio > Open project... or New game...)")
+         return False
+      if not self._confirm_all():   # the game opens again afterwards: every page's changes are saved or dropped
+         return False
+      try:
+         doc = project_core.open_project(self._project_path)
+         lines = game_world.create(doc)
+      except (DocumentError, OSError, ValueError) as e:
+         report_failure(self, CREATE_WORLD, str(e))
+         return False
+      self.open_game(self._project_path, asked=True)
+      self.show_page("world")
+      self.show_status(f"{CREATE_WORLD}: {lines[0]}; next: Tileset tab > New tileset..., then Map tab > "
+                       "New map... (the game builds once its world has a map)")
+      return True
+
+   def _ask_world_source(self) -> Path | None:
+      """!Asks which world to add: the engine's map sandbox (when found) or a world file.
+      @return its world.json, or None when cancelled
+      """
+      sandbox = game_world.sandbox_world()
+      box = QtWidgets.QMessageBox(self.dialog_parent())
+      box.setWindowTitle(ADD_WORLD)
+      box.setIcon(QtWidgets.QMessageBox.Icon.Question)
+      box.setText("Which world should the game use?")
+      box.setInformativeText("The map sandbox is the engine's sample world (it comes with the Studio). A world "
+                             "from outside the game folder is imported into the game first.")
+      role = QtWidgets.QMessageBox.ButtonRole
+      sandbox_button = box.addButton("Map sandbox", role.AcceptRole) if sandbox is not None else None
+      file_button = box.addButton("World file...", role.ActionRole)
+      box.addButton(QtWidgets.QMessageBox.StandardButton.Cancel)
+      box.exec()
+      clicked = box.clickedButton()
+      box.deleteLater()
+      if sandbox_button is not None and clicked is sandbox_button:
+         return sandbox
+      if clicked is not file_button:
+         return None
+      start = str(self._project_path.parent.parent) if self._project_path is not None else ""
+      path, _ = QtWidgets.QFileDialog.getOpenFileName(self.dialog_parent(), ADD_WORLD, start, WORLD_FILTER)
+      return Path(path) if path else None
+
+   def _choose_import(self, doc: Document, add: game_world.AddWorldPlan) -> tuple[list[str], list[str]] | None:
+      """!Offers to import a world from outside the game: the import dialog with every map ticked.
+      @param doc  the game's project Document
+      @param add  game_world.AddWorldPlan (action IMPORT)
+      @return (map names, tileset names), or None when cancelled
+      """
+      from .world_import import ImportWorldDialog   # local: only this action needs it
+      dlg = ImportWorldDialog(game_world.target_world(doc, add), Project.open(add.source), self.dialog_parent())
+      into = "a new world" if add.creates else "the game's world"
+      dlg.setWindowTitle(f"{ADD_WORLD}: import into {add.rel}")
+      dlg.layout().insertWidget(0, QtWidgets.QLabel(f"This world is not in the game yet. Its maps are imported into "
+                                                    f"{into} ({add.rel}) first, then the game names it."))
+      for i in range(dlg.map_list.count()):
+         dlg.map_list.item(i).setCheckState(QtCore.Qt.CheckState.Checked)
+      accepted = dlg.exec() == QtWidgets.QDialog.DialogCode.Accepted
+      chosen = dlg.choice()
+      dlg.deleteLater()
+      return chosen if accepted else None
+
+   def add_world_to_game(self, source: str | Path | None = None, maps: list[str] | None = None,
+                         tilesets: list[str] | None = None) -> bool:
+      """!Names a world in the open game's project manifest (core.game_world), importing it first when it is
+      outside the game folder, then opens the game again on its World page. With a source and the maps to import
+      nothing is asked (tests, scripts).
+      @param source    world.json to add, or None to ask (map sandbox or a file)
+      @param maps      maps to import from a world outside the game, or None to ask
+      @param tilesets  tilesets to import besides, or None (none, or what the dialog ticks)
+      @return True when the game names the world afterwards
+      """
+      quiet = source is not None and maps is not None
+      if self._project_path is None:
+         report_failure(self, ADD_WORLD, "Open or make a game first (Studio > Open project... or New game...)")
+         return False
+      if source is None:
+         source = self._ask_world_source()
+         if source is None:
+            return False
+      if not self._confirm_all():   # the game opens again afterwards: every page's changes are saved or dropped
+         return False
+      try:
+         doc = project_core.open_project(self._project_path)
+         add = game_world.plan(doc, source)
+      except DocumentError as e:
+         report_failure(self, ADD_WORLD, str(e))
+         return False
+      if add.action == game_world.LINKED:
+         self.show_page("world")
+         self.show_status(f"The game names this world already ({add.rel})")
+         return True
+      chosen = (maps or [], tilesets or [])
+      if add.action == game_world.IMPORT and not quiet:
+         chosen = self._choose_import(doc, add)
+         if chosen is None:
+            return False
+      elif add.action == game_world.LINK and add.replaces and not quiet:
+         b = QtWidgets.QMessageBox.StandardButton
+         answer = QtWidgets.QMessageBox.question(self.dialog_parent(), ADD_WORLD,
+                                                 f"The game names {add.replaces} now. Use {add.rel} instead?",
+                                                 b.Yes | b.Cancel, b.Yes)
+         if answer != b.Yes:
+            return False
+      try:
+         lines = game_world.run(doc, source, chosen[0], chosen[1])
+      except (DocumentError, OSError, ValueError, KeyError) as e:
+         report_failure(self, ADD_WORLD, str(e))
+         return False
+      self.open_game(self._project_path, asked=True)
+      self.show_page("world")
+      self.show_status(f"{ADD_WORLD}: {lines[-1]}")
+      if not quiet and not headless():
+         QtWidgets.QMessageBox.information(self, ADD_WORLD, "\n".join(lines))
+      return True
+
+   def open_game(self, path: str | Path | None = None, asked: bool = False) -> bool:
       """!Opens a game: each file its project manifest names, on its page.
-      @param path  reference/project.json, or None to ask
+      @param path   reference/project.json, or None to ask
+      @param asked  True when the caller asked every page about unsaved changes already
       @return True when the project opened
       """
       if path is None:
@@ -612,7 +877,7 @@ class StudioWindow(QtWidgets.QMainWindow):
       except DocumentError as e:
          QtWidgets.QMessageBox.warning(self.dialog_parent(), "Open project", f"{path}: {e}")
          return False
-      if not self._confirm_all():
+      if not asked and not self._confirm_all():
          return False
       problems = []
       for key, file in files.items():

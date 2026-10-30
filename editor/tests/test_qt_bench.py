@@ -183,7 +183,8 @@ class ScenarioFormTests(BenchPanelTestCase):
       self.assertEqual(panel.name_edit.text(), "wild")
       self.assertEqual(panel.party_table.rowCount(), 2)
       self.assertEqual(panel.party_table.item(0, 3).text(), "Novice Kit")
-      self.assertFalse(panel.member_table.isEnabled())   # a party of the data: its members read only
+      from capsule_studio.ui.widgets import is_enabled
+      self.assertFalse(is_enabled(panel.member_table))   # a party of the data: its members read only
       self.assertEqual(panel.member_table.item(0, 0).text(), "Sproutle")
       self.close(w)
 
@@ -232,7 +233,8 @@ class ScenarioFormTests(BenchPanelTestCase):
       self.settle()
       self.assertNotIn("data", doc.data["parties"][1])
       self.assertEqual([m["species"] for m in doc.data["parties"][1]["members"]], ["Duskowl", "Glimmet", "Voltmink"])
-      self.assertTrue(panel.member_table.isEnabled())
+      from capsule_studio.ui.widgets import is_enabled
+      self.assertTrue(is_enabled(panel.member_table))
       panel.member_table.item(0, 1).setText("15")
       self.settle()
       self.assertEqual(doc.data["parties"][1]["members"][0]["level"], 15)

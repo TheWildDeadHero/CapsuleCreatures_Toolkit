@@ -23,7 +23,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from ....core.document import DocumentError
 from ....core.structure import stages as stage_model
 from ....core.structure import stats as stat_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import NONE_TEXT, STRUCTURE, BattlePanel
 
 if TYPE_CHECKING:
@@ -162,8 +162,8 @@ class StagesPanel(BattlePanel):
          self._fill_entries(next((r for r in rows if r["name"] == self.selected), None))
       finally:
          self._filling = False
-      self.table.setEnabled(doc is not None)
-      self.entries.setEnabled(doc is not None)
+      set_enabled(self.table, doc is not None)   # read-only, still scrolling
+      set_enabled(self.entries, doc is not None)
       self.show_errors()
 
    def _fill_budget(self, rows: list[stage_model.StageRow]) -> None:

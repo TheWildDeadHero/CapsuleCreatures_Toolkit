@@ -17,7 +17,7 @@ from ...core import codepage, engine, preview, texts
 from ...core.document import DocumentError
 from ..panel import EditorPanel
 from ..qtimage import screen_qimage
-from ..widgets import DEBOUNCE_MS, Debounce, PixelView, button
+from ..widgets import DEBOUNCE_MS, Debounce, PixelView, button, set_enabled
 
 if TYPE_CHECKING:
    from ..panel import PanelHost
@@ -219,7 +219,7 @@ class TextPanel(EditorPanel):
          if self.key:
             self.list.setCurrentRow(keys.index(self.key))
          a = self.doc.find(self.key) if self.key else None
-         self.edit.setEnabled(a is not None)
+         set_enabled(self.edit, a is not None)   # read-only, still scrolling
          value = a.get("text", "") if a else ""
          if self.edit.toPlainText() != value:
             self.edit.setPlainText(value)

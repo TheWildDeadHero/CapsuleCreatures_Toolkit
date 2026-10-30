@@ -7,6 +7,12 @@ it lists), the File and Edit menus and the status bar. Each document keeps
 its own undo history; Undo / Redo act on the active panel's current
 document. Panels never open files or talk to each other.
 
+While no world is open the window shows an empty state (NoWorldPage) instead
+of its panels: why there is nothing to edit, and buttons that make or open a
+world (the Studio's World page offers "Create a new world" and "Add an existing
+world" for a game without one: set_empty_state()). A panel action that still
+runs without a world says why in the status bar (EditorPanel.explain()).
+
 Extensions (D-10, capsule_studio.plugins): the window holds a plugin
 registry (`extensions`) with the studio's own extensions; opening a world
 also loads the plugins its project (reference/project.json) lists. Panels
@@ -38,7 +44,8 @@ from .editors.world_doors import WorldDoorsPanel
 from .editors.world_interactions import InteractionsPanel
 from . import background, profiler
 from .panel import EditorPanel
-from .widgets import STATUS_MS, StartPage, file_toolbar, remember_file, report_failure
+from .widgets import START_TITLE_EXTRA_POINTS, STATUS_MS, StartPage, button, file_toolbar, remember_file, \
+   report_failure
 
 if TYPE_CHECKING:
    from ..core.document import Document
@@ -56,11 +63,87 @@ WINDOW_HEIGHT = 820
 ## Percent per whole (zoom factor to percent).
 PERCENT = 100
 
+## Heading of a world window's empty state while no world is open.
+NO_WORLD_HEADING = "No world is open"
+## What the empty state says.
+NO_WORLD_TEXT = ("Open a world (its world.json) or make a new one; its maps, tilesets and the world's other panels "
+                 "show here then.")
+## Why a world panel's action did nothing while no world is open (status bar).
+NO_WORLD_REASON = "no world is open (File > Open world... or New world...)"
+## Smallest height of the empty state's buttons, pixels.
+EMPTY_BUTTON_HEIGHT = 36
+## Widest the empty state's text grows, pixels.
+EMPTY_TEXT_WIDTH = 520
+## Space between the empty state's heading, text and buttons, pixels.
+EMPTY_SPACING = 12
+
+## A button of the empty state: (label, callable).
+EmptyAction = tuple[str, Callable[[], object]]
+
 ## Worlds of up to this many maps are compiled at once when they open (a few seconds at most). Larger ones (I2: the
-## imported Emerald world's 539 maps take about 15 s and 1 GB) are not compiled on open: the pure-Python compile
+## imported world's 500-odd maps take about 15 s and 1 GB) are not compiled on open: the pure-Python compile
 ## holds the interpreter lock, so on a thread it slows the editor tenfold. World > Validate compiles them on a
 ## background thread (ui/background.py), and every map shown compiles on its own against its tilesets.
 SYNC_VALIDATE_MAPS = 64
+
+class NoWorldPage(QtWidgets.QWidget):
+   """!What a world window shows instead of its panels while no world is open: a heading, a sentence on what to
+   do, and buttons that make or open a world. Nothing on it is disabled; every button does something."""
+
+   def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+      """!Builds the page (set_message() fills it).
+      @param parent  parent widget
+      """
+      super().__init__(parent)
+      ## The heading.
+      self.heading = QtWidgets.QLabel()
+      font = self.heading.font()
+      font.setPointSize(font.pointSize() + START_TITLE_EXTRA_POINTS)
+      font.setBold(True)
+      self.heading.setFont(font)
+      self.heading.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+      ## The sentence under it.
+      self.text = QtWidgets.QLabel()
+      self.text.setWordWrap(True)
+      self.text.setMaximumWidth(EMPTY_TEXT_WIDTH)
+      self.text.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+      ## The buttons, by label.
+      self.buttons = {}
+      ## Row of the buttons.
+      self._row = QtWidgets.QHBoxLayout()
+      box = QtWidgets.QVBoxLayout(self)
+      box.addStretch(1)
+      box.addWidget(self.heading, 0, QtCore.Qt.AlignmentFlag.AlignHCenter)
+      box.addSpacing(EMPTY_SPACING)
+      box.addWidget(self.text, 0, QtCore.Qt.AlignmentFlag.AlignHCenter)
+      box.addSpacing(EMPTY_SPACING)
+      box.addLayout(self._row)
+      box.addStretch(1)
+
+   def set_message(self, heading: str, text: str, actions: Sequence[EmptyAction]) -> None:
+      """!Shows a heading, a sentence and buttons (the old buttons go).
+      @param heading  the heading
+      @param text     what to do
+      @param actions  [(button label, callable), ...]
+      @return None
+      """
+      self.heading.setText(heading)
+      self.text.setText(text)
+      for b in self.buttons.values():
+         self._row.removeWidget(b)
+         b.deleteLater()
+      self.buttons = {}
+      while self._row.count():   # the stretches around the old buttons
+         self._row.takeAt(0)
+      self._row.addStretch(1)
+      for label, slot in actions:
+         b = button(label, slot)
+         b.setMinimumHeight(EMPTY_BUTTON_HEIGHT)
+         b.setDefault(not self.buttons)   # the first one is what Enter does
+         self.buttons[label] = b
+         self._row.addWidget(b)
+      self._row.addStretch(1)
+
 
 class WorldWindow(QtWidgets.QMainWindow):
    """!Main window hosting world panels (implements PanelHost, see panel.py)."""
@@ -98,6 +181,8 @@ class WorldWindow(QtWidgets.QMainWindow):
       self.reports = None
       ## The hosted EditorPanel instances.
       self.panels = []
+      ## Why a panel's action did nothing while no world is open (EditorPanel.explain(); the Studio sets its own).
+      self.no_world_reason = NO_WORLD_REASON
       ## The tab widget.
       self.tabs = QtWidgets.QTabWidget()
       self._build_menus()   # before the tabs: their signals update the menus
@@ -116,7 +201,16 @@ class WorldWindow(QtWidgets.QMainWindow):
          [("Open world...", lambda: self.open_world()), ("New world...", lambda: self.new_world())],
          self.tool_name, lambda path: self.open_world(path),
          skip=("Continue without a world", lambda: self.show_editor()), recent_title="Recent worlds")
-      self.setCentralWidget(self.tabs)   # the tab bar shows only with several panels
+      ## The empty state, shown instead of the panels while no world is open.
+      self.empty = NoWorldPage()
+      self.empty.set_message(NO_WORLD_HEADING, NO_WORLD_TEXT,
+                             [("New world...", lambda: self.new_world()), ("Open world...", lambda: self.open_world())])
+      ## The empty state or the tabs (the tab bar shows only with several panels).
+      self.body = QtWidgets.QStackedWidget()
+      self.body.addWidget(self.empty)
+      self.body.addWidget(self.tabs)
+      self.setCentralWidget(self.body)
+      self._show_body()
       self.tabs.currentChanged.connect(lambda *a: self._tab_changed(*a))
       self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
       self._update_title()
@@ -147,6 +241,23 @@ class WorldWindow(QtWidgets.QMainWindow):
          self.panels.append(panel)
          self.tabs.addTab(panel, spec.title)
       self.tabs.tabBar().setVisible(len(self.panels) > 1)
+
+   def set_empty_state(self, heading: str, text: str, actions: Sequence[EmptyAction], reason: str) -> None:
+      """!What the window shows and says while no world is open (the Studio's World page: a game without a world).
+      @param heading  the empty state's heading
+      @param text     what to do
+      @param actions  its buttons: [(label, callable), ...]
+      @param reason   why a panel's action does nothing meanwhile (status bar)
+      @return None
+      """
+      self.empty.set_message(heading, text, actions)
+      self.no_world_reason = reason
+
+   def _show_body(self) -> None:
+      """!Shows the panels while a world is open, else the empty state.
+      @return None
+      """
+      self.body.setCurrentWidget(self.tabs if self.project is not None else self.empty)
 
    def selected_map(self) -> str | None:
       """!The map the map panel shows (extension panels follow it).
@@ -189,7 +300,7 @@ class WorldWindow(QtWidgets.QMainWindow):
       self.start.hide()
       self.show()
       if self.project is None:
-         self.show_status("No world open: File > Open world... or New world...")
+         self.show_status(f"Nothing to edit: {self.no_world_reason}")
 
    def launch(self) -> None:
       """!Shows the editor when something is open, else the start window
@@ -240,13 +351,17 @@ class WorldWindow(QtWidgets.QMainWindow):
       """
       doc = document or self.document
       if doc is None:
+         self.show_status(f"{label}: {self.no_world_reason if self.project is None else 'nothing is chosen'}")
          return False
+      revision = doc.revision
       try:
          with doc.edit(label):
             fn()
       except (DocumentError, ValueError, KeyError, IndexError, OSError, engine.EngineNotFound) as e:
          report_failure(self, label, str(e))   # headless: the status bar only (nothing waits for a click)
          return False
+      if doc.revision == revision:   # it went through and changed nothing (no undo step): say so
+         self.show_status(f"{label}: nothing to change")
       self.changed()
       return True
 
@@ -294,7 +409,9 @@ class WorldWindow(QtWidgets.QMainWindow):
          for p in self.panels:
             p.document_replaced()
          self._update_title()
+         self._show_body()
          raise DocumentError(f"cannot show this world: {e}") from e
+      self._show_body()
       self.start.hide()
       if not self.isVisible():
          self.show()
@@ -483,7 +600,7 @@ class WorldWindow(QtWidgets.QMainWindow):
       @return None
       """
       if self.project is None:
-         self.show_status("Open or create a world first: imports go into the open world")
+         self.show_status(f"Import: {self.no_world_reason}; imports go into the open world")
          return
       path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Import from world", "", WORLD_FILTER)
       if not path:
@@ -555,6 +672,7 @@ class WorldWindow(QtWidgets.QMainWindow):
       @return None
       """
       if self.project is None:
+         self.show_status(f"Validate: {self.no_world_reason}")
          return
       if len(self.project.map_names()) > SYNC_VALIDATE_MAPS:   # I2: a large world compiles in the background
          self.show_status("Compiling the whole world in the background...")

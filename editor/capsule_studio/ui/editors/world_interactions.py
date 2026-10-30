@@ -15,7 +15,7 @@ from PySide6 import QtWidgets
 
 from ...core import engine, events, interactions
 from ..panel import EditorPanel
-from ..widgets import button
+from ..widgets import button, set_enabled
 
 if TYPE_CHECKING:
    from ...core.document import Document
@@ -142,8 +142,10 @@ class InteractionsPanel(EditorPanel):
       @return True when it went through
       """
       doc = self.world()
-      if self._filling or doc is None:
+      if self._filling:
          return False
+      if doc is None:
+         return self.explain(label)
       ok = self.host.run_edit(label, lambda: fn(doc), doc)
       self.refresh()
       return ok
@@ -155,7 +157,7 @@ class InteractionsPanel(EditorPanel):
       @return None
       """
       doc = self.world()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       if doc is None:
          return
       self._filling = True
@@ -277,15 +279,19 @@ class InteractionsPanel(EditorPanel):
       @return True when changed
       """
       i = self.table.currentRow()
+      if i < 0:
+         return self.explain("Apply interaction", "interaction rule")
       f = self.form()
-      return i >= 0 and self._run("Interaction", lambda doc: interactions.set_rule(doc, i, **f))
+      return self._run("Interaction", lambda doc: interactions.set_rule(doc, i, **f))
 
    def remove_rule(self) -> bool:
       """!Removes the chosen rule.
       @return True when removed
       """
       i = self.table.currentRow()
-      return i >= 0 and self._run("Remove interaction", lambda doc: interactions.remove_rule(doc, i))
+      if i < 0:
+         return self.explain("Remove interaction", "interaction rule")
+      return self._run("Remove interaction", lambda doc: interactions.remove_rule(doc, i))
 
    def move_rule(self, delta: int) -> bool:
       """!Moves the chosen rule earlier (-1) or later (+1).
@@ -293,8 +299,10 @@ class InteractionsPanel(EditorPanel):
       @return True when moved
       """
       i = self.table.currentRow()
+      if i < 0:
+         return self.explain("Move interaction", "interaction rule")
       to: list[int] = []
-      ok = i >= 0 and self._run("Move interaction", lambda doc: to.append(interactions.move_rule(doc, i, delta)))
+      ok = self._run("Move interaction", lambda doc: to.append(interactions.move_rule(doc, i, delta)))
       if ok and to:
          self.table.selectRow(to[0])
       return ok

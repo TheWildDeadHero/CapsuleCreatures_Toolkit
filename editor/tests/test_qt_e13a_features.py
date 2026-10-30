@@ -5,7 +5,7 @@ preview and coloured derived field, the Formulas page's coloured cells and
 error row, and the pipeline step's expression field. Each opens a copy of a
 sample laid out as a game and edits through the widgets (one undo step per
 edit). Skipped when PySide6 is missing; uses Qt's offscreen platform; the
-Gen-3 record data set's tests are skipped without the reference repo.
+Classic record data set's tests are skipped without the reference repo.
 CAPSULE_SHOTS=FOLDER saves pictures of the pages there.
 """
 from __future__ import annotations
@@ -20,14 +20,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from capsule_studio.core import battle, engine, expressions  # noqa: E402
 from capsule_studio.core.structure import progression, record, species_fields  # noqa: E402
-from sample_data import make_gen3_record_game, needs_gen3_record  # noqa: E402
+from sample_data import make_classic_record_game, needs_classic_record  # noqa: E402
 from test_qt_battle import QtBattleTestCase  # noqa: E402
 
 ## Where CAPSULE_SHOTS names the picture folder.
 SHOTS_ENV = "CAPSULE_SHOTS"
 ## Size of a saved picture.
 SHOT_SIZE = (1300, 860)
-## The Gen-3 record data set's unstored role, a stored custom role without a generation entry, its wide draw, its
+## The classic record data set's unstored role, a stored custom role without a generation entry, its wide draw, its
 ## gender role and field, and a species.
 UNSTORED, PLAIN_CUSTOM, WIDE_ROLE, FIELD_ROLE, FIELD, SPECIES = ("shiny", "friendship", "seed", "gender",
                                                                  "gender_ratio", "Mothlet")
@@ -145,16 +145,16 @@ class FormulaPageTests(QtBattleTestCase):
       self.close(w)
 
 
-@needs_gen3_record
-class Gen3RecordPageTests(QtBattleTestCase):
-   """!The Record and Progression pages on the reference repo's compat/gen3/record data set."""
+@needs_classic_record
+class ClassicRecordPageTests(QtBattleTestCase):
+   """!The Record and Progression pages on the reference repo's compat/classic/record data set."""
 
    def setUp(self) -> None:
       """!Copies the record data set as a game.
       @return None
       """
       super().setUp()
-      self.battle_json = make_gen3_record_game(self.root / "gen3")
+      self.battle_json = make_classic_record_game(self.root / "classic")
 
    def yes(self) -> Any:
       """!Answers the Record page's questions Yes (widgets.ask() says No without a screen).

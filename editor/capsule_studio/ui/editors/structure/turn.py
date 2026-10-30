@@ -26,7 +26,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core import battle
 from ....core.structure import nursery as nursery_model
 from ....core.structure import turn as model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, EntryPanel, set_check, set_combo, set_spin
 from ..content.presenters import PresenterPreview
 from ..record_widgets import NameChecks, table_height
@@ -175,7 +175,7 @@ class FormatsPanel(EntryPanel):
       row = self.row() if entry is not None else None
       enabled = row is not None
       for w in (self.side_count, self.range_box, self.fainted_box, self.party_max, self.places, self.stands):
-         w.setEnabled(enabled)
+         set_enabled(w, enabled)   # the tables go read-only and keep their scroll bars
       if row is None:
          return
       for w in [self.side_count] + self.side_spins:
@@ -480,7 +480,7 @@ class TurnPanel(BattlePanel):
       finally:
          self._filling = False
       self._fill_phase()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def set_allow_eggs(self, on: bool) -> bool:
@@ -511,7 +511,7 @@ class TurnPanel(BattlePanel):
       self.each.setEnabled(row is not None and row["each"] is not None)
       if battlers:
          self.use_order.setChecked(row["sources"] is None)
-         self.sources.setEnabled(row["sources"] is not None)
+         set_enabled(self.sources, row["sources"] is not None)   # read-only, still scrolling
          order = model.effect_order(doc)
          self.sources.set_names(row["runs"] + [s for s in order if s not in row["runs"]], row["runs"])
       set_combo(self.each, model.phase_each(), row["each"] if row is not None and row["each"] else None)

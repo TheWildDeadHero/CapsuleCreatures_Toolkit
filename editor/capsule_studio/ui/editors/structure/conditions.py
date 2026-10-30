@@ -24,7 +24,7 @@ from PySide6 import QtWidgets
 from ....core import battle, holders
 from ....core.document import DocumentError
 from ....core.structure import conditions as cond_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import (FORM_STRETCH, LIST_STRETCH, NONE_TEXT, STRUCTURE, BattlePanel,
                              set_check, set_combo, set_spin)
 from ..record_widgets import BudgetBars, NameChecks, PointHandlersBox, TextsTable
@@ -57,7 +57,7 @@ FIELD_HELP = {
    "counter": "A counter slot for its logic (holder.counter(X))",
    "word": "A word slot for its logic (holder.word(X))",
    "clears_on": "Events that end it",
-   "passes": "Passed on by a baton-pass switch",
+   "passes": "Passed on when the holder switches out to pass its changes on",
    "chain": "Consecutive uses succeed with odds 1 in den^n (n up to cap)",
    "hud": "Start / end events reach the screen",
    "layers": "Most layers it stacks to",
@@ -243,7 +243,7 @@ class ConditionTab(QtWidgets.QWidget):
       for key, (field, parts) in self.inputs.items():
          value = e.get(key)
          for w in parts.values():
-            w.setEnabled(entry is not None)
+            set_enabled(w, entry is not None)   # name checks go read-only and keep their scroll bars
          if field == cond_model.BOOL:
             set_check(parts["check"], value)
          elif field in (cond_model.BYTE, cond_model.LAYERS):

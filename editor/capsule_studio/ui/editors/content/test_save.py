@@ -43,7 +43,7 @@ from ....core.structure import nursery as nursery_model
 from ....core.structure import pockets as pocket_model
 from ....core.structure import step_effects as step_model
 from ....core.structure import storage as storage_model
-from ...widgets import button, report_failure
+from ...widgets import button, report_failure, set_enabled
 from ..battle_common import NONE_TEXT, BattlePanel, set_check, set_combo, set_spin_max
 
 if TYPE_CHECKING:
@@ -311,7 +311,7 @@ class TestSavePanel(BattlePanel):
          self.result_hatch.blockSignals(False)
          on = self.save is not None and slots > 0
          for w in (self.held, self.held_species, self.held_level, self.held_gained, self.result_species):
-            w.setEnabled(on)
+            set_enabled(w, on)   # tables go read-only and keep their scroll bars (also below)
          self.result_egg.setEnabled(on and eggs)
          self.result_hatch.setEnabled(on and eggs and is_egg)
       finally:
@@ -358,7 +358,7 @@ class TestSavePanel(BattlePanel):
       self.steps.resizeColumnsToContents()
       on = self.save is not None and bool(rows)
       for w in (self.steps, self.step_count):
-         w.setEnabled(on)
+         set_enabled(w, on)
 
    def set_step_selected(self, steps: int) -> bool:
       """!Sets the selected step effect's counter.
@@ -428,7 +428,7 @@ class TestSavePanel(BattlePanel):
       self.game_hex.setPlainText("\n".join(r for _o, r in rows))
       self.game_info.setText(info)
       for w in (self.game_version, self.game_size, self.game_hex):
-         w.setEnabled(self.save is not None)
+         set_enabled(w, self.save is not None)
 
    def set_game_from_form(self) -> bool:
       """!S5: writes the Game box's version, size and bytes.
@@ -545,7 +545,7 @@ class TestSavePanel(BattlePanel):
       self._fill_nursery()
       self._fill_game()
       self._fill_shapes()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_boxes(self) -> None:
@@ -580,7 +580,7 @@ class TestSavePanel(BattlePanel):
             set_spin_max(self.level, storage_model.max_level(doc))
          on = self.save is not None and bool(names)
          for w in (self.current, self.boxed, self.species_choice, self.level):
-            w.setEnabled(on)
+            set_enabled(w, on)
          eggs = doc is not None and nursery_model.eggs(doc) is not None
          set_spin_max(self.box_hatch, nursery_model.counter_max(doc) if eggs else 0)
          for w in (self.box_hatch, self.egg_button, self.not_egg_button):
@@ -609,7 +609,7 @@ class TestSavePanel(BattlePanel):
          set_spin_max(self.count, row["quantity_max"])
       on = self.save is not None
       for w in (self.item_choice, self.count, self.table):
-         w.setEnabled(on)
+         set_enabled(w, on)
       if self.save is None or doc is None:
          self.problems.setText("No test save: New... makes one." if doc is not None else "")
          self.problems.setStyleSheet("")

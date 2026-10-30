@@ -23,7 +23,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core.document import DocumentError
 from ....core.structure import categories as cat_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel
 
 if TYPE_CHECKING:
@@ -113,7 +113,7 @@ class CategoriesPanel(BattlePanel):
       ## The move mode's hit types' categories on / off (C5: hit_category_by_type).
       self.hit_box = QtWidgets.QCheckBox("A hit whose type is not its move's own (the move_type point changed it) "
                                          "takes that type's category")
-      self.hit_box.setToolTip("Hidden Power, Weather Ball: the category follows the type the move hits with "
+      self.hit_box.setToolTip("A move whose type changes when it is used: the category follows the type it hits with "
                               "(the structure's hit_category_by_type; each type starts with its moves' most "
                               "common damaging category)")
       self.hit_box.clicked.connect(lambda on: self._hit_clicked(bool(on)))
@@ -206,7 +206,7 @@ class CategoriesPanel(BattlePanel):
          self._fill_mode(doc)
       finally:
          self._filling = False
-      self.table.setEnabled(doc is not None)
+      set_enabled(self.table, doc is not None)   # read-only, still scrolling
       self.show_errors()
 
    def _fill_mode(self, doc: Document | None) -> None:

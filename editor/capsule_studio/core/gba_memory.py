@@ -26,6 +26,8 @@ from . import engine
 
 ## The build folder's cache file.
 CACHE_FILE = "CMakeCache.txt"
+## D-40 RG: a game's folder of build folders, one per preset (the umbrella's ./build PRESET --game FOLDER).
+GAME_BUILDS = "build"
 ## The memory checks' cache option.
 CHECKS = "CAPSULE_GBA_MEMORY_CHECKS"
 ## The stack reserve's cache setting.
@@ -259,16 +261,18 @@ def set_cache(build: str | Path, name: str, value: str) -> None:
 
 
 def build_folders(start: str | Path) -> list[Path]:
-   """!Configured build folders in a folder and one level below it (a game's, the engine's).
+   """!Configured build folders in a folder, one level below it (a game's, the engine's) and in its build/ folder
+   (D-40 RG: a game built with the umbrella's ./build PRESET --game FOLDER, in build/PRESET).
    @param start  the folder
    @return folders holding a CMakeCache.txt, GBA ones first
    """
    start = Path(start)
    found = [start] if (start / CACHE_FILE).is_file() else []
-   try:
-      found += sorted(p for p in start.iterdir() if p.is_dir() and (p / CACHE_FILE).is_file())
-   except OSError:
-      pass
+   for folder in (start, start / GAME_BUILDS):
+      try:
+         found += sorted(p for p in folder.iterdir() if p.is_dir() and (p / CACHE_FILE).is_file())
+      except OSError:
+         pass
 
    def gba_first(p: Path) -> tuple[bool, str]:
       """!Sort key: GBA folders first, then by name.

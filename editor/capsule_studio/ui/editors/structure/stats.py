@@ -23,7 +23,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from ....core import battle
 from ....core.document import DocumentError
 from ....core.structure import stats as stat_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, TERM_SLOT, BattlePanel
 
 if TYPE_CHECKING:
@@ -164,7 +164,7 @@ class StatsPanel(BattlePanel):
          self._fill_stats(rows)
       finally:
          self._filling = False
-      self.table.setEnabled(doc is not None)
+      set_enabled(self.table, doc is not None)   # read-only, still scrolling
       self.show_errors()
 
    def _fill_budget(self, doc: Any) -> None:

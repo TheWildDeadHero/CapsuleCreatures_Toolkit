@@ -16,7 +16,7 @@ rows (0 and 3 pixels in the background entry, entries 0 never written); Fill (0F
 at the text's start; Clear n / ClearTo n clear a glyph's height at the pen (a positive one types as a glyph does:
 it ends a typed frame); SkipTo n, ShiftRight n and ShiftDown n count from the text's start (print(): Config left /
 top; print_at(): its x / y); MinSpacing n makes every later glyph advance at least n pixels. line_width() is
-window::line_width() (GetStringWidth's rule for those controls), the width menus fit columns with.
+window::line_width() (as the handheld games measure a string with those controls), the width menus fit columns with.
 
 S6b (engine C13c): a window holds no pixels of its own; its owner attaches width x height tiles (TileBuffer<W, H>, a
 TilePool piece or a screen arena block). storage() says how many tiles and bytes one window needs.
@@ -190,7 +190,7 @@ def _controls() -> dict[str, tuple[int, int]]:
 
 def line_width(font: CompiledFont, codes: Sequence[int],
                placeholders: Mapping[int, Sequence[int]] | None = None) -> int:
-   """!S6b (C13a): a text's first line in pixels as window::line_width() counts it (pret's GetStringWidth): field
+   """!S6b (C13a): a text's first line in pixels as window::line_width() counts it (handheld-style): field
    placeholders expanded; Clear n adds n, SkipTo n sets the width to n, ClearTo n raises it to n, MinSpacing n makes
    every later glyph count at least n (without the letter spacing); other controls take none.
    @param font          compiled font
@@ -617,7 +617,7 @@ class Window:
 
    def _control(self) -> bool:
       """!Acts on the control escape at the next code (window.cpp control()).
-      @return S6b (C13a): True when it drew as a glyph does (Clear / ClearTo of a positive width: RENDER_PRINT)
+      @return S6b (C13a): True when it drew as a glyph does (Clear / ClearTo of a positive width count as drawn)
       """
       k = self._code(1)
       a = self._code(ESCAPE_HEAD)
@@ -913,7 +913,7 @@ class Window:
                self.blink = 0
                return   # a wait ends the frame (C14b: WAIT_SE's too)
             if drew and not rush:
-               return   # C13a: a Clear of a positive width types as a glyph (RENDER_PRINT)
+               return   # C13a: a Clear of a positive width types as a glyph (it counts as drawn)
             continue
          self.i += 1
          if c == te.CODE_NEWLINE:

@@ -13,7 +13,7 @@ os_plan() {
    }
    [ "${SKIP_DESKTOP:-0}" -eq 1 ] || {
       note "Desktop: 'sudo apt-get update' and 'sudo apt-get install build-essential cmake"
-      note "     python3 python3-venv git pkg-config libsdl2-dev mgba-qt'. On Ubuntu, mgba-qt is in the"
+      note "     python3 python3-venv git pkg-config libsdl2-dev mgba-qt libxcb-cursor0'. On Ubuntu, mgba-qt is in the"
       note "     'universe' component."
    }
 }
@@ -24,7 +24,9 @@ os_install() {
       local yes=()
       [ "$ASSUME_YES" -eq 1 ] && yes=(-y)
       run sudo apt-get update
+      # libxcb-cursor0: Qt 6's X11 platform plugin needs it for the studio (Wayland sessions do not).
       run sudo apt-get install ${yes[@]+"${yes[@]}"} build-essential cmake python3 python3-venv git pkg-config libsdl2-dev mgba-qt \
+         libxcb-cursor0 \
          || die "apt could not install the desktop dependencies (on Ubuntu, enable 'universe' for mgba-qt)"
    fi
    if [ "${SKIP_GBA:-0}" -ne 1 ]; then

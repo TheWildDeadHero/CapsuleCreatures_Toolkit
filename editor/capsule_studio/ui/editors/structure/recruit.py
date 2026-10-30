@@ -24,7 +24,7 @@ from ....core import battle
 from ....core.document import DocumentError
 from ....core.structure import nursery as nursery_model
 from ....core.structure import recruit as recruit_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, combo, set_check, set_combo, set_spin, spin
 
 if TYPE_CHECKING:
@@ -205,7 +205,7 @@ class RecruitPanel(BattlePanel):
       @return None
       """
       doc, p = self.structure_doc(), self.project()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       if doc is None or p is None:
          return
       stated = recruit_model.is_stated(doc)
@@ -221,7 +221,7 @@ class RecruitPanel(BattlePanel):
          self.pipeline_button.setEnabled(not piped)
          for w in (self.checks, self.rate, self.owned, self.item_role, self.bonus, self.break_free,
                    *self.keep.values(), *self.consumes.values(), *self.messages.values()):
-            w.setEnabled(stated)
+            set_enabled(w, stated)   # a view among them goes read-only and keeps its scroll bars
          set_spin(self.checks, s[recruit_model.CHECKS_KEY] or recruit_model.NEW_CHECKS)
          set_combo(self.rate, [NONE_CHOICE] + recruit_model.rate_choices(doc), s[recruit_model.RATE_KEY] or NONE_CHOICE)
          set_combo(self.owned, recruit_model.owned_choices(), s[recruit_model.OWNED_KEY])

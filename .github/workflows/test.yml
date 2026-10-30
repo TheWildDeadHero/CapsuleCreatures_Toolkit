@@ -1,0 +1,117 @@
+# Tests the toolkit on every push and pull request (D-40 RC):
+#   checks: the code map, and Doxygen (fails on anything undocumented), Linux
+#   unit:   editor/tests (core, command line, plugin host, style, and the test_qt_* windows on Qt's offscreen
+#           platform) in the toolkit environment (toolkit/env.py setup: the pinned PySide6), on Linux, Windows and
+#           macOS, with the oldest Python the toolkit supports (3.10) and the newest PySide6 6.11 supports (3.14)
+# The editor needs the engine beside it (../engine, D-37), so each job lays out the umbrella: the umbrella at its
+# default branch, this toolkit commit in toolkit/, and the engine at the commit the umbrella pins (its engine
+# gitlink), or at the engine_ref given to a manual run. The private repositories are never fetched; the tests that
+# need them skip themselves: the imported-world tests (CAPSULE_IMPORTED_CONTENT, CAPSULE_IMPORTED_MAP) and the
+# reference-rules tests (CAPSULE_REFERENCE, CAPSULE_REFERENCE_SET).
+# Actions are pinned to full commit SHAs; the comment names the release tag.
+name: test
+
+on:
+   push:
+   pull_request:
+   workflow_dispatch:
+      inputs:
+         engine_ref:
+            description: "Engine commit or branch to test against (default: the umbrella's pinned engine commit)"
+            required: false
+            default: ""
+
+concurrency:
+   group: ${{ github.workflow }}-${{ github.ref }}
+   cancel-in-progress: true
+
+permissions:
+   contents: read
+
+env:
+   UMBRELLA_REPO: TheWildDeadHero/CapsuleCreatures
+   ENGINE_REPO: TheWildDeadHero/CapsuleCreatures_Engine
+   QT_QPA_PLATFORM: offscreen
+   PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+   checks:
+      runs-on: ubuntu-24.04
+      steps:
+         - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+         - name: Install Doxygen
+           run: |
+              sudo apt-get update
+              sudo apt-get install -y --no-install-recommends doxygen
+         - name: Code map
+           run: python3 toolkit/code_map.py check --root .
+         # Gating since D-40 RF: the Doxyfile sets WARN_AS_ERROR, and the tree reports 0 warnings with 1.9.8 and 1.12.0.
+         - name: Documentation (Doxygen; fails on anything undocumented)
+           run: doxygen Doxyfile
+
+   unit:
+      runs-on: ${{ matrix.os }}
+      timeout-minutes: 90
+      strategy:
+         fail-fast: false
+         matrix:
+            os: [ubuntu-24.04, windows-2025, macos-15]
+            python: ["3.10", "3.14"]
+      defaults:
+         run:
+            shell: bash
+      steps:
+         - name: Check out the umbrella
+           uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+           with:
+              repository: ${{ env.UMBRELLA_REPO }}
+              path: umbrella
+              submodules: false
+         - name: Engine commit
+           id: engine
+           env:
+              ENGINE_REF_INPUT: ${{ inputs.engine_ref }}
+           run: |
+              ref="$ENGINE_REF_INPUT"
+              if [ -z "$ref" ]; then
+                 # The umbrella's engine gitlink: the commit the release pins.
+                 ref=$(git -C umbrella rev-parse HEAD:engine)
+              fi
+              echo "engine: $ref"
+              echo "ref=$ref" >> "$GITHUB_OUTPUT"
+         - name: Check out this toolkit commit
+           uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+           with:
+              path: umbrella/toolkit
+         - name: Check out the engine
+           uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+           with:
+              repository: ${{ env.ENGINE_REPO }}
+              ref: ${{ steps.engine.outputs.ref }}
+              path: umbrella/engine
+         - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97   # v7.0.0
+           with:
+              python-version: ${{ matrix.python }}
+         # Qt's offscreen platform still loads EGL, fontconfig and xkbcommon on Linux.
+         - name: Qt runtime libraries (Linux)
+           if: runner.os == 'Linux'
+           run: |
+              sudo apt-get update
+              sudo apt-get install -y --no-install-recommends libegl1 libgl1 libxkbcommon0 libfontconfig1 \
+                 libdbus-1-3 libglib2.0-0t64
+         - name: Toolkit environment (pinned PySide6)
+           working-directory: umbrella/toolkit
+           run: |
+              python toolkit/env.py setup
+              python toolkit/env.py status --check
+         - name: Unit suites
+           working-directory: umbrella/toolkit/editor
+           run: |
+              if [ "$RUNNER_OS" = Windows ]; then
+                 py=../.venv/Scripts/python.exe
+              else
+                 py=../.venv/bin/python
+              fi
+              "$py" --version
+              # One process per test file (the whole run in one process passed 4.5 GB): see the script.
+              "$py" ../.github/scripts/run_unit_suites.py --python "$py"

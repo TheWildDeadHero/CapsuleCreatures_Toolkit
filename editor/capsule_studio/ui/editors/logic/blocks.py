@@ -28,6 +28,7 @@ from typing import Any
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core import logic
+from ...widgets import set_enabled
 from .catalog import ExpressionEdit, FunctionPicker, RefPicker
 
 ## A row's reference: (row kind "handler" | "stmt" | "block", AST path as a tuple).
@@ -290,7 +291,7 @@ class BlockView(QtWidgets.QWidget):
       self.tree.blockSignals(False)
       self.tree.setDragEnabled(self.editable)
       for w in self.edit_widgets:
-         w.setEnabled(self.editable)
+         set_enabled(w, self.editable)   # the palette goes read-only and keeps its scroll bar
       if keep is not None:
          self.select(keep)
       self._selection_changed()

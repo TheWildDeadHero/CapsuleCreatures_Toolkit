@@ -288,6 +288,344 @@ class Debounce(QtCore.QObject):
          self._fn()
 
 
+## Value fields that step their value with the mouse wheel (combo boxes, spin boxes, sliders; never a scroll bar).
+WHEEL_FIELDS = (QtWidgets.QComboBox, QtWidgets.QAbstractSpinBox, QtWidgets.QSlider)
+## The wheel guard installed on the application, or None before install_wheel_guard().
+_WHEEL_GUARD: WheelGuard | None = None
+
+
+def scrolling_page(widget: QtWidgets.QWidget) -> QtWidgets.QAbstractScrollArea | None:
+   """!The scroll area a widget sits in (its page, a list or a text view), if any.
+   @param widget  QWidget
+   @return the nearest QAbstractScrollArea above it, or None
+   """
+   w = widget.parentWidget()
+   while w is not None:
+      if isinstance(w, QtWidgets.QAbstractScrollArea):
+         return w
+      w = w.parentWidget()
+   return None
+
+
+class WheelGuard(QtCore.QObject):
+   """!Keeps the mouse wheel scrolling the page over value fields (one filter on the whole application).
+
+   Qt gives the wheel to whatever combo box, spin box or slider is under the pointer, even one without the
+   keyboard focus: the page stops scrolling there and the field's value changes (an edit, with an undo step)
+   instead. Inside a scroll area this filter hands the wheel on to the page unless the field has the focus (the
+   user clicked or tabbed into it, so the wheel steps it as before). Fields outside any scroll area keep Qt's
+   behaviour. Fields also stop taking the focus from the wheel alone (Qt.WheelFocus -> Qt.StrongFocus), or the
+   first wheel step over one would focus it and the next would change it.
+   """
+
+   def eventFilter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
+      """!Passes an unfocused field's wheel to its page; polishes fields' focus policy.
+      @param watched  any object of the application
+      @param event    QEvent
+      @return True when the wheel goes on to the field's parents (the event is left ignored, so Qt delivers it
+              to the widgets under the field, up to the scroll area); False otherwise
+      """
+      kind = event.type()
+      if kind == QtCore.QEvent.Type.Wheel:
+         if isinstance(watched, WHEEL_FIELDS) and not watched.hasFocus() and scrolling_page(watched) is not None:
+            event.ignore()   # an ignored wheel event travels on to the parent widgets (QApplication::notify)
+            return True
+      elif kind == QtCore.QEvent.Type.Polish and isinstance(watched, WHEEL_FIELDS):
+         unfocus_wheel(watched)
+      elif kind == QtCore.QEvent.Type.EnabledChange and not _HoldState.active and \
+            isinstance(watched, QtWidgets.QWidget) and watched.property(HELD_PROPERTY) and watched.isEnabled():
+         # A part of a container set_contents_enabled() switched off was enabled by its own code (or by an
+         # ancestor being enabled): it stays off until the container is on again, as a disabled parent's child
+         # would. Its own state is kept for then (see _hold()).
+         _hold(watched, False)
+      return False
+
+
+def unfocus_wheel(field: QtWidgets.QWidget) -> None:
+   """!Makes a value field take the keyboard focus from clicks and Tab only, not from the wheel.
+   @param field  QComboBox, QAbstractSpinBox or QSlider
+   @return None
+   """
+   if field.focusPolicy() == QtCore.Qt.FocusPolicy.WheelFocus:
+      field.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
+
+
+def install_wheel_guard() -> WheelGuard | None:
+   """!Installs the WheelGuard on the running QApplication once (every panel and start page calls this, so each
+   editor window and the Studio has it); fields that exist already get the focus policy now.
+   @return the guard, or None without a QApplication
+   """
+   global _WHEEL_GUARD
+   app = QtWidgets.QApplication.instance()
+   if app is None:
+      return None
+   try:
+      installed = _WHEEL_GUARD is not None and _WHEEL_GUARD.parent() is app
+   except RuntimeError:   # the application that owned the old guard is gone (and the guard with it)
+      installed = False
+   if not installed:
+      _WHEEL_GUARD = WheelGuard(app)   # owned by the application: lives as long as it does
+      app.installEventFilter(_WHEEL_GUARD)
+      for w in QtWidgets.QApplication.allWidgets():
+         if isinstance(w, WHEEL_FIELDS):
+            unfocus_wheel(w)
+   return _WHEEL_GUARD
+
+
+## Dynamic property marking a view lock_view() made read-only (True while locked).
+LOCKED_PROPERTY = "capsule_view_locked"
+## Dynamic property holding a locked view's own focus policy (an int), restored when it is unlocked.
+LOCKED_FOCUS_PROPERTY = "capsule_view_focus"
+## Dynamic property holding a locked text view's own read-only state, restored when it is unlocked.
+LOCKED_READ_ONLY_PROPERTY = "capsule_view_read_only"
+## Palette roles a locked view shows in their disabled colours (its text, items and background).
+LOCKED_ROLES = (QtGui.QPalette.ColorRole.Text, QtGui.QPalette.ColorRole.WindowText, QtGui.QPalette.ColorRole.Base,
+                QtGui.QPalette.ColorRole.AlternateBase, QtGui.QPalette.ColorRole.Highlight,
+                QtGui.QPalette.ColorRole.HighlightedText, QtGui.QPalette.ColorRole.ButtonText)
+
+
+def view_locked(view: QtWidgets.QAbstractScrollArea) -> bool:
+   """!Whether lock_view() made a view read-only (what isEnabled() tells for any other widget).
+   @param view  QAbstractScrollArea
+   @return True while locked
+   """
+   return bool(view.property(LOCKED_PROPERTY))
+
+
+def lock_view(view: QtWidgets.QAbstractScrollArea, locked: bool) -> None:
+   """!Makes a list, table, tree or text view read-only, or editable again, without disabling it.
+
+   setEnabled(False) on a view disables its scroll bars too: whatever does not fit can then not be read at all.
+   A locked view stays enabled, so its scroll bars and the mouse wheel keep working, but its contents (the
+   viewport, with any cell widgets in it) and headers are disabled, it takes no keyboard focus, a text view is
+   read-only, and its text and items show in the disabled colours as before.
+   @param view    QAbstractScrollArea (not a QScrollArea page: set_enabled() handles those)
+   @param locked  True to lock, False to unlock
+   @return None
+   """
+   view.setEnabled(True)
+   if view.property(HELD_PROPERTY) and not _HoldState.active:
+      # Its container is switched off (set_contents_enabled()): the view stays locked; this is its own state for
+      # when the container is on again.
+      view.setProperty(HELD_VIEW_ON_PROPERTY, not locked)
+      return
+   if locked == view_locked(view):
+      return
+   text = isinstance(view, (QtWidgets.QPlainTextEdit, QtWidgets.QTextEdit))
+   bars = (view.verticalScrollBar(), view.horizontalScrollBar())
+   if locked:
+      view.setProperty(LOCKED_FOCUS_PROPERTY, view.focusPolicy().value)
+      if text:
+         view.setProperty(LOCKED_READ_ONLY_PROPERTY, view.isReadOnly())
+         view.setReadOnly(True)
+      own = view.palette()
+      grey = QtGui.QPalette(own)
+      for group in (QtGui.QPalette.ColorGroup.Active, QtGui.QPalette.ColorGroup.Inactive):
+         for role in LOCKED_ROLES:
+            grey.setColor(group, role, own.color(QtGui.QPalette.ColorGroup.Disabled, role))
+      view.setPalette(grey)
+      for bar in bars:
+         bar.setPalette(own)   # the scroll bars still work, so they keep their normal look
+      if view.hasFocus():
+         view.clearFocus()
+      view.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
+   else:
+      view.setFocusPolicy(QtCore.Qt.FocusPolicy(int(view.property(LOCKED_FOCUS_PROPERTY))))
+      if text:
+         view.setReadOnly(bool(view.property(LOCKED_READ_ONLY_PROPERTY)))
+      view.setPalette(QtGui.QPalette())   # no toolkit view has its own palette: back to the inherited one
+      for bar in bars:
+         bar.setPalette(QtGui.QPalette())
+   view.viewport().setEnabled(not locked)
+   if isinstance(view, QtWidgets.QTableView):
+      view.horizontalHeader().setEnabled(not locked)
+      view.verticalHeader().setEnabled(not locked)
+   elif isinstance(view, QtWidgets.QTreeView):
+      view.header().setEnabled(not locked)
+   view.setProperty(LOCKED_PROPERTY, locked)
+
+
+def set_enabled(widget: QtWidgets.QWidget, on: bool) -> None:
+   """!setEnabled() that never disables a scroll bar: use it for every widget a panel switches off, the panel
+   itself included ("no document", "nothing chosen").
+
+   A view (list, table, tree, text view) is locked or unlocked (lock_view()); a QScrollArea page stays enabled
+   while its contents are switched; a widget that holds views (a panel, a form, a group box) has its contents
+   switched by set_contents_enabled(), so it and every container on the way to a view stay enabled; any other
+   widget is enabled or disabled as usual. Qt disables every child of a disabled widget, its scroll bars too, so
+   no widget above a scroll area may be disabled.
+   @param widget  QWidget
+   @param on      True to enable (editable), False to disable (read-only)
+   @return None
+   """
+   if isinstance(widget, QtWidgets.QScrollArea):
+      widget.setEnabled(True)
+      page = widget.widget()
+      if page is not None:
+         set_enabled(page, on)
+   elif isinstance(widget, QtWidgets.QAbstractScrollArea):
+      lock_view(widget, not on)
+   elif _holds_view(widget) or widget.property(CONTENTS_OFF_PROPERTY):   # (its parts were held: release them)
+      set_contents_enabled(widget, on)
+   else:
+      widget.setEnabled(on)
+
+
+def _holds_view(widget: QtWidgets.QWidget) -> bool:
+   """!Whether a widget is or contains a scrolling view (not counting the popup lists of combo boxes).
+   @param widget  QWidget
+   @return True when set_contents_enabled() must look inside it
+   """
+   if isinstance(widget, QtWidgets.QAbstractScrollArea):
+      return True
+   if isinstance(widget, WHEEL_FIELDS):
+      return False   # a combo box's popup list is its own business
+   return any(_holds_view(child) for child in _child_widgets(widget))
+
+
+def _child_widgets(widget: QtWidgets.QWidget) -> list[QtWidgets.QWidget]:
+   """!A widget's direct child widgets, without separate windows (popups, dialogs).
+   @param widget  QWidget
+   @return list of QWidget
+   """
+   return [c for c in widget.findChildren(QtWidgets.QWidget, options=QtCore.Qt.FindChildOption.FindDirectChildrenOnly)
+           if not c.isWindow()]
+
+
+## Dynamic property of a container set_contents_enabled() switched off (True while its contents are off).
+CONTENTS_OFF_PROPERTY = "capsule_contents_off"
+## Dynamic property of a part (a view, or a widget that holds none) held off for its container (True while held).
+HELD_PROPERTY = "capsule_held_off"
+## Dynamic property of a held view: whether its own code wants it editable (restored when it is released).
+HELD_VIEW_ON_PROPERTY = "capsule_held_view_on"
+## Parts set_contents_enabled() never switches off: moving around is not editing (a tab bar shows another page,
+## a splitter handle resizes them).
+NAVIGATION = (QtWidgets.QTabBar, QtWidgets.QSplitterHandle)
+
+
+class _HoldState:
+   """!Whether set_contents_enabled() is changing parts right now (so their own code is not)."""
+
+   ## True while set_contents_enabled() switches parts.
+   active = False
+
+
+def _off_above(widget: QtWidgets.QWidget) -> bool:
+   """!Whether a container around a widget (up to its window) has its contents switched off.
+   @param widget  QWidget
+   @return True when set_contents_enabled() switched one of them off
+   """
+   w = widget.parentWidget()
+   while w is not None:
+      if w.property(CONTENTS_OFF_PROPERTY):
+         return True
+      if w.isWindow():
+         return False
+      w = w.parentWidget()
+   return False
+
+
+def _hold(part: QtWidgets.QWidget, on: bool) -> None:
+   """!Holds one part of a container off, or releases it, keeping the part's own state (Qt's parent-child rule
+   without a disabled parent).
+
+   A view is locked (lock_view()); its own state is kept in HELD_VIEW_ON_PROPERTY. Any other part is disabled the
+   way a disabled parent disables its child: Qt.WA_ForceDisabled (what its own setEnabled() sets) is cleared again,
+   so it still tells the part's own state; WheelGuard holds a part its own code enables meanwhile.
+   @param part  a view, or a widget that holds no view
+   @param on    False to hold it off, True to release it to its own state
+   @return None
+   """
+   view = isinstance(part, QtWidgets.QAbstractScrollArea) and not isinstance(part, QtWidgets.QScrollArea)
+   held = bool(part.property(HELD_PROPERTY))
+   if on and held and _off_above(part):
+      return   # a container around it is still off (nested ones: the outer one wins, as Qt's rule does)
+   was = _HoldState.active
+   _HoldState.active = True
+   try:
+      if not on:
+         if view:
+            if not held:
+               part.setProperty(HELD_VIEW_ON_PROPERTY, not view_locked(part))
+            lock_view(part, True)
+         elif part.isEnabled():
+            part.setEnabled(False)
+            part.setAttribute(QtCore.Qt.WidgetAttribute.WA_ForceDisabled, False)   # its own state stays "on"
+         part.setProperty(HELD_PROPERTY, True)
+      elif held:
+         part.setProperty(HELD_PROPERTY, False)
+         if view:
+            lock_view(part, not bool(part.property(HELD_VIEW_ON_PROPERTY)))
+         elif not part.testAttribute(QtCore.Qt.WidgetAttribute.WA_ForceDisabled):
+            part.setEnabled(True)   # its own code did not switch it off meanwhile
+   finally:
+      _HoldState.active = was
+
+
+def _switch_parts(container: QtWidgets.QWidget, on: bool) -> None:
+   """!Holds or releases the parts of a container (see set_contents_enabled()); containers on the way to a view
+   are enabled and looked into.
+   @param container  QWidget
+   @param on         True to release, False to hold
+   @return None
+   """
+   for child in _child_widgets(container):
+      if isinstance(child, NAVIGATION):
+         continue
+      if isinstance(child, QtWidgets.QScrollArea):   # a page: it scrolls; its contents are the parts
+         child.setEnabled(True)
+         page = child.widget()
+         if page is not None and _holds_view(page):
+            page.setEnabled(True)
+            _switch_parts(page, on)
+         elif page is not None:
+            _hold(page, on)
+      elif isinstance(child, QtWidgets.QAbstractScrollArea) or not _holds_view(child):
+         _hold(child, on)
+      else:
+         child.setEnabled(True)
+         _switch_parts(child, on)
+
+
+def set_contents_enabled(container: QtWidgets.QWidget, on: bool) -> None:
+   """!Switches everything in a container (a panel, a form, a group box, a tab widget) off or on again without
+   locking a scroll bar: the container and every container on the way to a view stay enabled; the views are
+   locked (lock_view()); every other part is disabled, greyed, as under a disabled parent.
+
+   Each part keeps its own state, as Qt's parent-child rule does: a button its code disabled stays disabled when
+   the container is on again, and a part its code enables while the container is off stays off until then.
+   Call it again after building new parts into a container that is off (refresh() does, in the panels).
+   @param container  QWidget
+   @param on         True to enable
+   @return None
+   """
+   if on and not container.property(CONTENTS_OFF_PROPERTY):
+      container.setEnabled(True)   # never switched off (the usual refresh): nothing of its own is held
+      return
+   install_wheel_guard()   # its EnabledChange watch keeps held parts off (WheelGuard)
+   was = _HoldState.active
+   _HoldState.active = True
+   try:
+      container.setEnabled(True)
+      container.setProperty(CONTENTS_OFF_PROPERTY, not on)
+      _switch_parts(container, on)
+   finally:
+      _HoldState.active = was
+
+
+def is_enabled(widget: QtWidgets.QWidget) -> bool:
+   """!Whether set_enabled() last enabled a widget (a locked view, a container whose contents are off and a held
+   part count as disabled).
+   @param widget  QWidget
+   @return True when it can be edited
+   """
+   if widget.property(CONTENTS_OFF_PROPERTY):
+      return False
+   if isinstance(widget, QtWidgets.QAbstractScrollArea) and not isinstance(widget, QtWidgets.QScrollArea):
+      return widget.isEnabled() and not view_locked(widget)
+   return widget.isEnabled()
+
+
 ## Most recent files a start page lists.
 MAX_RECENT = 8
 
@@ -361,6 +699,7 @@ class StartPage(QtWidgets.QWidget):
       @param recent_title  heading of the recent list (e.g. "Recent worlds")
       """
       super().__init__(parent)
+      install_wheel_guard()   # every editor window and the Studio build a start page (see WheelGuard)
       self.setWindowFlag(QtCore.Qt.WindowType.Window, True)
       self.setWindowTitle(heading)
       ## Tool name for the recent list.
@@ -610,6 +949,13 @@ class MetatileGrid(QtWidgets.QWidget):
       """
       return max(self.cell() + GRID_ROW_GAPS * GRID_GAP, self._layout(width)[1])
 
+   def minimumSizeHint(self) -> QtCore.QSize:
+      """!One picture wide (a scroll area scrolls sideways below that rather than cut it off).
+      @return QSize
+      """
+      w = GRID_GAP + self.cell() + GRID_GAP
+      return QtCore.QSize(w, self.heightForWidth(w))
+
    def sizeHint(self) -> QtCore.QSize:
       """!About five pictures wide.
       @return QSize
@@ -812,14 +1158,15 @@ class MetatileGrid(QtWidgets.QWidget):
 
 
 def grid_area(grid: MetatileGrid) -> QtWidgets.QScrollArea:
-   """!A scroll area holding a MetatileGrid (vertical scrolling only).
+   """!A scroll area holding a MetatileGrid (it scrolls down; sideways only when narrower than one picture).
    @param grid  MetatileGrid
    @return QScrollArea
    """
    area = QtWidgets.QScrollArea()
    area.setWidget(grid)
    area.setWidgetResizable(True)
-   area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+   # No ScrollBarAlwaysOff: the grid reflows to the width, so a horizontal bar shows only when the view is
+   # narrower than one picture (MetatileGrid.minimumSizeHint()), instead of cutting that picture off.
    return area
 
 

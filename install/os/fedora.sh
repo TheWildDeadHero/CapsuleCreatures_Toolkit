@@ -9,7 +9,7 @@ PACMAN_CONF="${PACMAN_CONF:-/etc/pacman.conf}"   # overridable for testing
 os_plan() {
    [ "${SKIP_DESKTOP:-0}" -eq 1 ] || {
       note "Desktop: 'sudo dnf install gcc-c++ make cmake python3 git pkgconf-pkg-config"
-      note "     pkgconfig(sdl2) mgba-qt'."
+      note "     pkgconfig(sdl2) mgba-qt xcb-util-cursor'."
    }
    [ "${SKIP_GBA:-0}" -eq 1 ] || {
       note "GBA: 'sudo dnf install pacman', initialise its keyring, add devkitPro's key,"
@@ -23,7 +23,9 @@ os_install() {
       say "Desktop dependencies (dnf)"
       local yes=()
       [ "$ASSUME_YES" -eq 1 ] && yes=(-y)
+      # xcb-util-cursor: Qt 6's X11 platform plugin needs it for the studio (Wayland sessions do not).
       run sudo dnf install ${yes[@]+"${yes[@]}"} gcc-c++ make cmake python3 git pkgconf-pkg-config 'pkgconfig(sdl2)' mgba-qt \
+         xcb-util-cursor \
          || die "dnf could not install the desktop dependencies"
    fi
    if [ "${SKIP_GBA:-0}" -ne 1 ]; then

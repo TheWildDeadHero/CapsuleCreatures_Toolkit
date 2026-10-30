@@ -11,7 +11,7 @@ build/
 /build-docs/
 # Performance reports (Help > Record performance)
 /profiles/
-# Imported content (tier rule, D-29): pret-derived content is never committable in this repository
+# Imported content (tier rule, D-29): importer output is never committable in this repository
 assets-imported/
 # Other build folders, local state and databases (D-37: never committed)
 /build-*/
@@ -20,3 +20,6 @@ assets-imported/
 .local/
 *.sqlite
 _to_delete/
+
+# Local scratch work that must never be committed (developer rule): any name containing DO_NOT_ADD.
+*DO_NOT_ADD*

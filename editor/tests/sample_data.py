@@ -1,11 +1,10 @@
 """!Where the studio's tests get their battle data (S13, after the engine's E11).
 
 The engine's neutral fixture is its Starter sample (samples/starter, E9): every test that is not about one
-ruleset uses a copy of it. The Gen-3 sample moved to the reference repo (templates/gen3 of the reference rules,
-E11; since D-37 the rules/ folder of CapsuleCreatures_PocketProject), found as core.templates finds it
-(CAPSULE_REFERENCE, then the PocketProject checkouts in the workspace folder). The few Gen-3 tests are kept in
-their own classes, decorated with
-needs_gen3: they run when the reference repo is found and are skipped otherwise.
+ruleset uses a copy of it. The classic sample (the GBA-era rules preset) moved to the private reference-ruleset
+repo (E11, D-37; its templates/<set>, compat/<set> and <set>/ folders, <set> being CAPSULE_REFERENCE_SET or
+"classic"), found as core.templates finds it (CAPSULE_REFERENCE). The few classic tests are kept in their own
+classes, decorated with needs_classic: they run when the reference repo is found and are skipped otherwise.
 
 The map sandbox's world names the Starter by the engine's layout (apps/sandbox_map/data/world.json "battle" is
 ../../../samples/starter/battle.json), so copy_engine_apps() copies apps and the Starter in that layout.
@@ -13,6 +12,7 @@ The map sandbox's world names the Starter by the engine's layout (apps/sandbox_m
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import sys
 import unittest
@@ -35,20 +35,22 @@ APPS = "apps"
 STARTER = "starter"
 ## The engine app that plays the Starter (its reference/project.json is the model of a Starter game's).
 STARTER_APP = "starter_battle"
-## The reference repo's Gen-3 sample (templates/gen3) and its game (apps/sandbox_battle).
-GEN3 = "gen3"
-## The reference repo's Gen-3 sandbox app.
-GEN3_APP = "sandbox_battle"
+## Environment variable naming the reference repo's folder of its classic sample (templates/<set>, compat/<set>,
+## <set>/), for a checkout that still uses another name.
+REFERENCE_SET_ENV = "CAPSULE_REFERENCE_SET"
+## The reference repo's classic sample (templates/classic) and its game (apps/sandbox_battle).
+CLASSIC = os.environ.get(REFERENCE_SET_ENV) or "classic"
+## The reference repo's classic sandbox app.
+CLASSIC_APP = "sandbox_battle"
 ## A game's project manifest, relative to the game folder.
 PROJECT_JSON = ("reference", "project.json")
 ## A game's data folder.
 DATA = "data"
-## The reference repo's Gen-3 record data set (compat/gen3/record, R3: unstored roles, species fields, bit
+## The reference repo's classic record data set (compat/classic/record, R3: unstored roles, species fields, bit
 ## operators, a low-first wide draw; the engine's E13a features), relative to the reference root.
-GEN3_RECORD = ("compat", GEN3, "record")
-## Why a Gen-3 test is skipped.
-NO_REFERENCE = ("the reference rules (CAPSULE_REFERENCE or CapsuleCreatures_PocketProject*/rules in the workspace) "
-                "are not found: Gen-3 tests skip")
+CLASSIC_RECORD = ("compat", CLASSIC, "record")
+## Why a classic test is skipped.
+NO_REFERENCE = ("the reference rules (CAPSULE_REFERENCE) are not found: classic tests skip")
 
 
 def starter_data() -> Path:
@@ -65,68 +67,68 @@ def reference_root() -> Path | None:
    return templates.reference_root()
 
 
-def gen3_data() -> Path | None:
-   """!The reference repo's Gen-3 sample (templates/gen3), when the repo is found.
+def classic_data() -> Path | None:
+   """!The reference repo's classic sample (templates/classic), when the repo is found.
    @return folder, or None
    """
    ref = reference_root()
-   folder = ref / templates.REFERENCE_TEMPLATES / GEN3 if ref is not None else None
+   folder = ref / templates.REFERENCE_TEMPLATES / CLASSIC if ref is not None else None
    return folder if folder is not None and (folder / "battle.json").is_file() else None
 
 
-def gen3_app() -> Path | None:
-   """!The reference repo's Gen-3 sandbox game (apps/sandbox_battle: reference/project.json, data/).
+def classic_app() -> Path | None:
+   """!The reference repo's classic sandbox game (apps/sandbox_battle: reference/project.json, data/).
    @return folder, or None
    """
    ref = reference_root()
-   folder = ref / APPS / GEN3_APP if ref is not None else None
+   folder = ref / APPS / CLASSIC_APP if ref is not None else None
    return folder if folder is not None and folder.joinpath(*PROJECT_JSON).is_file() else None
 
 
 def method1_source() -> Path | None:
-   """!The reference repo's Method-1 generator (compat/gen3/src/random_method1.cpp).
+   """!The reference repo's Method-1 generator (compat/classic/src/random_method1.cpp).
    @return Path, or None
    """
    ref = reference_root()
-   path = ref / "compat" / GEN3 / "src" / "random_method1.cpp" if ref is not None else None
+   path = ref / "compat" / CLASSIC / "src" / "random_method1.cpp" if ref is not None else None
    return path if path is not None and path.is_file() else None
 
 
-def gen3_record_data() -> Path | None:
-   """!The reference repo's Gen-3 record data set (compat/gen3/record), when the repo is found.
+def classic_record_data() -> Path | None:
+   """!The reference repo's classic record data set (compat/classic/record), when the repo is found.
    @return folder, or None
    """
    ref = reference_root()
-   folder = ref.joinpath(*GEN3_RECORD) if ref is not None else None
+   folder = ref.joinpath(*CLASSIC_RECORD) if ref is not None else None
    return folder if folder is not None and (folder / "battle.json").is_file() else None
 
 
-def needs_gen3_record(item: Decorated) -> Decorated:
-   """!Skips a test (class or function) when the reference repo's Gen-3 record data set is not found.
+def needs_classic_record(item: Decorated) -> Decorated:
+   """!Skips a test (class or function) when the reference repo's classic record data set is not found.
    @param item  the test
    @return the decorated item
    """
-   skip: Callable[[Decorated], Decorated] = unittest.skipUnless(gen3_record_data() is not None, NO_REFERENCE)
+   skip: Callable[[Decorated], Decorated] = unittest.skipUnless(classic_record_data() is not None, NO_REFERENCE)
    return skip(item)
 
 
-def make_gen3_record_game(root: Path) -> Path:
-   """!The reference repo's Gen-3 record data set as a game folder (the Starter app's project.json naming it;
-   needs_gen3_record tests only).
+def make_classic_record_game(root: Path) -> Path:
+   """!The reference repo's classic record data set as a game folder (the Starter app's project.json naming it;
+   needs_classic_record tests only).
    @param root  the game folder
    @return the copied battle.json
    """
-   data = gen3_record_data()
+   data = classic_record_data()
    assert data is not None, NO_REFERENCE
    return make_game(root, data)
 
 
-def needs_gen3(item: Decorated) -> Decorated:
-   """!Skips a Gen-3 test (class or method) when the reference repo is not found.
+def needs_classic(item: Decorated) -> Decorated:
+   """!Skips a classic test (class or method) when the reference repo is not found.
    @param item  test class or method
    @return the decorated item
    """
-   skip: Callable[[Decorated], Decorated] = unittest.skipUnless(gen3_data() is not None, NO_REFERENCE)
+   skip: Callable[[Decorated], Decorated] = unittest.skipUnless(classic_data() is not None, NO_REFERENCE)
    return skip(item)
 
 
@@ -167,12 +169,12 @@ def make_game(root: Path, data: Path | None = None, project: Path | None = None)
    return root / DATA / "battle.json"
 
 
-def make_gen3_game(root: Path) -> Path:
-   """!The reference repo's Gen-3 sandbox as a game folder (needs_gen3 tests only).
+def make_classic_game(root: Path) -> Path:
+   """!The reference repo's classic sandbox as a game folder (needs_classic tests only).
    @param root  the game folder
    @return the copied battle.json
    """
-   app = gen3_app()
+   app = classic_app()
    assert app is not None, NO_REFERENCE
    return make_game(root, app / DATA, app.joinpath(*PROJECT_JSON))
 

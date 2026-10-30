@@ -20,7 +20,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core.document import Document, DocumentError
 from ....core.structure import passive_slots as slot_model
 from ....core.structure import stats as stat_model
-from ...widgets import ask, button
+from ...widgets import ask, button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel
 
 if TYPE_CHECKING:
@@ -176,7 +176,7 @@ class PassiveSlotsPanel(BattlePanel):
          self._fill_used_by()
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_used_by(self) -> None:

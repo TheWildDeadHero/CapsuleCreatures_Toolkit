@@ -35,7 +35,7 @@ from ....core import battle, engine, expressions, pipelines
 from ....core.document import DocumentError
 from ....core.structure import record
 from ....core.structure import turn as turn_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import NONE_TEXT, BattlePanel, set_combo, set_spin, set_spin_max
 from .expression_edit import FormulaEdit
 
@@ -494,7 +494,7 @@ class PipelinesPointsPanel(BattlePanel):
       finally:
          self._filling = False
       for w in (self.step_list, self.points):
-         w.setEnabled(p is not None)
+         set_enabled(w, p is not None)   # read-only lists still scroll
       self.calculate()
       self.show_errors()
 

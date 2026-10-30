@@ -22,7 +22,7 @@ from ....core import ai as ai_model
 from ....core import battle, engine
 from ....core.document import DocumentError
 from ....core.structure import passive_slots, record
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import (NONE_TEXT, TERM_SLOT, EntryPanel, combo, set_check, set_combo, set_spin,
                              set_spin_max, spin)
 
@@ -214,7 +214,7 @@ class PartiesPanel(EntryPanel):
       self.members.blockSignals(False)
       for w in [self.reward, self.rank, self.escape, self.shown, self.presenter_choice, self.members,
                 self.add_member_button, self.ai] + self.presenter_buttons:
-         w.setEnabled(on)
+         set_enabled(w, on)   # the lists go read-only and keep their scroll bars
       # A full party (the layout's party_size) takes no more members, nor more presenters than the engine shows.
       self.add_member_button.setEnabled(on and p is not None and n < record.party_size(p.battle))
       self.presenter_buttons[0].setEnabled(on and bool(others) and len(shown) < battle.presenters_max())

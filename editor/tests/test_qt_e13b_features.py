@@ -3,9 +3,9 @@ Moves page's point handlers (a move's .ceffect point members), the Conditions
 page's side condition handlers, the Effects page's palette with E13b's
 statements, the Turn page's delayed phase, the Bench page's owner texts
 switch and data level, the damage calculator's conditions and hidden stat
-inputs, and the Gen-3 cost cell. Each opens a copy of a sample laid out as a
+inputs, and the classic cost cell. Each opens a copy of a sample laid out as a
 game and edits through the widgets (one undo step per edit). Skipped when
-PySide6 is missing; uses Qt's offscreen platform; the Gen-3 tests are
+PySide6 is missing; uses Qt's offscreen platform; the classic tests are
 skipped without the reference repo. CAPSULE_SHOTS=FOLDER saves pictures of
 the pages there.
 """
@@ -21,14 +21,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from capsule_studio.core import battle, bench, engine, holders, logic, pipelines  # noqa: E402
 from capsule_studio.core.structure import record, turn  # noqa: E402
-from sample_data import gen3_data, make_game, needs_gen3  # noqa: E402
+from sample_data import classic_data, make_game, needs_classic  # noqa: E402
 from test_qt_battle import QtBattleTestCase  # noqa: E402
 
 ## Where CAPSULE_SHOTS names the picture folder.
 SHOTS_ENV = "CAPSULE_SHOTS"
 ## Size of a saved picture.
 SHOT_SIZE = (1300, 900)
-## Gen-3 names: a move with move_type handlers, a move with a power handler, a screen side condition.
+## Classic names: a move with move_type handlers, a move with a power handler, a screen side condition.
 SKY_BALL, WHIRL, HARD_WALL = "Sky Ball", "Whirl", "Hard Wall"
 
 
@@ -137,16 +137,16 @@ class StarterPagesTests(QtBattleTestCase):
       self.close(w)
 
 
-@needs_gen3
-class Gen3PagesTests(QtBattleTestCase):
-   """!E13b's owners on the reference repo's Gen-3 template."""
+@needs_classic
+class ClassicPagesTests(QtBattleTestCase):
+   """!E13b's owners on the reference repo's classic template."""
 
    def setUp(self) -> None:
-      """!The Gen-3 template as a game.
+      """!The classic template as a game.
       @return None
       """
       super().setUp()
-      self.battle_json = make_game(self.root / "gen3", gen3_data())
+      self.battle_json = make_game(self.root / "classic", classic_data())
 
    def test_move_point_handlers(self) -> None:
       """!The Moves page shows a move's point handlers (its logic's point members), adds one into its logic block

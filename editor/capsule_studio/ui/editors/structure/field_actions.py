@@ -18,7 +18,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core.structure import field_actions as fa_model
 from ....core.structure import nursery as nursery_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, set_check, set_combo
 
 if TYPE_CHECKING:
@@ -198,7 +198,7 @@ class FieldActionsPanel(BattlePanel):
       finally:
          self._filling = False
       self._fill_preview()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_form(self) -> None:

@@ -29,7 +29,7 @@ from ....core import inventory
 from ....core.document import DocumentError
 from ....core.structure import combination as cb_model
 from ....core.structure import storage
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, set_check, set_combo, set_spin, set_spin_max
 
 if TYPE_CHECKING:
@@ -403,7 +403,7 @@ class CombinationPanel(BattlePanel):
       finally:
          self._filling = False
       self.run_preview()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_form(self) -> None:
@@ -412,7 +412,7 @@ class CombinationPanel(BattlePanel):
       """
       doc, m = self.battle_doc(), self.current()
       on = m is not None
-      self.tabs.setEnabled(on)
+      set_enabled(self.tabs, on)   # greyed, read-only; its grid and lists still scroll
       rows = {r["name"]: r for r in cb_model.method_rows(doc)} if doc is not None else {}
       row = rows.get(self.selected)
       named = (row["users"] + cb_model.script_users(doc, row["name"])) if row and doc is not None else []
@@ -474,7 +474,7 @@ class CombinationPanel(BattlePanel):
       set_combo(self.table_key, keys, t.get("key") if t else None)
       set_check(self.symmetric, t.get("symmetric", True) if t else False)
       for w in (self.table_key, self.symmetric, self.grid):
-         w.setEnabled(t is not None)
+         set_enabled(w, t is not None)   # the grid goes read-only and keeps its scroll bars
       self.grid.blockSignals(True)
       self.grid.clear()
       if t is None or doc is None:

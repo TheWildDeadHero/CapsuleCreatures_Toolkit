@@ -1,7 +1,6 @@
 """!Any JSON file shown read-only [S5]: data files the studio has no editor for, such as an imported game's
-importer / tier-3 data (the importer's N1 / N2 / N3 Emerald content: world/scripts/story.json
-capsule_import.emerald_story/1, ui/menus.json capsule_import.menus/1, overworld/field.json
-capsule_import.emerald_field/1). The studio opens them without errors and changes nothing: open_file() reads one,
+importer / tier-3 data (an importer's story, menu and field data, with their own capsule_import.* schemas).
+The studio opens them without errors and changes nothing: open_file() reads one,
 says which schema it has and whether a studio editor owns that schema (core.document.EMPTY: the schemas the
 studio edits), and children() / summary() walk its values for a tree (long lists in chunks).
 

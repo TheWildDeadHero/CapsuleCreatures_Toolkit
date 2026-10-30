@@ -291,7 +291,8 @@ class TextViewTests(EffectsTestCase):
       self.assertIn(f"{MOVES}:{line}:", panel.banner.text())
       self.assertEqual(self.block_texts(panel), good)
       self.assertFalse(panel.editable)
-      self.assertFalse(panel.blocks.palette.isEnabled())
+      from capsule_studio.ui.widgets import is_enabled
+      self.assertFalse(is_enabled(panel.blocks.palette))   # read-only; it still scrolls
       self.assertFalse(panel.blocks.insert_template("yield;"))
       self.assertIn(line, [m[0] for m in panel.code.marks])
       self.assertEqual(panel.diag_list.count(), 1)

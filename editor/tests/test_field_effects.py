@@ -7,7 +7,7 @@ No Qt.
 
 Uses a copy of the engine's Starter sample (test_battle.BattleTestCase): its Ward effect (steps, refresh, an expiry
 message, persists), the Ward Charm starting it for 120 steps, the global ward_rule and Quick Feet's `on encounter`
-are read from the sample. The Gen-3 class runs on the reference repo's sample (skipped without it).
+are read from the sample. The classic class runs on the reference repo's sample (skipped without it).
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ from capsule_studio.cli.main import main as cli  # noqa: E402
 from capsule_studio.core import battle, engine, logic  # noqa: E402
 from capsule_studio.core.document import DocumentError  # noqa: E402
 from capsule_studio.core.structure import encounter_rules, field_effects  # noqa: E402
-from sample_data import gen3_data, needs_gen3  # noqa: E402
+from sample_data import classic_data, needs_classic  # noqa: E402
 from test_battle import BattleTestCase  # noqa: E402
 
 ## The Starter's field effect.
@@ -236,15 +236,15 @@ class SaveShapeCheckTests(unittest.TestCase):
          self.assertIn("every shape is recorded", out)
 
 
-@needs_gen3
-class Gen3FieldTests(BattleTestCase):
-   """!The reference repo's Gen-3 sample: the repel effect, its sprays and the lead abilities."""
+@needs_classic
+class ClassicFieldTests(BattleTestCase):
+   """!The reference repo's classic sample: the repel effect, its sprays and the lead abilities."""
 
    def sample(self) -> Path:
-      """!The Gen-3 sample.
+      """!The classic sample.
       @return its folder
       """
-      folder = gen3_data()
+      folder = classic_data()
       assert folder is not None
       return folder
 

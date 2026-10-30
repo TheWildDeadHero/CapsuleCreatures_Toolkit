@@ -3,7 +3,7 @@ capsule/text/window.h): a font compiled by the engine's tools/font_compiler.py c
 pixels in the window's palette entries (1 ink, 2 shadow, 0 and 3 the background; an entry 0 is never written), the
 pen advancing by the glyph's width and the font's letter spacing.
 
-S6b (engine C13a, the handheld games' CopyGlyphToWindow): a glyph draws only its advance width's columns (at most its
+S6b (engine C13a, as the handheld games copy a glyph): a glyph draws only its advance width's columns (at most its
 cell) and the font's glyph_height rows (the whole cell when 0, glyph_rows()), so the pixels a cell keeps past them
 never show.
 
@@ -251,7 +251,7 @@ def glyph_pixels(font: CompiledFont, code: int) -> list[list[int]]:
 
 def drawn_pixels(font: CompiledFont, code: int) -> list[list[int]]:
    """!S6b (C13a): the part of a glyph a window draws: its width's columns (at most the cell's) of its glyph_rows()
-   rows (CopyGlyphToWindow's clip).
+   rows (the handheld games' glyph clip).
    @param font  compiled font
    @param code  the code
    @return rows of values ([] for a code the font lacks)

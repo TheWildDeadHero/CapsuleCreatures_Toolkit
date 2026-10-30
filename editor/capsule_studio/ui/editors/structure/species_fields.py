@@ -1,7 +1,7 @@
 """!The Species fields page (engine E13a; core.structure.species_fields):
 the structure manifest's "species_fields", numeric data columns every
 species has, read by the generation list's derived expressions as
-species.NAME (a Gen-3 gender from gender_ratio and the seed).
+species.NAME (a classic gender from gender_ratio and the seed).
 
 Each row is a field in order: its name (typing renames it; the species'
 values and the derived expressions follow), its width in bits (up to the
@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core.structure import species_fields as model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel
 
 if TYPE_CHECKING:
@@ -165,7 +165,7 @@ class SpeciesFieldsPanel(BattlePanel):
             self.table.selectRow(names.index(chosen))
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _selection_changed(self) -> None:

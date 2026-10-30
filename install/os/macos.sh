@@ -55,6 +55,6 @@ os_install() {
       [ "$ASSUME_YES" -eq 1 ] && flags+=(--noconfirm)
       run sudo "$dkp" "${flags[@]}" gba-dev || die "dkp-pacman could not install gba-dev"
       note "devkitPro recommends a reboot (or new login) so its environment variables are set;"
-      note "the engine's makefile doesn't need them."
+      note "the engine's GBA toolchain file (the gba-* presets) doesn't need them."
    fi
 }

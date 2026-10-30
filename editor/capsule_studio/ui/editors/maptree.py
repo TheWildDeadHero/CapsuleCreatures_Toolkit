@@ -1,5 +1,5 @@
 """!The map editor's map list: the world's map groups as a tree (like
-PoryMap's map list), with a filter, drag and drop to reorganise, and a
+common tile-map editors' map lists), with a filter, drag and drop to reorganise, and a
 context menu for groups and new maps."""
 from __future__ import annotations
 

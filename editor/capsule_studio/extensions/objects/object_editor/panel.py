@@ -26,7 +26,7 @@ from PySide6 import QtWidgets
 from capsule_studio.core import engine, events, map_field, maps, objects, script_words
 from capsule_studio.core.document import DocumentError
 from capsule_studio.ui.panel import EditorPanel
-from capsule_studio.ui.widgets import button
+from capsule_studio.ui.widgets import button, lock_view, set_enabled, view_locked
 
 from . import maptools
 from .movement_args import MovementArgsBox
@@ -176,6 +176,22 @@ class RouteBox(QtWidgets.QWidget):
       @return None
       """
       self.on_apply(self.text.toPlainText(), self.repeat.isChecked(), self.skip.isChecked())
+
+   def set_editable(self, on: bool) -> None:
+      """!Lets the route be edited, or shows it read-only (another movement, or no page chosen). Not
+      setEnabled(False): the steps box keeps its scroll bar, so a long route can still be read.
+      @param on  True to edit
+      @return None
+      """
+      lock_view(self.text, not on)
+      for w in (self.repeat, self.skip, self.apply_button, self.status):
+         w.setEnabled(on)
+
+   def editable(self) -> bool:
+      """!Whether the route can be edited (set_editable()).
+      @return True when it can
+      """
+      return not view_locked(self.text)
 
 
 class ObjectsPanel(EditorPanel):
@@ -616,7 +632,7 @@ class ObjectsPanel(EditorPanel):
       p = self.project()
       self._filling = True
       try:
-         self.setEnabled(p is not None)
+         set_enabled(self, p is not None)
          if p is None:
             return
          if self.map_name not in p.map_names():
@@ -784,7 +800,7 @@ class ObjectsPanel(EditorPanel):
          box.setChecked(opts.get(k, objects.OPTIONS[k]) is True)
       self.route.flags = self._route_flags()
       self.route.fill(o.get("route"))
-      self.route.setEnabled(move == "custom")
+      self.route.set_editable(move == "custom")
       self._combo(self.script, self.names["scripts"], o.get("script", ""), "")
       self.trigger.setCurrentText(o.get("trigger", "action"))
       p = self.project()
@@ -808,7 +824,7 @@ class ObjectsPanel(EditorPanel):
       """
       pg = self._page()
       for w in self.page_conditions + self.page_fields:
-         w.setEnabled(pg is not None)
+         self._set_editable(w, pg is not None)
       pg = pg or {}
       when = pg.get("when") if isinstance(pg.get("when"), dict) else {}
       self._combo(self.pg_flag, self.names["flags"], when.get("flag", ""), "")
@@ -844,10 +860,22 @@ class ObjectsPanel(EditorPanel):
       self.pg_has_route.setChecked(isinstance(pg.get("route"), dict))
       self.pg_route.flags = self._route_flags()
       self.pg_route.fill(pg.get("route"))
-      self.pg_route.setEnabled(isinstance(pg.get("route"), dict))
+      self.pg_route.set_editable(isinstance(pg.get("route"), dict))
       if hidden:
          for w in self.page_fields:
-            w.setEnabled(False)
+            self._set_editable(w, False)
+
+   @staticmethod
+   def _set_editable(w: QtWidgets.QWidget, on: bool) -> None:
+      """!Enables or disables a page widget; a route box only goes read-only (RouteBox.set_editable()).
+      @param w   a widget of page_fields or page_conditions
+      @param on  True to enable
+      @return None
+      """
+      if isinstance(w, RouteBox):
+         w.set_editable(on)
+      else:
+         w.setEnabled(on)
 
    def _fill_problems(self, p: Project) -> None:
       """!The map's object problems.
@@ -1014,6 +1042,7 @@ class ObjectsPanel(EditorPanel):
       """
       doc = self.map_doc()
       if doc is None:
+         self.explain("Add object", "map")
          return
       x, y = self.x.value(), self.y.value()
       out: dict[str, int] = {}
@@ -1031,6 +1060,7 @@ class ObjectsPanel(EditorPanel):
       chosen = self.selected()
       doc = self.map_doc()
       if chosen is None or doc is None:
+         self.explain("Remove", "object")
          return
       i = chosen[0]
       out: dict[str, list[str]] = {}
@@ -1188,6 +1218,7 @@ class ObjectsPanel(EditorPanel):
       chosen = self.selected()
       doc = self.map_doc()
       if chosen is None or doc is None:
+         self.explain("Add page", "object")
          return
       i, o = chosen
       when = {"flag": self.names["flags"][0]} if self.names["flags"] else {"self": "A"}
@@ -1207,6 +1238,7 @@ class ObjectsPanel(EditorPanel):
       doc = self.map_doc()
       row = self._page_row
       if chosen is None or doc is None or self._page() is None:
+         self.explain("Remove page", "page")
          return
       i = chosen[0]
       if self._run("Remove page", lambda: objects.remove_page(doc, i, row)):
@@ -1221,6 +1253,7 @@ class ObjectsPanel(EditorPanel):
       doc = self.map_doc()
       row = self._page_row
       if chosen is None or doc is None or self._page() is None:
+         self.explain("Move page", "page")
          return
       to = row + delta
       if not 0 <= to < len(objects.pages(doc, chosen[0])):

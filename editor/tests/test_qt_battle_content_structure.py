@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """!Smoke tests of S11 (D-22 A15): every Content page widget follows the
-compiled structure, on the Starter and on the reference repo's Gen-3 game
+compiled structure, on the Starter and on the reference repo's classic game
 (the expected counts and ranges are read from each game's data, never
 written down): the Species page's type, base, passive and preview boxes, the
 Moves page's ranges, flags, targets and bases, the Parties page's AI boxes,
@@ -8,7 +8,7 @@ ranks, levels, move slots, genes and passive slots; and the Messages page
 (engine C4: the battle's own messages listed, edited, renamed, added and
 removed through the widgets, one undo step each). Skipped when PySide6 is
 missing; uses Qt's offscreen platform. CAPSULE_SHOTS=FOLDER saves pictures of
-the four pages there (starter_*.png, gen3_*.png).
+the four pages there (starter_*.png, classic_*.png).
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from capsule_studio.core import ai as ai_model, battle, engine, messages  # noqa: E402
 from capsule_studio.core.structure import chart, passive_slots, record, resources, stages  # noqa: E402
-from sample_data import make_gen3_game, needs_gen3  # noqa: E402
+from sample_data import make_classic_game, needs_classic  # noqa: E402
 from test_qt_battle import QtBattleTestCase  # noqa: E402
 
 ## Environment variable naming a folder for the pages' pictures.
@@ -176,17 +176,17 @@ class ContentFollowsStructureTests(ContentChecks, QtBattleTestCase):
       self.close(w)
 
 
-@needs_gen3
-class GenThreeContentTests(ContentChecks, QtBattleTestCase):
-   """!The same checks on the reference repo's Gen-3 game (its own counts and ranges)."""
+@needs_classic
+class ClassicContentTests(ContentChecks, QtBattleTestCase):
+   """!The same checks on the reference repo's classic game (its own counts and ranges)."""
 
    ## Picture name prefix.
-   shot_prefix = "gen3"
+   shot_prefix = "classic"
 
    def setUp(self) -> None:
-      """!Lays out the Gen-3 game instead of the Starter.
+      """!Lays out the classic game instead of the Starter.
       @return None
       """
       super().setUp()
-      self.battle_json = make_gen3_game(self.root / "gen3")
+      self.battle_json = make_classic_game(self.root / "classic")
 

@@ -28,7 +28,7 @@ type's.
 The hit types' categories (engine C5, structure `hit_category_by_type`,
 hit_key()): in BY_MOVE mode a structure may name a damaging category for
 every type that a damaging move hits with when the ruleset's move_type point
-changed its type (Hidden Power, Weather Ball: the category follows the hit
+changed its type (e.g. a move whose type is chosen when it is used: the category follows the hit
 type). set_hit() turns the table on (each type its moves' most common
 damaging category) or off, set_hit_category() sets one type's; in BY_TYPE
 mode category_by_type gives them (the engine refuses both: set_mode() to

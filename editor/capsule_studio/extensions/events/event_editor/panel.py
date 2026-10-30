@@ -22,7 +22,7 @@ from PySide6 import QtWidgets
 from capsule_studio.core import doors, engine, events, maps
 from capsule_studio.core.document import DocumentError
 from capsule_studio.ui.panel import EditorPanel
-from capsule_studio.ui.widgets import button
+from capsule_studio.ui.widgets import button, set_enabled
 
 from . import maptools
 
@@ -366,7 +366,7 @@ class EventsPanel(EditorPanel):
       p = self.project()
       self._filling = True
       try:
-         self.setEnabled(p is not None)
+         set_enabled(self, p is not None)
          if p is None:
             return
          if self.map_name not in p.map_names():
@@ -633,6 +633,7 @@ class EventsPanel(EditorPanel):
       """
       doc = self.map_doc()
       if doc is None:
+         self.explain(f"Add {kind}", "map")
          return
       x, y = self.x.value(), self.y.value()
       out: dict[str, int] = {}
@@ -650,6 +651,7 @@ class EventsPanel(EditorPanel):
       chosen = self.selected()
       p = self.project()
       if chosen is None or p is None:
+         self.explain("Remove", "event")
          return
       kind, i, _e = chosen
       try:
@@ -667,6 +669,7 @@ class EventsPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
+         self.explain("Scripts manifest")
          return
       path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Scripts manifest", str(p.base),
                                                       "Scripts manifest (scripts.json *.json);;All files (*)")
@@ -680,6 +683,7 @@ class EventsPanel(EditorPanel):
       """
       p = self.project()
       if p is None:
+         self.explain("Add step hook")
          return
       name, ok = QtWidgets.QInputDialog.getText(self, "Step hook", "Name (an identifier, e.g. step_counter):")
       if not ok or not name.strip():
@@ -698,6 +702,7 @@ class EventsPanel(EditorPanel):
       row = self.hooks.currentRow()
       hooks = events.step_hooks(p) if p is not None else []
       if not 0 <= row < len(hooks):
+         self.explain("Remove step hook", "step hook")
          return
       name = hooks[row].get("name")
       self._edit("Remove step hook", lambda: events.remove_hook(p, name), p.world)

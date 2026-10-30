@@ -10,11 +10,8 @@ Templates are found, in this order (an id found twice keeps the first):
      (Blank: neutral, minimal data that compiles);
   2. the engine's samples, `samples/*/template.json` of the engine checkout
      in use (core.engine.root(); the Starter sample, E9);
-  3. the reference repo's `templates/*/template.json` (the rules/ folder of
-     the private CapsuleCreatures_PocketProject, D-37), found like the engine:
-     CAPSULE_REFERENCE, then ../../CapsuleCreatures_PocketProject-work/rules
-     and ../../CapsuleCreatures_PocketProject/rules (this toolkit inside the
-     umbrella), then the same two one folder up (a standalone toolkit clone);
+  3. the reference repo's `templates/*/template.json` (the rules folder of a
+     private reference-ruleset repository, D-37), named by CAPSULE_REFERENCE;
   4. plugins: `ctx.add_battle_template(path)` (plugin API 2,
      plugins.registry.Registry.battle_templates()).
 
@@ -23,9 +20,15 @@ their relative paths (effects/ stays effects/), refusing to overwrite a file,
 and records `editor.template {id, version}` in every JSON manifest it copies
 (the compilers strip "editor"), so the studio can later compare the game's
 data with a newer version of the template (Q7). new_game() makes a game
-folder from a template: its data in data/ and a reference/project.json that
+folder from a template: its data in data/, a reference/project.json that
 names the battle manifest ("battle") and the asset manifest ("assets") it
-copied. Nothing here depends on a user interface.
+copied, and (D-40 RN) a world, data/world.json named as "maps", with one
+simple-shape tileset and one map (core.starter_world, through
+core.game_world.create()), so every new game builds and opens on a map.
+D-40 RG: with the world comes a first scene (core.starter_scene:
+src/game.cpp, the player's sprite, the manifest's "sources" and ROM header),
+so the game also runs at once; its "name" is the build name
+(starter_scene.build_name()). Nothing here depends on a user interface.
 """
 from __future__ import annotations
 
@@ -36,7 +39,7 @@ from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any
 
-from . import engine, manifest_io
+from . import engine, manifest_io, starter_scene
 from .document import DocumentError
 
 if TYPE_CHECKING:
@@ -79,10 +82,6 @@ ENGINE_SAMPLES = "samples"
 REFERENCE_TEMPLATES = "templates"
 ## Environment variable naming the reference repo checkout.
 REFERENCE_ENV = "CAPSULE_REFERENCE"
-## The repository holding the reference rules, editable copy first (D-37 section 3).
-REFERENCE_REPOS = ("CapsuleCreatures_PocketProject-work", "CapsuleCreatures_PocketProject")
-## The reference rules' folder inside that repository.
-REFERENCE_RULES = "rules"
 
 ## A manifest's studio-only object (the compilers strip it).
 EDITOR_KEY = "editor"
@@ -249,9 +248,6 @@ def reference_candidates() -> list[Path]:
    out = []
    if os.environ.get(REFERENCE_ENV):
       out.append(Path(os.environ[REFERENCE_ENV]).expanduser())
-   # The toolkit inside the umbrella (workspace/CapsuleCreatures-work/toolkit), then a standalone toolkit clone.
-   for workspace in (engine.STUDIO_ROOT.parent.parent, engine.STUDIO_ROOT.parent):
-      out += [workspace / repo / REFERENCE_RULES for repo in REFERENCE_REPOS]
    return out
 
 
@@ -406,12 +402,18 @@ def apply(template: Template, folder: str | Path, parts: list[str] | None = None
    return written
 
 
-def new_game(folder: str | Path, template: Template, name: str | None = None) -> Path:
-   """!A new game folder from a template: the template's files in data/, and reference/project.json naming the
-   battle and asset manifests it copied (paths relative to the game folder, as the engine's build reads them).
+def new_game(folder: str | Path, template: Template, name: str | None = None, world: bool = True) -> Path:
+   """!A new game folder from a template: the template's files in data/, reference/project.json naming the battle
+   and asset manifests it copied (paths relative to the game folder, as the engine's build reads them), and its
+   world: data/world.json with the starter tileset and map (core.game_world.create(), core.starter_world), named
+   as "maps" before "battle", pointed at the game's battle data; with the world, its first scene (D-40 RG,
+   core.starter_scene.add(): src/game.cpp, sprite:PLAYER in the asset manifest, "rom" and "sources").
    @param folder    the game folder (new, or empty)
    @param template  Template
-   @param name      the game's name, or None for the folder's name
+   @param name      the game's name, or None for the folder's name (the scene shows it; the manifest's "name" is
+                    starter_scene.build_name() of it)
+   @param world     False to leave the world and the scene out (a game as made before D-40 RN; tests of the
+                    no-world state)
    @return the project manifest's path
    @throws DocumentError when the folder has files already
    """
@@ -420,10 +422,21 @@ def new_game(folder: str | Path, template: Template, name: str | None = None) ->
       raise DocumentError(f"{game} is not an empty folder: a new game starts in a new folder")
    project = game / REFERENCE_DIR / PROJECT_FILE
    written = apply(template, game / DATA_FOLDER)
-   data: JsonDict = {SCHEMA_KEY: PROJECT_SCHEMA, "name": name or game.name,
+   shown = name or game.name
+   # D-40 RG: the engine builds the game as capsule_<name>, so the name keeps only what a build target can hold
+   data: JsonDict = {SCHEMA_KEY: PROJECT_SCHEMA, "name": starter_scene.build_name(shown),
                      EDITOR_KEY: {TEMPLATE_KEY: {"id": template.id, "version": template.version}}}
    for key, path in game_manifests(written).items():
       data[key] = path.relative_to(game).as_posix()
+   if world:
+      # D-40 RG: the first scene (src/game.cpp, the player's sprite, "sources" and the ROM header), so the game
+      # builds and runs at once
+      starter_scene.add(game, data, shown)
    project.parent.mkdir(parents=True, exist_ok=True)
    manifest_io.save(project, data)
+   if world:
+      # local: game_world reads worlds and battle data, which only a new game's world needs
+      from . import game_world
+      from .project import open_project
+      game_world.create(open_project(project), starter=True)
    return project

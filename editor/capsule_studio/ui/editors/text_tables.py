@@ -29,7 +29,7 @@ from ...core import asset_tables, engine, text_boxes, text_render, text_tables
 from ...core.document import Document, DocumentError
 from ..panel import EditorPanel
 from ..qtimage import to_qimage
-from ..widgets import DEBOUNCE_MS, Debounce, PixelView, button
+from ..widgets import DEBOUNCE_MS, Debounce, PixelView, button, set_enabled
 from .text_common import MarkupHighlighter, control_menu, session_of
 
 if TYPE_CHECKING:
@@ -420,7 +420,7 @@ class TextTablesPanel(EditorPanel):
       self._filling = True
       try:
          for w in (self.edit, self.wrap, self.font_box, self.insert):
-            w.setEnabled(row is not None)
+            set_enabled(w, row is not None)   # the text goes read-only and keeps its scroll bar
          value = row.text if row is not None else ""
          if self.edit.toPlainText() != value:
             self.edit.setPlainText(value)

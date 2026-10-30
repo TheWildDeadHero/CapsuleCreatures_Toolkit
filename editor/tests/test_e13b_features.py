@@ -15,8 +15,8 @@
 - the read commands keeping their project alive (the weak reference from a
   Document to its project, S16's generation fix).
 
-The Starter (neutral) tests run everywhere; the Gen-3 ones (the reference
-repo's templates/gen3 has E13b's moves, side conditions and points) are
+The Starter (neutral) tests run everywhere; the classic ones (the reference
+repo's templates/classic has E13b's moves, side conditions and points) are
 skipped without the reference repo. Expected values come from the data or
 the engine, not written down.
 """
@@ -39,10 +39,10 @@ from capsule_studio.core import battle, bench, engine, holders, logic, pipelines
 from capsule_studio.core.battle import BattleProject  # noqa: E402
 from capsule_studio.core.document import Document, DocumentError  # noqa: E402
 from capsule_studio.core.structure import conditions, turn  # noqa: E402
-from sample_data import copy_battle_data, gen3_data, make_game, needs_gen3  # noqa: E402
+from sample_data import copy_battle_data, classic_data, make_game, needs_classic  # noqa: E402
 from test_battle import BattleTestCase  # noqa: E402
 
-## Gen-3 sample names E13b's rows use (reference README): a move with move_type handlers, a move with a power
+## Classic sample names E13b's rows use (reference README): a move with move_type handlers, a move with a power
 ## handler against a volatile, that volatile, the screens and the weather that turns Sky Ball's type.
 SKY_BALL, WHIRL, AIRBORNE, HARD_WALL, GLOW_WALL, RAIN = ("Sky Ball", "Whirl", "airborne", "Hard Wall", "Glow Wall",
                                                          "Rain")
@@ -105,17 +105,17 @@ class OwnerListTests(unittest.TestCase):
 
 
 class PointMemberCommentTests(unittest.TestCase):
-   """!review3 probe p_points as a regression (C5): a point member added to a Gen-3 move keeps its source's
+   """!review3 probe p_points as a regression (C5): a point member added to a classic move keeps its source's
    comments."""
 
-   @needs_gen3
+   @needs_classic
    def test_point_member_keeps_comments(self) -> None:
       """!Cold Haze's comment inside its hit phase ("a step per battler") stays when a point member is added.
       @return None
       """
       with tempfile.TemporaryDirectory() as tmp:
          folder = Path(tmp)
-         copy_battle_data(gen3_data() / "battle.json", folder)
+         copy_battle_data(classic_data() / "battle.json", folder)
          p = BattleProject.open(folder / "battle.json")
          doc = p.battle
          choices = holders.point_choices(p, "moves")
@@ -254,15 +254,15 @@ class ReadCommandProjectTests(unittest.TestCase):
       self.assertEqual(lost, [])
 
 
-@needs_gen3
-class Gen3Tests(BattleTestCase):
-   """!E13b's owners on the reference repo's Gen-3 template."""
+@needs_classic
+class ClassicTests(BattleTestCase):
+   """!E13b's owners on the reference repo's classic template."""
 
    def sample(self) -> Path:
-      """!The Gen-3 template.
+      """!The classic template.
       @return folder
       """
-      return gen3_data()
+      return classic_data()
 
    def test_move_point_members(self) -> None:
       """!A move's point handlers are its logic's point members: listed, added (a new logic block for a move

@@ -6,7 +6,7 @@ panel's movement settings, object view and stacked objects, the Behaviors panel'
 modes' turn time, bump and keep-moving, the scene editor's mirrored steps, streaming and step table, and the
 background job helper. Skipped without PySide6.
 
-With CAPSULE_CONTENT_EMERALD naming an imported Emerald content folder (assets-imported/emerald, private: never
+With CAPSULE_IMPORTED_CONTENT naming an imported content folder (assets-imported/<game>, private: never
 copied into this repository), the map editor opens its world and shows one of its maps, and the times are printed.
 """
 from __future__ import annotations
@@ -34,10 +34,10 @@ from capsule_studio.plugins.registry import STUDIO_HOSTS  # noqa: E402
 from sample_data import copy_engine_maps  # noqa: E402
 from test_world_format import FRAME, SHEET_FRAMES, palette_png  # noqa: E402
 
-## The environment variable naming an imported Emerald content folder (its world/world.json is opened).
-CONTENT_ENV = "CAPSULE_CONTENT_EMERALD"
-## The imported map the content test shows.
-CONTENT_MAP = "LittlerootTown"
+## The environment variable naming an imported content folder (its world/world.json is opened).
+CONTENT_ENV = "CAPSULE_IMPORTED_CONTENT"
+## The imported map the content test shows (CAPSULE_IMPORTED_MAP; an invented default).
+CONTENT_MAP = os.environ.get("CAPSULE_IMPORTED_MAP", "StarterTown")
 ## Most seconds the content test lets opening the world and showing a map take (a slow machine's margin over the
 ## few seconds they take).
 CONTENT_SECONDS = 60
@@ -318,7 +318,7 @@ class QtSpriteTests(unittest.TestCase):
 
 @unittest.skipIf(QtWidgets is None or not os.environ.get(CONTENT_ENV), f"{CONTENT_ENV} names no imported content")
 class QtContentTests(unittest.TestCase):
-   """!The map editor on an imported Emerald world (private content, never part of this repository)."""
+   """!The map editor on an imported world (private content, never part of this repository)."""
 
    def test_open_imported_world(self) -> None:
       """!Opens the world, shows a map of fixed tilesets with every metatile pictured, in a few seconds.

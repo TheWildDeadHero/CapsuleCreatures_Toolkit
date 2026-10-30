@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtCore, QtWidgets
 
 from ....core.structure import field_effects as fx_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, set_check, set_combo
 
 if TYPE_CHECKING:
@@ -34,6 +34,8 @@ LIST_WIDTH = 220
 class FieldEffectsPanel(BattlePanel):
    """!The timed field effects.
 
+   @var errors
+   Compile result line.
    @var _filling
    True while the panel fills its own widgets.
    """
@@ -142,7 +144,7 @@ class FieldEffectsPanel(BattlePanel):
          self._fill_form()
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_form(self) -> None:

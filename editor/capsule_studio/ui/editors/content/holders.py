@@ -27,7 +27,7 @@ from ....core import battle, holders, inventory
 from ....core.structure import field_effects as fx_model
 from ....core.structure import pockets as pocket_model
 from ....core.structure import recruit as recruit_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import BattlePanel, EntryPanel, combo, set_check, set_combo, set_spin, spin
 from ..record_widgets import PointHandlersBox
 
@@ -231,7 +231,7 @@ class ItemsTab(HolderTab):
       for w in (self.pocket, self.price, self.use, self.target, self.use_text, *self.flags.values(),
                 *self.add_hook.values(), self.recruit_bonus, self.recruit_button, self.field_effect,
                 self.field_amount, self.field_button):
-         w.setEnabled(on)
+         set_enabled(w, on)   # the use text goes read-only and keeps its scroll bars
       if not on:
          self.use_text.setPlainText("")
          self.recruit_info.setText("")
@@ -400,7 +400,7 @@ class ShopsTab(BattlePanel):
          set_combo(self.item_choice, [str(i) for i in items], items[0] if items else None)
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_items(self, rows: list[dict[str, Any]]) -> None:

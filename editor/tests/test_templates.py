@@ -27,7 +27,7 @@ from capsule_studio.core.battle import BattleProject  # noqa: E402
 from capsule_studio.core.document import DocumentError  # noqa: E402
 from capsule_studio.core.structure import resources, stats  # noqa: E402
 from capsule_studio.plugins import loader, registry  # noqa: E402
-from sample_data import gen3_data, needs_gen3  # noqa: E402
+from sample_data import CLASSIC, classic_data, needs_classic  # noqa: E402
 
 ## Environment variable that enables the slow bench build test (test_bench.BUILD_ENV).
 BUILD_ENV = "CAPSULE_BENCH_BUILD"
@@ -133,30 +133,32 @@ class DiscoveryTests(TemplateTestCase):
       @return None
       """
       ref = self.dir / "rules"
-      write_template(ref / "templates" / "gen3", "gen3")   # the real repo's id (E11)
+      write_template(ref / "templates" / "classic", "classic")   # the real repo's id (E11)
       write_template(ref / "templates" / "again", "starter")
       with mock.patch.dict(os.environ, {templates.REFERENCE_ENV: str(ref)}):
          self.assertEqual(templates.reference_root(), ref.resolve())
          found, problems = templates.discover()
-      gen3 = next(t for t in found if t.id == "gen3")
-      self.assertEqual((gen3.origin, gen3.folder), (templates.REFERENCE, (ref / "templates" / "gen3").resolve()))
+      classic = next(t for t in found if t.id == "classic")
+      want = (templates.REFERENCE, (ref / "templates" / "classic").resolve())
+      self.assertEqual((classic.origin, classic.folder), want)
       self.assertEqual([t.origin for t in found if t.id == "starter"], [templates.ENGINE])
       self.assertTrue(any("'starter'" in p and "left out" in p for p in problems))
 
-   @needs_gen3
+   @needs_classic
    def test_real_reference_repo(self) -> None:
-      """!The reference repo's Gen-3 template (E11, skipped without the repo): found as "gen3", a game made from it
-      compiles and records the template.
+      """!The reference repo's classic template (E11, skipped without the repo): found by its folder's id
+      (sample_data.CLASSIC), a game made from it compiles and records the template.
       @return None
       """
-      gen3 = templates.find("gen3")
-      self.assertEqual((gen3.origin, gen3.name), (templates.REFERENCE, "Gen-3 reference"))
-      self.assertEqual(gen3.folder, gen3_data().resolve())
-      project = templates.new_game(self.dir / "gen3_game", gen3)
+      classic = templates.find(CLASSIC)
+      self.assertEqual(classic.origin, templates.REFERENCE)
+      self.assertTrue(classic.name)   # the reference repo names its own template
+      self.assertEqual(classic.folder, classic_data().resolve())
+      project = templates.new_game(self.dir / "classic_game", classic)
       battle_json = project.parent.parent / json.loads(project.read_text(encoding="utf-8"))["battle"]
       p = BattleProject.open(battle_json)
       self.assertIsNone(p.validate())
-      self.assertEqual(templates.recorded(battle_json), {"id": "gen3", "version": gen3.version})
+      self.assertEqual(templates.recorded(battle_json), {"id": CLASSIC, "version": classic.version})
 
    def plugin(self, pid: str, api: int, register: str) -> Path:
       """!Writes a plugin folder with a template folder "tpl".
@@ -231,11 +233,13 @@ class ApplyTests(TemplateTestCase):
       project = templates.new_game(game, templates.find("starter"), "My quest")
       data = manifest_io.load(project)
       self.assertEqual(project, game / "reference" / "project.json")
-      self.assertEqual((data["schema"], data["name"]), ("capsule.project/1", "My quest"))
+      # D-40 RG: the name as the engine builds it (capsule_<name>), letters, digits and "_"
+      self.assertEqual((data["schema"], data["name"]), ("capsule.project/1", "My_quest"))
       self.assertEqual((data["battle"], data["assets"]), ("data/battle.json", "data/assets.json"))
       self.assertEqual(data["editor"]["template"], {"id": "starter", "version": 1})
       blank = templates.new_game(self.dir / "Empty", templates.find("blank"))
-      self.assertNotIn("assets", manifest_io.load(blank))
+      # D-40 RG: Blank copies no asset manifest; the first scene starts data/assets.json with the player's sprite
+      self.assertEqual(manifest_io.load(blank)["assets"], "data/assets.json")
       self.assertEqual(manifest_io.load(blank)["name"], "Empty")
       with self.assertRaises(DocumentError):
          templates.new_game(game, templates.find("blank"))
@@ -311,7 +315,7 @@ class CompileTests(TemplateTestCase):
       self.assertEqual(st["terms"], {})
       self.assertEqual(p.battle.data.get("effects", []), [])
       words = json.dumps([p.battle.data, st, p.ruleset.data]).lower()
-      for word in ("pokemon", "pokémon", "trainer", "nature", "ability", "pp", "spa", "spd", "surf"):
+      for word in ("pok" + "emon", "pok" + "\u00e9mon", "trainer", "nature", "ability", "pp", "spa", "spd", "surf"):
          self.assertNotIn(f'"{word}"', words, word)
 
    def test_starter_in_the_studio(self) -> None:

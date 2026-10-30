@@ -31,9 +31,11 @@ STYLE_KEY = os.environ.get("CAPSULE_TEXT_BOX_STYLE")
 ## Size of the windows in the pictures.
 SHOT_SIZE = (1500, 900)
 ## The script shown (a map's source; the first source when the game has no such file).
-SCRIPT_SOURCE = "maps/LittlerootTown.cscript"
+## The imported map whose script and table are shown (CAPSULE_IMPORTED_MAP; an invented default).
+IMPORTED_MAP = os.environ.get("CAPSULE_IMPORTED_MAP", "StarterTown")
+SCRIPT_SOURCE = f"maps/{IMPORTED_MAP}.cscript"
 ## The table shown (the first table when the game has no such file).
-TABLE_NAME = "LittlerootTown.json"
+TABLE_NAME = f"{IMPORTED_MAP}.json"
 ## The font shown (the first font otherwise).
 FONT_NAME = "normal.font.json"
 ## Characters typed onto a text's first line to make it wider than its box.
@@ -94,7 +96,7 @@ class ImportedContentQtTests(unittest.TestCase):
       t = time.perf_counter()
       w.check()
       timed("script editor: check again", t)
-      self.shot(w, "script_editor_emerald")
+      self.shot(w, "script_editor_imported")
       self.assertFalse(w.project.dirty)
       w.close()
 

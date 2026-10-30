@@ -9,7 +9,7 @@ whole cell), the compiler's verdict (core.fonts.problem(): compile_proportional(
 game's code page), the page's characters the font lacks, and a preview of a text in the font
 (core.text_render.render_text()).
 
-S6b (C13a, the handheld games' CopyGlyphToWindow): a window draws only a glyph's advance width's columns and the glyph
+S6b (C13a, as the handheld games copy a glyph): a window draws only a glyph's advance width's columns and the glyph
 height's rows, so the editor and the grid show the pixels past them darker (kept in the font, never drawn), the
 editor marks the glyph height with a line across, and the preview draws as the engine does.
 

@@ -19,7 +19,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core.document import DocumentError
 from ....core.structure import stats as stat_model
 from ....core.structure import storage as storage_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, set_spin, spin
 
 if TYPE_CHECKING:
@@ -122,7 +122,7 @@ class StoragePanel(BattlePanel):
       @return None
       """
       doc, p = self.structure_doc(), self.project()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       if doc is None or p is None:
          return
       stated = storage_model.is_stated(doc)
@@ -135,7 +135,7 @@ class StoragePanel(BattlePanel):
          self.enable_button.setEnabled(not stated)
          self.disable_button.setEnabled(stated)
          for w in (self.count, self.size, self.pattern, self.table):
-            w.setEnabled(stated)
+            set_enabled(w, stated)   # the table goes read-only and keeps its scroll bars
          set_spin(self.count, s[storage_model.COUNT_KEY] or storage_model.NEW_COUNT)
          set_spin(self.size, s[storage_model.SIZE_KEY] or storage_model.NEW_SIZE)
          names = s[storage_model.NAMES_KEY]

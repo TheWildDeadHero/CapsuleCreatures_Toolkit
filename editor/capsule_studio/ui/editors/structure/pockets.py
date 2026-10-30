@@ -20,7 +20,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core.document import DocumentError
 from ....core.structure import pockets as pocket_model
 from ....core.structure import stats as stat_model
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, combo, set_combo
 
 if TYPE_CHECKING:
@@ -168,7 +168,7 @@ class PocketsPanel(BattlePanel):
          self._fill_selected()
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_selected(self) -> None:

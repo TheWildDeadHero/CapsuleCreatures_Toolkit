@@ -12,7 +12,7 @@ from PySide6 import QtWidgets
 from ...core import behaviors as model
 from ...core import engine
 from ..panel import EditorPanel
-from ..widgets import button
+from ..widgets import button, set_enabled
 from .battle_common import FORM_STRETCH, LIST_STRETCH
 from .record_widgets import NameChecks
 
@@ -131,7 +131,7 @@ class BehaviorsPanel(EditorPanel):
       finally:
          self._filling = False
       self._fill_form()
-      self.setEnabled(self.world() is not None)
+      set_enabled(self, self.world() is not None)
 
    def _picked(self, row: int) -> None:
       """!Another behavior was picked.
@@ -163,7 +163,7 @@ class BehaviorsPanel(EditorPanel):
          doc = self.world()
          modes = [str(n) for n in engine.tool("map_compiler").vehicle_class_names(doc.data)] if doc else []
          self.passable.set_names(modes, row["passable"] or [])
-         self.passable.setEnabled(row["passable"] is not None)
+         set_enabled(self.passable, row["passable"] is not None)   # read-only, still scrolling
       finally:
          self._filling = False
 
@@ -174,8 +174,10 @@ class BehaviorsPanel(EditorPanel):
       @return True when it went through
       """
       doc = self.world()
-      if self._filling or doc is None or self.selected is None:
+      if self._filling:
          return False
+      if doc is None or self.selected is None:
+         return self.explain(label, "behavior")
       ok = self.host.run_edit(label, lambda: fn(doc), doc)
       if not ok:
          self.refresh()
@@ -202,7 +204,7 @@ class BehaviorsPanel(EditorPanel):
       """
       doc = self.world()
       if doc is None:
-         return False
+         return self.explain("Add behavior")
       if name is None:
          text, ok = QtWidgets.QInputDialog.getText(self, "Add behavior", "Name:")
          if not ok or not text.strip():

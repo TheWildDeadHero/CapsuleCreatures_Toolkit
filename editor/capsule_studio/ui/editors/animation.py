@@ -12,7 +12,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from ...core import engine, imaging, sprite_grid, sprites
 from ..panel import EditorPanel, report_for
 from ..qtimage import indexed_qimage, load_rgba, to_qimage
-from ..widgets import PaletteStrip, PixelView, button
+from ..widgets import PaletteStrip, PixelView, button, set_enabled
 from .import_dialog import ImportDialog
 from .sprite_grid import GridBox
 
@@ -199,8 +199,7 @@ class AnimationPanel(EditorPanel):
       self.stream = QtWidgets.QCheckBox("Streamed")
       self.stream.setToolTip("Only the frame shown is in the sprite slot's tiles (uploaded when it changes), so the "
                              "frames together may use more tiles than a slot holds; one frame must fit")
-      self.stream.clicked.connect(lambda on: self._sprite_edit("Stream", lambda: sprites.set_stream(
-         self.doc, self.key, on)))
+      self.stream.clicked.connect(lambda on: self._stream_edited(on))
       ## I3: the walk animations' step table is set.
       self.has_steps = QtWidgets.QCheckBox("Step table")
       self.has_steps.setToolTip("The walk animations pause on one of two standing entries between steps and a new "
@@ -381,7 +380,7 @@ class AnimationPanel(EditorPanel):
          enabled = a is not None
          for w in [self.size_box, self.anim_box, self.loop, self.table, self.duration, self.stream,
                    self.has_steps] + self.step_table:
-            w.setEnabled(enabled)
+            set_enabled(w, enabled)   # the tables go read-only and keep their scroll bars
          self.table.setRowCount(0)
          self.anim_box.clear()
          if a is None:
@@ -745,6 +744,14 @@ class AnimationPanel(EditorPanel):
       if not self._filling and self.sprite() is not None:
          self._edit(label, fn)
 
+   def _stream_edited(self, on: bool) -> None:
+      """!I3: the Streamed box changed: the sprite's stream flag set (one undo step).
+      @param on  the box's new state
+      @return None
+      """
+      doc = self.doc   # a local for the lambda, as the other edits do (Doxygen lists self.doc in a lambda)
+      self._sprite_edit("Stream", lambda: sprites.set_stream(doc, self.key, on))
+
    def _steps_edited(self) -> None:
       """!The step table box or an entry changed (I3).
       @return None
@@ -829,7 +836,8 @@ class AnimationPanel(EditorPanel):
          if not ok or not key.strip():
             return False
       key = key.strip()
-      if self.host.run_edit("New grid sprite", lambda: sprite_grid.new_grid(self.doc, key, *size)):
+      doc = self.doc   # a local for the lambda (Doxygen lists self.doc in a lambda as a module member)
+      if self.host.run_edit("New grid sprite", lambda: sprite_grid.new_grid(doc, key, *size)):
          self.key = key
          self.refresh()
          return True

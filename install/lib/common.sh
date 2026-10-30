@@ -224,7 +224,7 @@ finish() {
    [ "${SKIP_GBA:-0}" -eq 1 ] || verify_gba
    [ "${SKIP_DESKTOP:-0}" -eq 1 ] || verify_desktop
    [ "$VERIFY_FAILED" -eq 0 ] || die "some components are missing (see above)"
-   say "Ready. The engine's GBA makefile defaults to $DEVKITPRO_DIR; no environment setup is required."
+   say "Ready. The engine's gba-* CMake presets find devkitPro at $DEVKITPRO_DIR; no environment setup is required."
 }
 
 cxx_present() { have c++ || have g++ || have clang++; }

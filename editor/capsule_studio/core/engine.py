@@ -7,10 +7,11 @@ engine checkout so a preview matches the build.
 The engine is found, in order, at (D-37 layout; relative to this repository):
   1. the directory in the CAPSULE_ENGINE environment variable;
   2. ../engine, the engine submodule beside this toolkit inside the
-     CapsuleCreatures umbrella (CapsuleCreatures-work/toolkit and
-     CapsuleCreatures-work/engine);
-  3. ../CapsuleCreatures_Engine-work, then ../CapsuleCreatures_Engine: a
-     standalone engine clone beside a standalone toolkit clone.
+     CapsuleCreatures umbrella (CapsuleCreatures/toolkit and
+     CapsuleCreatures/engine); in a prebuilt Studio download this is the
+     engine copy the bundle ships beside the studio's sources;
+  3. ../CapsuleCreatures_Engine: a standalone engine clone beside a
+     standalone toolkit clone.
 """
 from __future__ import annotations
 
@@ -29,8 +30,8 @@ STUDIO_ROOT_DEPTH = 3
 STUDIO_ROOT = Path(__file__).resolve().parents[STUDIO_ROOT_DEPTH]
 ## The engine submodule's folder inside the umbrella, beside this toolkit (toolkit/ and engine/).
 ENGINE_SUBMODULE = "engine"
-## Standalone engine clones beside a standalone toolkit clone, editable copy first (D-37 section 3).
-ENGINE_CLONES = ("CapsuleCreatures_Engine-work", "CapsuleCreatures_Engine")
+## Standalone engine clones beside a standalone toolkit clone (the public repository's folder name).
+ENGINE_CLONES = ("CapsuleCreatures_Engine",)
 ## Environment variable naming an engine checkout.
 ENV_VAR = "CAPSULE_ENGINE"
 ## OBJ tiles per sprite slot when the engine header cannot be read (gfx::sprites::kTilesPerSlot).

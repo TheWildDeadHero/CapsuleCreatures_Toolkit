@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core import battle, engine
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel
 
 if TYPE_CHECKING:
@@ -128,7 +128,7 @@ class TermsPanel(BattlePanel):
                   item.setForeground(grey)
                self.table.setItem(r, c, item)
          self.table.resizeColumnsToContents()
-         self.table.setEnabled(doc is not None)
+         set_enabled(self.table, doc is not None)   # read-only, still scrolling
          rules = battle.plural_rules()
          self.plural.clear()
          self.plural.addItems(rules)

@@ -26,7 +26,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import field_rules as model
 from ..panel import EditorPanel
-from ..widgets import button, headless
+from ..widgets import button, headless, set_enabled
 from .battle_common import FORM_STRETCH, LIST_STRETCH, set_combo
 from .record_widgets import NameChecks
 
@@ -108,8 +108,10 @@ class FieldPanel(EditorPanel):
       @return True when it went through
       """
       doc = self.world()
-      if doc is None or self._filling:
+      if self._filling:
          return False
+      if doc is None:
+         return self.explain(label)
       ok = self.host.run_edit(label, lambda: fn(doc), doc)
       if not ok:
          self.refresh()
@@ -203,7 +205,7 @@ class LevelsPanel(FieldPanel):
          self.table.resizeColumnsToContents()
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _typed(self, item: QtWidgets.QTableWidgetItem) -> None:
@@ -362,7 +364,7 @@ class ModesPanel(FieldPanel):
       finally:
          self._filling = False
       self._fill_form()
-      self.setEnabled(self.world() is not None)
+      set_enabled(self, self.world() is not None)
       self.show_errors()
 
    def _picked(self, row: int) -> None:
@@ -399,7 +401,7 @@ class ModesPanel(FieldPanel):
          doc = self.world()
          behaviors = [b.get("name") for b in doc.data.get(model.BEHAVIORS_KEY, []) if isinstance(b, dict)]
          self.passable.set_names([str(b) for b in behaviors], row["passable"] or [])
-         self.passable.setEnabled(row["passable"] is not None)
+         set_enabled(self.passable, row["passable"] is not None)   # read-only, still scrolling
          self.enters.setText(", ".join(str(b) for b in row["enters"]) or "nothing")
       finally:
          self._filling = False
@@ -460,7 +462,7 @@ class ModesPanel(FieldPanel):
       """
       old = self.selected
       if old is None:
-         return False
+         return self.explain("Rename movement mode", "movement mode")
       new = new if new is not None else self._ask("Rename movement mode", "New name:", old)
       if new is None or not self._scripts_ok(old):
          return False
@@ -475,7 +477,9 @@ class ModesPanel(FieldPanel):
       @return True when it went through
       """
       name = self.selected
-      if name is None or not self._scripts_ok(name):
+      if name is None:
+         return self.explain("Remove movement mode", "movement mode")
+      if not self._scripts_ok(name):
          return False
       return self._run("Remove mode", lambda doc: model.remove_mode(doc, name))
 
@@ -485,4 +489,6 @@ class ModesPanel(FieldPanel):
       @return True when it went through
       """
       name = self.selected
-      return name is not None and self._run("Move mode", lambda doc: model.move_mode(doc, name, delta))
+      if name is None:
+         return self.explain("Move movement mode", "movement mode")
+      return self._run("Move mode", lambda doc: model.move_mode(doc, name, delta))

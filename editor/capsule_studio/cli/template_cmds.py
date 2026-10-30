@@ -1,8 +1,10 @@
 """!`capsule-studio new ...` and `capsule-studio template ...`: battle data
 templates (D-23 section 3.5, core.templates).
 
-    new GAME --template NAME [--name N]     a new game folder: the template's files in GAME/data/ and
-                                            GAME/reference/project.json naming its battle and asset manifests
+    new GAME --template NAME [--name N]     a new game folder: the template's files in GAME/data/, a world
+                                            (GAME/data/world.json: one simple-shape tileset, the map start) and
+                                            GAME/reference/project.json naming its world, battle and asset
+                                            manifests
     template list                           every template found (built in, engine samples, reference repo,
                                             plugins): id, name, where, version, parts
     template show NAME                      one template's description and files by part
@@ -19,7 +21,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from ..core import templates
+from ..core import manifest_io, starter_world, templates
 from .main import CommandError
 
 
@@ -28,7 +30,8 @@ def register(sub: argparse._SubParsersAction) -> None:
    @param sub  argparse subparsers
    @return None
    """
-   p = sub.add_parser("new", help="a new game folder from a battle data template (data/ + reference/project.json)")
+   p = sub.add_parser("new", help="a new game folder from a battle data template (data/ with a starter world "
+                           "+ reference/project.json)")
    p.add_argument("game", help="the new game's folder (new, or empty)")
    p.add_argument("--template", required=True, metavar="NAME", help="template id or name (template list), e.g. "
                                                                    "starter or blank")
@@ -69,7 +72,8 @@ def cmd_new_game(args: argparse.Namespace) -> int:
    """
    t = templates.find(args.template, registry_of(args))
    project = templates.new_game(Path(args.game), t, args.name)
-   print(f"created {project} from {t.label()}")
+   world = manifest_io.load(project).get("maps")
+   print(f"created {project} from {t.label()}, with a world ({world}: map {starter_world.START_MAP})")
    return 0
 
 

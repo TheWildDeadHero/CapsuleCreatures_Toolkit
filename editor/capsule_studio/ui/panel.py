@@ -26,6 +26,9 @@ A host of world panels (maps, tilesets) also provides:
                        follow its map only then); selected_map() and
                        select_map(name) read and set that tab's map
 Undo and Redo act on the active panel's current_document().
+A panel action that cannot run (no world, nothing chosen) says why with
+explain(), never by returning silently; a panel with nothing to show greys
+itself with widgets.set_enabled(self, False), which keeps its scroll bars.
 [S2] A panel that edits files besides the host's Document (the text tables
 and fonts an asset manifest names) lists them in extra_documents(); the
 scene editor saves them with its manifest and counts them as unsaved changes.
@@ -37,10 +40,14 @@ from typing import TYPE_CHECKING, Protocol
 
 from PySide6 import QtWidgets
 
+from .widgets import install_wheel_guard
+
 if TYPE_CHECKING:
    from ..core.document import AssetReport, Document
    from ..core.world import Project
 
+## Why a world panel's action did nothing while its host has no world (hosts give their own: no_world_reason).
+NO_WORLD_REASON = "no world is open"
 ## Results of the last validation: (problems, {asset key: AssetReport}), or None before the first one.
 Reports = tuple[list[str], dict[str | None, "AssetReport"]] | None
 
@@ -89,12 +96,27 @@ class EditorPanel(QtWidgets.QWidget):
       super().__init__(parent)
       ## The PanelHost this panel belongs to.
       self.host = host
+      install_wheel_guard()   # the wheel scrolls the panel's pages over its fields (widgets.WheelGuard)
 
    def host_project(self) -> Project | None:
       """!The host's world Project, for world panels.
       @return Project, or None (hosts of asset panels have none)
       """
       return getattr(self.host, "project", None)
+
+   def explain(self, action: str, missing: str | None = None) -> bool:
+      """!Says in the status bar why an action did nothing: no action returns silently. Without a world open the
+      reason is the host's (WorldWindow.no_world_reason: open or make one); else "no <missing> is chosen".
+      @param action   what was asked, as its button reads ("New tileset")
+      @param missing  what it needs besides a world ("map", "tileset"), or None
+      @return False (handlers that report success return it)
+      """
+      if self.host_project() is None:
+         why = getattr(self.host, "no_world_reason", NO_WORLD_REASON)
+      else:
+         why = f"no {missing or 'entry'} is chosen"
+      self.host.show_status(f"{action}: {why}")
+      return False
 
    @property
    def doc(self) -> Document:

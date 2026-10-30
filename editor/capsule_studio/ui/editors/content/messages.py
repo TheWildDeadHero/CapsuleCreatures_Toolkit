@@ -21,7 +21,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core import messages as msg_model
 from ....core.document import DocumentError
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import BattlePanel, set_combo
 
 if TYPE_CHECKING:
@@ -166,7 +166,7 @@ class MessagesPanel(BattlePanel):
          self._fill_selection()
       finally:
          self._filling = False
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       self.show_errors()
 
    def _fill_row(self, doc: object, r: int, row: msg_model.MessageRow) -> None:

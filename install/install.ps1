@@ -6,7 +6,7 @@
 .DESCRIPTION
    GBA:     devkitPro's official installer (github.com/devkitPro/installer); you tick
             "GBA Development" in its window. Its folder is then made visible to MSYS2
-            as /opt/devkitpro, where the engine's GBA makefile expects it.
+            as /opt/devkitpro, where the engine's GBA toolchain file (the gba-* presets) expects it.
    Desktop: winget installs Git, MSYS2 and mGBA. Inside MSYS2's UCRT64 environment,
             pacman installs GCC, make, CMake, Ninja, Python 3, pkg-config and SDL2.
             Build from the "MSYS2 UCRT64" shell.

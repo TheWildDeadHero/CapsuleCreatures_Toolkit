@@ -140,7 +140,7 @@ class QtObjectTests(unittest.TestCase):
       ob.tree.setCurrentItem(ob.tree.topLevelItem(5))
       self.settle()
       self.assertEqual(ob.route.text.toPlainText(), "right 6\ndown 2\nleft 6\nup 2")
-      self.assertTrue(ob.route.isEnabled())
+      self.assertTrue(ob.route.isEnabled() and ob.route.editable())   # read-only boxes still scroll
       ob.route.text.setPlainText("left 1\nhop")
       self.assertIn("unknown step 'hop'", ob.route.status.text())
       ob.route.text.setPlainText("left 1\nwait 10\nright 1")

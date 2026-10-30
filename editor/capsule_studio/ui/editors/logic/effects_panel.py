@@ -32,7 +32,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core import logic
 from ....core.document import DocumentError
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..battle_common import BattlePanel
 from ..script import CodeEditor
 from .blocks import AstChange, BlockView
@@ -544,7 +544,7 @@ class EffectsPanel(BattlePanel):
       self._sync_picker()
       for w in (self.handler_list, self.add_handler_button, self.set_hook_button, self.remove_handler_button,
                 self.handler_up, self.handler_down, self.per_foe):
-         w.setEnabled(self.editable)
+         set_enabled(w, self.editable)   # the handler list goes read-only and keeps its scroll bar
 
    def _selected_handler(self) -> dict[str, Any] | None:
       """!The selected handler node (of the shown AST).

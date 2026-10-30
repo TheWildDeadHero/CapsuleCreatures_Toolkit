@@ -4,7 +4,7 @@
 A group is {"name", "maps": [map names], "groups": [subgroups]}; each map is
 in at most one group, and maps in none are ungrouped (listed after the
 groups). A group is addressed by its path: the tuple of group names from the
-top, e.g. ("Hoenn", "Towns"). The runtime does not use groups yet.
+top, e.g. ("World", "Towns"). The runtime does not use groups yet.
 
 Functions that change a Document must be called inside doc.edit().
 """

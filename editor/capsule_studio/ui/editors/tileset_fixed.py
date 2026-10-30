@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import tilesets
-from ..widgets import button
+from ..widgets import button, set_enabled
 from .tileset_targets import TargetsBox
 
 if TYPE_CHECKING:
@@ -138,7 +138,7 @@ class FixedBox(QtWidgets.QWidget):
          fixed = pl is not None
          self.make.setVisible(doc is not None and not fixed)
          for w in (self.sheet, self.tile, self.tiles, self.palette, self.palettes, self.banks, self.entries):
-            w.setEnabled(fixed)
+            set_enabled(w, fixed)   # the tables go read-only and keep their scroll bars
          self.add_sheet.setEnabled(doc is not None and (fixed or not doc.data.get("sheets")))
          self.sheet.clear()
          if doc is not None:
@@ -181,7 +181,7 @@ class FixedBox(QtWidgets.QWidget):
          except ValueError:
             m = None
       entries = m.get("entries") if isinstance(m, dict) else None
-      self.entries.setEnabled(isinstance(entries, list))
+      set_enabled(self.entries, isinstance(entries, list))   # read-only, still scrolling
       for slot, (t, h, v, b) in enumerate(self._entry_widgets):
          tile, hf, vf, bank = tilesets.split_entry(entries[slot]) if isinstance(entries, list) else (0, False, False, 0)
          t.setValue(tile)
@@ -208,7 +208,9 @@ class FixedBox(QtWidgets.QWidget):
       @return None
       """
       doc = self.panel.ts_doc()
-      if doc is not None:
+      if doc is None:
+         self.panel.explain("Make fixed placement", "tileset")
+      else:
          first = next((s.get("name") for s in doc.data.get("sheets", [])), None)
          self.panel.edit_tileset("Make fixed", lambda: tilesets.set_place(doc, sheet=first))
 
@@ -243,7 +245,9 @@ class FixedBox(QtWidgets.QWidget):
       @return None
       """
       doc = self.panel.ts_doc()
-      if doc is not None:
+      if doc is None:
+         self.panel.explain("Remove last bank", "tileset")
+      else:
          self.panel.edit_tileset("Remove bank", lambda: tilesets.remove_last_bank(doc))
 
    def _entry_edited(self, slot: int) -> None:
@@ -447,7 +451,9 @@ class AnimationBox(QtWidgets.QWidget):
       @return None
       """
       doc, i, an = self._current()
-      if an is not None:
+      if an is None:
+         self.panel.explain("Remove animation", "animation")
+      else:
          self.panel.edit_tileset("Remove animation", lambda: tilesets.remove_animation(doc, i))
 
 

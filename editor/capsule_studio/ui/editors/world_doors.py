@@ -13,7 +13,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import doors, draw_order, engine
 from ..panel import EditorPanel
-from ..widgets import PixelView, button
+from ..widgets import PixelView, button, set_enabled
 
 if TYPE_CHECKING:
    from ...core.document import Document
@@ -240,8 +240,10 @@ class WorldDoorsPanel(EditorPanel):
       @return True when it went through
       """
       doc = self.world()
-      if self._filling or doc is None:
+      if self._filling:
          return False
+      if doc is None:
+         return self.explain(label)
       ok = self.host.run_edit(label, lambda: fn(doc), doc)
       if not ok:
          self.refresh()
@@ -254,7 +256,7 @@ class WorldDoorsPanel(EditorPanel):
       @return None
       """
       doc = self.world()
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       if doc is None:
          return
       self._filling = True
@@ -369,8 +371,10 @@ class WorldDoorsPanel(EditorPanel):
       @return True when changed
       """
       i = self.bindings.currentRow()
+      if i < 0:
+         return self.explain("Apply door binding", "door binding")
       t, m, d = self._form()
-      return i >= 0 and self._run("Door binding", lambda doc: doors.set_binding(doc, i, tileset=t, metatile=m,
+      return self._run("Door binding", lambda doc: doors.set_binding(doc, i, tileset=t, metatile=m,
                                                                                 door=d))
 
    def remove_binding(self) -> bool:
@@ -378,7 +382,9 @@ class WorldDoorsPanel(EditorPanel):
       @return True when removed
       """
       i = self.bindings.currentRow()
-      return i >= 0 and self._run("Remove door binding", lambda doc: doors.remove_binding(doc, i))
+      if i < 0:
+         return self.explain("Remove door binding", "door binding")
+      return self._run("Remove door binding", lambda doc: doors.remove_binding(doc, i))
 
    def _value(self, name: str) -> int:
       """!A rule field's value in the form.

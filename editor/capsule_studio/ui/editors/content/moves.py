@@ -25,7 +25,7 @@ from ....core import engine, holders
 from ....core.document import DocumentError
 from ....core.structure import categories as cat_model
 from ....core.structure import resources, stages
-from ...widgets import button
+from ...widgets import button, set_enabled
 from ..record_widgets import PointHandlersBox
 from ..battle_common import EntryPanel, combo, set_check, set_combo, set_spin, set_spin_max, spin
 
@@ -44,7 +44,7 @@ FROM_COLUMN = 2
 FROM_MOVE = "this move"
 ## "From" text of the engine's default amount (the move states no cost).
 FROM_DEFAULT = "default"
-## "From" text of a default amount of nothing (a battler resource the move states no cost of: S17, the Gen-3 hp row
+## "From" text of a default amount of nothing (a battler resource the move states no cost of: S17, the classic hp row
 ## read "0 / default").
 FROM_FREE = "default: pays nothing"
 ## Colour of a default amount.
@@ -212,7 +212,7 @@ class MovesPanel(EntryPanel):
       on = entry is not None
       for w in (self.type_box, self.category, self.power, self.accuracy, self.never, self.priority, self.target,
                 self.crit, self.cost_table, self.cost_reset):
-         w.setEnabled(on)
+         set_enabled(w, on)   # the cost table goes read-only and keeps its scroll bars
       e = entry or {}
       set_combo(self.type_box, p.names("types") if p else [], e.get("type"))
       categories = p.names("categories") if p else []

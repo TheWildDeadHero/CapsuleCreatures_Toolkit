@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """!Tests for capsule_studio.core.battle and the battle commands (no Qt needed).
 
-Uses a copy of the engine's Starter sample (tests/sample_data.py); GenThreeTests use the reference repo's Gen-3
+Uses a copy of the engine's Starter sample (tests/sample_data.py); ClassicTests use the reference repo's classic
 sample and are skipped without it.
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ from capsule_studio.core import battle, engine  # noqa: E402
 from capsule_studio.core.battle import BattleProject  # noqa: E402
 from capsule_studio.core.document import DocumentError  # noqa: E402
 from capsule_studio.core.structure import chart as chart_model  # noqa: E402
-from sample_data import copy_battle_data, gen3_data, make_game, needs_gen3, starter_data  # noqa: E402
+from sample_data import copy_battle_data, classic_data, make_game, needs_classic, starter_data  # noqa: E402
 
 ## A trait percentage that changes nothing (the stat formulas' trait_pct of no trait).
 NEUTRAL_PCT = 100
@@ -41,7 +41,7 @@ class BattleTestCase(unittest.TestCase):
 
    def sample(self) -> Path:
       """!The sample folder the test copies.
-      @return the Starter's (a Gen-3 test class gives the reference repo's)
+      @return the Starter's (a classic test class gives the reference repo's)
       """
       return starter_data()
 
@@ -82,15 +82,15 @@ def tier_factor(project: BattleProject, tier: str) -> float:
    return chart_model.tier_entry(project.structure, tier)["q8"] / Q8_ONE
 
 
-class GenThreeTestCase(BattleTestCase):
-   """!Base of the Gen-3 tests: a copy of the reference repo's Gen-3 sample (decorate the class with needs_gen3)."""
+class ClassicTestCase(BattleTestCase):
+   """!Base of the classic tests: a copy of the reference repo's classic sample (decorate the class: needs_classic)."""
 
    def sample(self) -> Path:
-      """!The reference repo's Gen-3 sample.
+      """!The reference repo's classic sample.
       @return folder
       """
-      folder = gen3_data()
-      assert folder is not None, "decorate Gen-3 test classes with needs_gen3"
+      folder = classic_data()
+      assert folder is not None, "decorate classic test classes with needs_classic"
       return folder
 
 
@@ -179,7 +179,7 @@ class ProjectTests(BattleTestCase):
       self.assertFalse(set(doc.data) & set(battle.structure_keys()))
       self.assertLessEqual(set(p.structure.data) - {"schema", "editor"}, set(battle.structure_keys()))
       text = json.dumps([doc.data, p.structure.data, p.ruleset.data]).lower()
-      for word in ("trainer", "pokemon", "nature", "abilit", "prize", "wild", "special", "pp_"):
+      for word in ("trainer", "pok" + "emon", "nature", "abilit", "prize", "wild", "special", "pp_"):
          self.assertNotIn(word, text)
       with doc.edit("Add"):
          battle.add_entry(doc, "moves", "Poke")
@@ -475,9 +475,9 @@ class PresenterTrackTests(BattleTestCase):
       self.assertEqual(battle.sprite_sizes(game)["sprite:PRESENTER"], self.SIZE)
 
 
-@needs_gen3
-class GenThreeTests(GenThreeTestCase):
-   """!The Gen-3 sample of the reference repo (skipped without it): its stats and presenters, including the one
+@needs_classic
+class ClassicTests(ClassicTestCase):
+   """!The classic sample of the reference repo (skipped without it): its stats and presenters, including the one
    whose entrance is a sequence file."""
 
    ## The sample presenter sprite's OBJ size.

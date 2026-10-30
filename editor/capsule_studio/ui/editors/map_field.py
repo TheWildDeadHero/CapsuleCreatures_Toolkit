@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtCore, QtWidgets
 
 from ...core import document, map_field as model
-from ..widgets import button
+from ..widgets import button, set_enabled
 from .battle_common import set_check, set_combo
 from .field_rules import FieldPanel
 
@@ -221,7 +221,7 @@ class MapFieldPanel(FieldPanel):
          self._fill_flight()
       finally:
          self._filling = False
-      self.setEnabled(w is not None)
+      set_enabled(self, w is not None)
       self.show_errors()
 
    def _fill_map(self) -> None:
@@ -242,7 +242,7 @@ class MapFieldPanel(FieldPanel):
             self.tags.addItem(item)
          set_check(self.escape, escape)
          for widget in (self.darkness, self.tags, self.escape):
-            widget.setEnabled(doc is not None)
+            set_enabled(widget, doc is not None)   # the tag list goes read-only and keeps its scroll bar
       finally:
          self._filling = was
 
@@ -361,7 +361,7 @@ class MapFieldPanel(FieldPanel):
       """
       p = self.host_project()
       if p is None:
-         return False
+         return self.explain("Remove darkest")
       return self._run("Remove darkness level", lambda _w: model.remove_darkness_level(p))
 
    def set_tags(self, tags: list[str]) -> bool:
@@ -396,7 +396,7 @@ class MapFieldPanel(FieldPanel):
       """
       p = self.host_project()
       if p is None:
-         return False
+         return self.explain(f"Add {what}")
       if name is None:
          name, ok = QtWidgets.QInputDialog.getText(self, f"Add {what}", "Name (lower case):")
          if not ok:
@@ -412,7 +412,7 @@ class MapFieldPanel(FieldPanel):
       """
       p, item = self.host_project(), self.name_lists[key].currentItem()
       if p is None or item is None:
-         return False
+         return self.explain(f"Rename {what}", what)
       old = item.text()
       if new is None:
          new, ok = QtWidgets.QInputDialog.getText(self, f"Rename {what}", "New name:", text=old)
@@ -428,7 +428,7 @@ class MapFieldPanel(FieldPanel):
       """
       p, item = self.host_project(), self.name_lists[key].currentItem()
       if p is None or item is None:
-         return False
+         return self.explain("Remove name", "name")
       name = item.text()
       return self._run("Remove name", lambda _w: model.remove_name(p, key, name))
 
@@ -460,7 +460,7 @@ class MapFieldPanel(FieldPanel):
       """
       map_name = self.map_choice.currentText()
       if not map_name:
-         return False
+         return self.explain("Add flight point", "map")
       if name is None:
          name, ok = QtWidgets.QInputDialog.getText(self, "Add flight point", "Name (lower case):")
          if not ok:
@@ -474,5 +474,5 @@ class MapFieldPanel(FieldPanel):
       """
       name = self.selected_flight()
       if name is None:
-         return False
+         return self.explain("Remove flight point", "flight point")
       return self._run("Remove flight point", lambda wd: model.remove_flight_point(wd, name))

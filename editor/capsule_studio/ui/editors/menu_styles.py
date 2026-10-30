@@ -28,7 +28,7 @@ from ...core import menu_styles, text_boxes
 from ...core.document import DocumentError
 from ..panel import EditorPanel
 from ..qtimage import to_qimage
-from ..widgets import PixelView, button
+from ..widgets import PixelView, button, set_enabled
 from .text_common import session_of
 
 if TYPE_CHECKING:
@@ -362,7 +362,7 @@ class MenuStylePanel(EditorPanel):
          self.script.setText(str(p.get("script", "")))
          for w in (self.kind, self.items, self.items_button, self.columns, self.shown, self.cursor, self.cancel,
                    self.fit, self.script, *self.repeat):
-            w.setEnabled(on)
+            set_enabled(w, on)   # the items box goes read-only and keeps its scroll bar
       finally:
          self._filling = False
       self._update_preview()

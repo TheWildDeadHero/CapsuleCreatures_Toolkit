@@ -4,7 +4,7 @@ One animation's frames shown on several tile ranges: each target names its first
 the placement in a fixed tileset), a frame offset (the frame it shows while target 0 shows frame 0; 0 to frames -
 1) and optionally its own phase (frames into the period at map entry). The frames are stored once; the readout says
 what the tileset's targets save. The preview shows every target's tiles together, animating at the GBA's frame rate
-(an imported Emerald flower field: one animation, many targets at the offsets Emerald shows them at). Changes go
+(an imported flower field: one animation, many targets at the offsets the original game shows them at). Changes go
 through the Tileset panel's edit (one undo step; the engine's map compiler checks offsets, fits and overlaps).
 """
 from __future__ import annotations
@@ -15,7 +15,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import mapview, sprites, tilesets
 from ..qtimage import to_qimage
-from ..widgets import PixelView, button
+from ..widgets import PixelView, button, set_enabled
 
 if TYPE_CHECKING:
    from ...core.document import Document
@@ -126,7 +126,7 @@ class TargetsBox(QtWidgets.QWidget):
          items = tilesets.targets(an) if an is not None else []
          self.use.setChecked(bool(items))
          self.use.setEnabled(an is not None)
-         self.table.setEnabled(bool(items))
+         set_enabled(self.table, bool(items))   # read-only, still scrolling
          self.table.setRowCount(len(items))
          ref = tilesets.target_ref_key(doc) if doc is not None else tilesets.TARGET_REF_KEYS[0]
          for k, tg in enumerate(items):

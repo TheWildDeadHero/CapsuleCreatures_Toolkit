@@ -23,7 +23,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from ...core import engine, screen_graphics as sg
 from ..panel import EditorPanel, PanelHost
 from ..qtimage import to_qimage
-from ..widgets import HALF, PixelView, button
+from ..widgets import HALF, PixelView, button, set_enabled
 from .content.json_edit import JsonEdit
 
 if TYPE_CHECKING:
@@ -426,7 +426,7 @@ class ScreenGraphicsPanel(EditorPanel):
       @return None
       """
       a = self.asset()
-      self.forms.setEnabled(a is not None)
+      set_enabled(self.forms, a is not None)   # greyed, read-only; its tables and text still scroll
       if a is None:
          self.error.setText("")
          self.view.set_image(None)
@@ -461,8 +461,9 @@ class ScreenGraphicsPanel(EditorPanel):
       self.tiles_source.setText(f"data file {a['data']}" if data else "shapes drawn on a canvas")
       self.bpp.setCurrentIndex(self.bpp.findData(a.get("bpp", sg.BPP4)))
       self.columns.setValue(int(a.get("columns", 0)))
-      for wid in (self.canvas_w, self.canvas_h, self.fill, self.use_block, self.block_w, self.block_h, self.shapes):
+      for wid in (self.canvas_w, self.canvas_h, self.fill, self.use_block, self.block_w, self.block_h):
          wid.setEnabled(not data)
+      self.shapes.set_editable(not data)   # greyed out, but its text still scrolls
       self.canvas_w.setValue(int(a.get("width", sg.TILE)))
       self.canvas_h.setValue(int(a.get("height", sg.TILE)))
       self.fill.setValue(int(a.get("fill", 0)))

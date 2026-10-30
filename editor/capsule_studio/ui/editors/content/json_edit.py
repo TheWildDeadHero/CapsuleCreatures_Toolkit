@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from PySide6 import QtGui, QtWidgets
 
-from ...widgets import button
+from ...widgets import button, lock_view
 
 if TYPE_CHECKING:
    from ..battle_common import JsonValue
@@ -62,6 +62,16 @@ class JsonEdit(QtWidgets.QWidget):
       self.text.setReadOnly(note is not None)
       self.apply_button.setEnabled(note is None)
       self.status.setText(note or "")
+
+   def set_editable(self, on: bool) -> None:
+      """!Greys the editor out (the value is not used), or brings it back. Not setEnabled(False): the text keeps
+      its scroll bar, so a long value can still be read.
+      @param on  True to edit
+      @return None
+      """
+      lock_view(self.text, not on)
+      self.apply_button.setEnabled(on and self._read_only_note is None)
+      self.status.setEnabled(on)
 
    def set_value(self, value: JsonValue) -> None:
       """!Shows a value (replacing unapplied typing).

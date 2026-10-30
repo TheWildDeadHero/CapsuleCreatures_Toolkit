@@ -1,10 +1,18 @@
 # CapsuleCreatures Studio
 
-The development home for CapsuleCreatures projects: machine setup, and the
-asset tools and editor as they're built. The runtime engine
+The development home for CapsuleCreatures projects: the Studio and its
+editors, the `capsule-studio` command line, the machine installers and the
+toolkit's Python environment. The runtime engine
 (`CapsuleCreatures_Engine`) stays its own repository; both are submodules of
-the `CapsuleCreatures` umbrella repository (`toolkit/` and `engine/`, D-37),
+the `CapsuleCreatures` umbrella repository (`toolkit/` and `engine/`),
 whose root launchers call into this toolkit.
+
+- New here? Start with the umbrella's
+  [getting-started guide](https://github.com/TheWildDeadHero/CapsuleCreatures/blob/main/docs/GETTING_STARTED.md).
+- The <a href="docs/USER_GUIDE.md">user guide</a> explains the Studio's pages, the
+  editors, the environment and extensions; [`editor/README.md`](editor/README.md)
+  is the full reference.
+- Changes per release: <a href="CHANGELOG.md">CHANGELOG.md</a>.
 
 ## Layout
 
@@ -13,6 +21,8 @@ install/            sets up a machine to build and run projects for GBA and desk
   install.sh        Linux (Arch-, Debian-, Fedora-based), macOS, Haiku (desktop only)
   install.ps1       Windows 10/11
   SUPPORT.md        what each OS gets, how far it's tested, and what isn't supported
+packaging/          the prebuilt studio downloads (one-folder bundles; see packaging/README.md)
+docs/               the user guide, the code map and the tileset builder notes
 editor/             the CapsuleCreatures editor (Python; see editor/README.md)
   capsule_studio/   core (no UI), cli (capsule-studio command), ui (PySide6 panels),
                     plugins (extension host), extensions (the studio's own extensions)
@@ -36,7 +46,7 @@ capsule-studio      the command-line tools (capsule-studio.cmd on Windows)
 Doxyfile            documentation rule for the Python sources (warnings are errors)
 ```
 
-Planned (design change to D-1, see the project's design spec):
+Planned:
 
 - `tools/`: asset compilers (fonts, input maps, then maps, tilesets, and so on),
   moved out of the engine. Until then the editor imports the engine's own
@@ -167,23 +177,25 @@ safely and never upgrade the rest of your system. Details per OS are in
 ## Working copies
 
 This repository is the `toolkit/` submodule of the `CapsuleCreatures`
-umbrella repository (see the umbrella's `docs/WORKSPACE.md`, D-37). The
-umbrella is checked out twice, side by side in the workspace folder, and the
-editor finds the engine as its sibling `../engine` (or through
-`CAPSULE_ENGINE`; see `editor/README.md`):
+umbrella repository (the umbrella's `docs/WORKSPACE.md` describes the
+contributor layout). The editor finds the engine as its sibling
+`../engine` (or through `CAPSULE_ENGINE`; see `editor/README.md`).
 
-- `CapsuleCreatures-work/toolkit/` is the editable copy. Changes are made and
-  pushed from here, after every change has been reviewed by a human before it
-  is committed.
-- `CapsuleCreatures/toolkit/` is a read-only reference checkout. It is updated
-  only by hand (`git pull`, `git submodule update`) by the developer, after
-  review.
+The toolkit environment (`.venv/`) is created in this folder, so a checkout's
+`toolkit/.venv` is the one environment of that checkout.
 
-The toolkit environment (`.venv/`) is created in this folder, so the umbrella's
-`CapsuleCreatures-work/toolkit/.venv` is the one environment of the work
-copy.
+## Tests
 
-## Credits
+`editor/README.md` ("Tests") says how to run the editor's test suite. In one
+process it needs several GB of memory; `.github/scripts/run_unit_suites.py`
+runs one test file per process, as CI does.
+
+## Licence and credits
+
+The toolkit is licensed under the Mozilla Public License 2.0 (`LICENSE`).
+`THIRD_PARTY_NOTICES.md` lists the third-party parts the studio and its
+prebuilt downloads use (Qt for Python / Qt 6 under the LGPL-3.0, Python, the
+bundler) and the tools the installers set up.
 
 The GBA toolchain is devkitPro's (https://devkitpro.org). The installers follow
 devkitPro's published instructions and download their official installers.

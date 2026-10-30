@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""!The studio core on an imported Emerald world (I2: 539 maps, 76 fixed tilesets, "all" dictionaries; I3 content
-sets add warps, objects and sprites). Private content, never part of this repository: the tests run when
-CAPSULE_CONTENT_EMERALD names an imported content folder (assets-imported/emerald, holding world/world.json) and are
+"""!The studio core on a large imported world (I2: hundreds of maps, dozens of fixed tilesets, "all" dictionaries; I3
+content sets add warps, objects and sprites). Private content, never part of this repository: the tests run when
+CAPSULE_IMPORTED_CONTENT names an imported content folder (assets-imported/<game>, holding world/world.json) and are
 skipped otherwise. The round trip works on a temporary copy, removed afterwards.
 
 Checks: every map compiles one by one against its tilesets (what the map editor shows) without errors, every
@@ -26,14 +26,14 @@ from capsule_studio.core.document import Document  # noqa: E402
 from capsule_studio.core.world import Project  # noqa: E402
 
 ## The environment variable naming the content folder.
-CONTENT_ENV = "CAPSULE_CONTENT_EMERALD"
+CONTENT_ENV = "CAPSULE_IMPORTED_CONTENT"
 ## Seconds the one-by-one compile of every map may take at most (a slow machine's margin over the ten it takes).
 MAPS_SECONDS = 120
 
 
 def content_world() -> Path | None:
    """!The content set's world.json.
-   @return Path, or None when CAPSULE_CONTENT_EMERALD names none
+   @return Path, or None when CAPSULE_IMPORTED_CONTENT names none
    """
    folder = os.environ.get(CONTENT_ENV)
    if not folder:
@@ -43,7 +43,7 @@ def content_world() -> Path | None:
 
 
 @unittest.skipIf(content_world() is None, f"{CONTENT_ENV} names no imported content (private; skipped)")
-class EmeraldContentTests(unittest.TestCase):
+class ImportedWorldTests(unittest.TestCase):
    """!The core on the imported world."""
 
    def test_every_map(self) -> None:

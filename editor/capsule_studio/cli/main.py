@@ -38,7 +38,9 @@ COMMAND_MODULES = ["assets_cmds", "sprite_cmds", "text_cmds", "world_cmds", "fie
                    # [S6b] engine C13b: the world's cell interaction rules
                    "interaction_cmds",
                    # [S7] engine M4 (D-34): the audio manifest (songs, instruments, samples, MIDI, sounds)
-                   "audio_cmds"]
+                   "audio_cmds",
+                   # D-40 RP: the engine's sample projects (list, copy as a game of your own, check)
+                   "sample_cmds"]
 ## Modules (relative to this package) that add actions to the `battle FILE` group (each has a
 ## register_actions(subparsers) function; battle_cmds calls them).
 BATTLE_ACTION_MODULES = ["structure_cmds", "tier_stage_cmds", "condition_cmds", "turn_progress_cmds", "logic_cmds",
@@ -96,7 +98,7 @@ def build_parser(reg: Registry | None = None) -> argparse.ArgumentParser:
    p = argparse.ArgumentParser(prog="capsule-studio", description="CapsuleCreatures Studio command line.")
    p.add_argument("--version", action="version", version=f"capsule-studio {__version__}")
    p.add_argument("--engine", metavar="DIR", help=f"engine checkout (default: ${engine.ENV_VAR}, the umbrella's "
-                                                  "../engine, ../CapsuleCreatures_Engine-work, "
+                                                  "../engine (or the download's own copy), "
                                                   "../CapsuleCreatures_Engine)")
    p.add_argument("--project", metavar="FILE", help="a game's reference/project.json: also load the plugins it "
                                                     "lists (their commands, and their validators in world validate)")

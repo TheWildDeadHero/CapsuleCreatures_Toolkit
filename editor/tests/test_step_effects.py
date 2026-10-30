@@ -7,7 +7,7 @@ script banks) and the `battle FILE step-effect ...` / `testsave step` commands. 
 
 Uses the map sandbox as one game (sample_data.make_field_game: sandbox_map's data with the Starter inside the game):
 the Starter's blight (every 4 steps, the survive rule, the message blight_survived) and bond (every 64) effects,
-Blight's `on steps` and the global bond_rule, the sandbox's scripts (the effects' implicit counters). The Gen-3 class
+Blight's `on steps` and the global bond_rule, the sandbox's scripts (the effects' implicit counters). The classic class
 runs on the reference repo's sample (skipped without it).
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ from capsule_studio.core import engine, inventory, logic  # noqa: E402
 from capsule_studio.core.battle import BattleProject  # noqa: E402
 from capsule_studio.core.document import DocumentError  # noqa: E402
 from capsule_studio.core.structure import encounter_rules, step_effects  # noqa: E402
-from sample_data import DATA, gen3_data, make_field_game, needs_gen3  # noqa: E402
+from sample_data import DATA, classic_data, make_field_game, needs_classic  # noqa: E402
 
 ## The Starter's step effects, in order (B2: the grove's check and the egg cycle after the F3 ones).
 NAMES = ["blight", "bond", "grove_check", "egg_cycle"]
@@ -253,15 +253,15 @@ class CliTests(StepGameCase):
       self.assertNotEqual(code, 0)
 
 
-@needs_gen3
-class Gen3StepTests(unittest.TestCase):
-   """!The reference repo's Gen-3 sample (read only)."""
+@needs_classic
+class ClassicStepTests(unittest.TestCase):
+   """!The reference repo's classic sample (read only)."""
 
-   def test_gen3(self) -> None:
+   def test_classic(self) -> None:
       """!field_poison every 4 with the faint rule and its message; friendship_walk every 128; their logic.
       @return None
       """
-      data = gen3_data()
+      data = classic_data()
       assert data is not None
       p = BattleProject.open(data / "battle.json")
       rows = {r["name"]: r for r in step_effects.effect_rows(p.structure)}

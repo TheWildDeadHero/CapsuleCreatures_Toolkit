@@ -22,7 +22,7 @@ from ...core import doors, engine, sprites
 from ...core.world import Project
 from ..panel import EditorPanel, PanelHost
 from ..qtimage import to_qimage
-from ..widgets import PixelView, button
+from ..widgets import PixelView, button, set_enabled
 
 if TYPE_CHECKING:
    from ...core.document import Document
@@ -414,7 +414,7 @@ class DoorPanel(EditorPanel):
       for i in range(self.form.rowCount()):
          item = self.form.itemAt(i, QtWidgets.QFormLayout.ItemRole.FieldRole)
          if item is not None and item.widget() is not None:
-            item.widget().setEnabled(a is not None)
+            set_enabled(item.widget(), a is not None)   # the step tables keep their scroll bars
       if a is None:
          self.error.setText("")
          self.sound_check.setText("")
@@ -498,7 +498,7 @@ class DoorPanel(EditorPanel):
             for i, (frame, ticks) in enumerate(st):
                table.setItem(i, 0, QtWidgets.QTableWidgetItem(str(frame)))
                table.setItem(i, 1, QtWidgets.QTableWidgetItem(str(ticks)))
-            table.setEnabled(a is not None and not (which == "close" and doors.is_reverse(a)))
+            set_enabled(table, a is not None and not (which == "close" and doors.is_reverse(a)))
       finally:
          self._filling = False
 

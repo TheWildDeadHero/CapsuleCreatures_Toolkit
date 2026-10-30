@@ -17,6 +17,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ...core import project
 from ..panel import EditorPanel
+from ..widgets import set_enabled
 
 if TYPE_CHECKING:
    from ..panel import PanelHost
@@ -158,7 +159,7 @@ class BuildSettingsPanel(EditorPanel):
       @return None
       """
       doc = self.doc
-      self.setEnabled(doc is not None)
+      set_enabled(self, doc is not None)
       if doc is None:
          return
       self._loading = True
