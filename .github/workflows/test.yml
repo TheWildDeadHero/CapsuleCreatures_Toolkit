@@ -61,10 +61,24 @@ jobs:
          run:
             shell: bash
       steps:
+         # The umbrella branch of the same name when it exists (a release-candidate or feature branch pins the
+         # matching engine there), else its default branch.
+         - name: Umbrella branch
+           id: umbrella
+           env:
+              BRANCH: ${{ github.head_ref || github.ref_name }}
+           run: |
+              ref=""
+              if git ls-remote --exit-code --heads "https://github.com/$UMBRELLA_REPO" "$BRANCH" >/dev/null; then
+                 ref="$BRANCH"
+              fi
+              echo "umbrella: ${ref:-default branch}"
+              echo "ref=$ref" >> "$GITHUB_OUTPUT"
          - name: Check out the umbrella
            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
            with:
               repository: ${{ env.UMBRELLA_REPO }}
+              ref: ${{ steps.umbrella.outputs.ref }}
               path: umbrella
               submodules: false
          - name: Engine commit
