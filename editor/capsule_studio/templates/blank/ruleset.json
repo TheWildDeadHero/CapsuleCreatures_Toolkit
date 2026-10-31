@@ -1,0 +1,64 @@
+{
+  "schema": "capsule.ruleset/2",
+  "editor": {
+    "notes": "The Blank template's ruleset: stats are the base values, damage is power x offense / defense, every hit lands, no critical hits, every escape succeeds."
+  },
+  "constants": {"PERCENT": 100, "ESCAPE_ALWAYS": 256},
+  "inputs": {
+    "base": [1, 255],
+    "gene": [0, 31],
+    "training": [0, 255],
+    "awaken": [0, 255],
+    "level": [1, 100],
+    "trait_pct": [100, 100],
+    "power": [1, 1023],
+    "attack": [1, 999],
+    "defense": [1, 999],
+    "yield": [0, 65535],
+    "victor_level": [1, 100],
+    "participants": [1, 24],
+    "foe_rank": [0, 1],
+    "outsider": [0, 1],
+    "speed": [1, 999],
+    "foe_speed": [1, 999],
+    "attempts": [0, 255],
+    "reward_base": [0, 65535]
+  },
+  "stat_formulas": {
+    "stat_pool": {"expr": "base", "range": [1, 255]},
+    "stat_other": {"expr": "base * trait_pct / PERCENT", "range": [1, 255]}
+  },
+  "formulas": {
+    "damage_base": {
+      "args": ["level", "power", "attack", "defense"],
+      "expr": "max(1, power * attack / defense)",
+      "range": [1, 65535]
+    },
+    "exp_gain": {"expr": "max(1, yield / participants)", "range": [1, 65535]},
+    "reward": {"expr": "reward_base", "range": [0, 65535]},
+    "escape_odds": {"expr": "ESCAPE_ALWAYS", "range": [0, 65535]}
+  },
+  "points": {},
+  "pipelines": {
+    "damage": [
+      {"let": "d", "expr": "damage_base(level, move_power, offense_raw, defense_raw)", "range": [0, 65535]},
+      {"let": "d", "expr": "type_scale(d)", "range": [0, 65535]},
+      {"let": "damage", "expr": "max(d, 1)", "range": [1, 65535]}
+    ],
+    "self_hit": [
+      {
+        "let": "damage",
+        "expr": "damage_base(level, move_power, offense_raw, defense_raw)",
+        "range": [1, 65535]
+      }
+    ],
+    "speed": [{"let": "speed", "expr": "speed_raw", "range": [1, "STAT_CAP"]}],
+    "accuracy": [
+      {"let": "chance", "expr": "move_accuracy"},
+      {"let": "out_of", "expr": "PERCENT"},
+      {"roll": "r", "span": "if(chance > 0 && chance < out_of, out_of, 0)"},
+      {"let": "hit", "expr": "chance >= out_of || r < chance"}
+    ],
+    "crit": [{"let": "chance", "expr": "0"}, {"let": "out_of", "expr": "1"}, {"let": "crit", "expr": "0"}]
+  }
+}

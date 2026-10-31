@@ -1,0 +1,144 @@
+/// @file
+/// @GAME_TITLE@: the game's first scene, made by the Studio's New game (D-40 RG).
+///
+/// The overworld, as small as it gets: the player stands on the world's start
+/// map (data/world.json, "start" names the map, cell and facing), walks with
+/// the D-pad and runs while B is held; the map's attribute layer blocks the
+/// wall ring. A text box names the game until A closes it.
+///
+/// What runs where:
+/// - the engine's overworld runner (capsule/overworld/overworld.h) moves the
+///   player, scrolls the camera, runs the map's events and draws the map;
+/// - the player's sprite is sprite:PLAYER in data/assets.json (simple
+///   shapes: replace it on the Assets page);
+/// - the text box is the engine's (capsule/text/text_layer.h), on BG0 above
+///   the map's layers.
+///
+/// Change the scene here, then build again (reference/project.json lists
+/// this file under "sources").
+#include "capsule/asset/asset.h"
+#include "capsule/field/field.h"
+#include "capsule/gfx/palette.h"
+#include "capsule/gfx/sprites.h"
+#include "capsule/hal/input.h"
+#include "capsule/hal/system.h"
+#include "capsule/input/input.h"
+#include "capsule/map/map.h"
+#include "capsule/overworld/overworld.h"
+#include "capsule/text/encode.h"
+#include "capsule/text/text_layer.h"
+
+#include <cstdint>
+
+namespace
+{
+
+using namespace capsule;
+namespace layer = text::layer;
+
+/// The player's sprite in the game's asset manifest.
+constexpr AssetKey kPlayerSprite = asset::key_v1("sprite:PLAYER");
+
+/// @name The welcome box
+/// A box across the bottom of the screen; the rows and the centre column are
+/// counted inside its frame.
+///@{
+/// Screen width in text cells (30 on the GBA).
+constexpr uint8_t kScreenCells = static_cast<uint8_t>(hal::video::kScreenWidth / hal::video::kTileSize);
+/// Screen height in text cells (20 on the GBA).
+constexpr uint8_t kScreenRows = static_cast<uint8_t>(hal::video::kScreenHeight / hal::video::kTileSize);
+constexpr uint8_t kFrameCells = 2;   ///< Cells the frame takes across (left and right) or down (top and bottom).
+constexpr uint8_t kHalf = 2;         ///< Halves a width (the centre column).
+constexpr uint8_t kBoxRows = 5;      ///< Box height, frame included: three rows of text.
+constexpr uint8_t kBoxLeft = 0;      ///< Box left edge: the screen's.
+constexpr uint8_t kBoxTop = static_cast<uint8_t>(kScreenRows - kBoxRows);   ///< Box top: the bottom rows.
+/// Centre column inside the frame, the anchor of centred text.
+constexpr uint8_t kBoxCentre = static_cast<uint8_t>((kScreenCells - kFrameCells) / kHalf);
+constexpr uint8_t kTitleRow = 0;     ///< Row of the game's name.
+constexpr uint8_t kHintRow = 2;      ///< Row of the controls, one blank row below.
+///@}
+
+/// The game's name (the Studio wrote it from the name given to New game).
+constexpr auto kTitle = text::encode("@GAME_TITLE@");
+/// The controls, under the name.
+constexpr auto kHint = text::encode("D-pad walk, B run, A close");
+
+/// Shows the player's sprite and lets the walker use it. A game without the
+/// sprite still walks, unseen.
+void load_player()
+{
+   const asset::Sprite* player = asset::sprite(kPlayerSprite);
+   if (player != nullptr)
+   {
+      gfx::sprites::load(field::kWalkerSlot, *player);
+      gfx::sprites::show(field::kWalkerSlot, true);
+      field::attach_sprite(field::kWalkerSlot, player);
+   }
+}
+
+/// Opens the welcome box with the game's name and the controls.
+void open_welcome()
+{
+   layer::open_box(kBoxLeft, kBoxTop, kScreenCells, kBoxRows);
+   layer::print(layer::kBoxTarget, kBoxCentre, kTitleRow, layer::Align::Center, false, kTitle.codes);
+   layer::print(layer::kBoxTarget, kBoxCentre, kHintRow, layer::Align::Center, false, kHint.codes);
+}
+
+/// The player's input for the overworld from this frame's actions.
+/// @param in  this frame's actions (input::update())
+/// @return the field's intent: one direction (down, up, left, right first), run, interact
+field::Intent intent_of(const input::InputState& in)
+{
+   field::Intent intent;
+   if (in.held & input::action_bit(input::ACTION_DOWN))
+   {
+      intent.direction = field::DIR_DOWN;
+   }
+   else if (in.held & input::action_bit(input::ACTION_UP))
+   {
+      intent.direction = field::DIR_UP;
+   }
+   else if (in.held & input::action_bit(input::ACTION_LEFT))
+   {
+      intent.direction = field::DIR_LEFT;
+   }
+   else if (in.held & input::action_bit(input::ACTION_RIGHT))
+   {
+      intent.direction = field::DIR_RIGHT;
+   }
+   intent.run = (in.held & input::action_bit(input::ACTION_BACK)) != 0;
+   intent.interact = (in.pressed & input::action_bit(input::ACTION_ACCEPT)) != 0;
+   return intent;
+}
+
+} // namespace
+
+/// Starts the player on the world's start map, then walks until the platform quits.
+/// @return 0
+int main()
+{
+   hal::system::init();
+   gfx::palette::reset();
+   gfx::sprites::reset();
+   load_player();
+
+   // The world's start (data/world.json "start"): the map, the cell and the facing.
+   const map::Start& start = map::kWorld.start;
+   overworld::start(start.map, start.x, start.y, start.facing);
+   // After the map is shown: entering a map resets BG0, which the box is drawn on.
+   open_welcome();
+
+   input::InputState in{};
+   while (hal::system::update())
+   {
+      input::update(in, hal::input::held(), input::kInputMap);   // buttons to actions (the game's input map)
+      if (layer::box_open() && (in.pressed & input::action_bit(input::ACTION_ACCEPT)))
+      {
+         layer::close_box();
+      }
+      overworld::update(intent_of(in));   // walk, run the map's events, type text
+      gfx::sprites::update();
+      map::update();
+   }
+   return 0;
+}

@@ -1,0 +1,747 @@
+{
+  "schema": "capsule.map/2",
+  "id": "Anotha One",
+  "tilesets": ["t1"],
+  "layers": [
+    {"bg": 3, "priority": 3, "content": "tilemap", "purpose": "terrain"},
+    {"bg": 2, "priority": 2, "content": "tilemap", "purpose": "terrain"},
+    {"bg": 1, "priority": 1, "content": "tilemap", "purpose": "canopy"}
+  ],
+  "metatiles": [
+    "t1/metatile",
+    "t1/metatile_4",
+    "t1/metatile_5",
+    "t1/metatile_6",
+    "t1/metatile_3",
+    "t1/metatile_2",
+    "t1/metatile_8",
+    "t1/metatile_9",
+    "t1/metatile_11",
+    "t1/metatile_10",
+    "t1/metatile_12",
+    "t1/metatile_13"
+  ],
+  "chunks": [
+    {
+      "at": [-1, -1],
+      "cells": [
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0]
+      ],
+      "layers": [
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0],
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [0, -1],
+      "cells": [
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536]
+      ],
+      "layers": [
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [6, 7, 6, 7, 6, 7, 6, 7],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [6, 7, 6, 7, 6, 7, 6, 7],
+          [0, 0, 0, 0, 0, 0, 0, 0]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [10, 11, 10, 11, 10, 11, 10, 11],
+          [9, 8, 9, 8, 9, 8, 9, 8],
+          [10, 11, 10, 11, 10, 11, 10, 11],
+          [9, 8, 9, 8, 9, 8, 9, 8],
+          [null, null, null, null, null, null, null, null],
+          [2, 2, 2, 2, 2, 2, 2, 2]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [3, 3, 3, 3, 3, 3, 3, 3],
+          [3, 3, 3, 3, 3, 3, 3, 3]
+        ]
+      ]
+    },
+    {
+      "at": [1, -1],
+      "cells": [
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536]
+      ],
+      "layers": [
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [6, 7, 6, 7, 6, 7, 6, 7],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [6, 7, 6, 7, 6, 7, 6, 7],
+          [0, 0, 0, 0, 0, 0, 0, 0]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [10, 11, 10, 11, 10, 11, 10, 11],
+          [9, 8, 9, 8, 9, 8, 9, 8],
+          [10, 11, 10, 11, 10, 11, 10, 11],
+          [9, 8, 9, 8, 9, 8, 9, 8],
+          [null, null, null, null, null, null, null, null],
+          [2, 2, 2, 2, 2, 2, 2, 2]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [3, 3, 3, 3, 3, 3, 3, 3],
+          [3, 3, 3, 3, 3, 3, 3, 3]
+        ]
+      ]
+    },
+    {
+      "at": [2, -1],
+      "cells": [
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null]
+      ],
+      "layers": [
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null],
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [-1, 0],
+      "cells": [
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0]
+      ],
+      "layers": [
+        [
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0],
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0],
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0],
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0]
+        ],
+        [
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [0, 0],
+      "cells": [
+        [65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536],
+        [65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536],
+        [65536, 65536, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 0, 0, 65536, 0, 0, 0],
+        [65536, 65536, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 0, 0, 0, 0, 0, 0]
+      ],
+      "layers": [
+        [
+          [1, 1, 1, 1, 1, 1, 1, 1],
+          [1, 1, 1, 1, 1, 1, 1, 1],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0]
+        ],
+        [
+          [2, 2, 2, 2, 2, 2, 2, 2],
+          [2, 2, null, null, null, null, null, null],
+          [2, 2, null, null, null, null, null, null],
+          [2, 2, null, null, null, null, null, null],
+          [2, 2, null, null, 4, null, null, null],
+          [2, 2, null, null, null, null, null, null],
+          [2, 2, null, null, null, null, null, 5],
+          [2, 2, null, null, null, null, null, 5]
+        ],
+        [
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [1, 0],
+      "cells": [
+        [65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536],
+        [65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536],
+        [0, 0, 0, 0, 0, 0, 65536, 65536],
+        [0, 0, 0, 0, 0, 0, 65536, 65536],
+        [0, 0, 0, 0, 0, 0, 65536, 65536],
+        [0, 0, 0, 0, 0, 0, 65536, 65536],
+        [0, 0, 0, 0, 0, 0, 65536, 65536],
+        [0, 0, 0, 0, 0, 0, 65536, 65536]
+      ],
+      "layers": [
+        [
+          [1, 1, 1, 1, 1, 1, 1, 1],
+          [1, 1, 1, 1, 1, 1, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1]
+        ],
+        [
+          [2, 2, 2, 2, 2, 2, 2, 2],
+          [null, null, null, null, null, null, 2, 2],
+          [null, null, 5, 5, 5, 5, 2, 2],
+          [null, null, 5, 5, 5, 5, 2, 2],
+          [null, null, 5, 5, 5, 5, 2, 2],
+          [null, null, null, null, null, null, 2, 2],
+          [5, 5, 5, null, null, null, 2, 2],
+          [5, 5, 5, null, null, null, 2, 2]
+        ],
+        [
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3]
+        ]
+      ]
+    },
+    {
+      "at": [2, 0],
+      "cells": [
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null]
+      ],
+      "layers": [
+        [
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null],
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null],
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null],
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null]
+        ],
+        [
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [-1, 1],
+      "cells": [
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0]
+      ],
+      "layers": [
+        [
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0],
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0],
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0],
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0]
+        ],
+        [
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [0, 1],
+      "cells": [
+        [65536, 65536, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 0, 0, 0, 0, 0, 0],
+        [65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536],
+        [65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536],
+        [65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536]
+      ],
+      "layers": [
+        [
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 0, 0, 0, 0, 0, 0],
+          [1, 1, 1, 1, 1, 1, 1, 1],
+          [1, 1, 1, 1, 1, 1, 1, 1]
+        ],
+        [
+          [2, 2, null, null, null, null, null, 5],
+          [2, 2, null, null, null, null, null, 5],
+          [2, 2, null, null, null, null, null, null],
+          [2, 2, null, null, null, 5, 5, 5],
+          [2, 2, null, null, null, 5, 5, 5],
+          [2, 2, 2, 2, 2, 2, 2, 2],
+          [2, 2, 2, 2, 2, 2, 2, 2],
+          [2, 2, 2, 2, 2, 2, 2, 2]
+        ],
+        [
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, null, null, null, null, null, null],
+          [3, 3, 3, 3, 3, 3, 3, 3],
+          [3, 3, 3, 3, 3, 3, 3, 3],
+          [3, 3, 3, 3, 3, 3, 3, 3],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [1, 1],
+      "cells": [
+        [0, 0, 0, 0, 0, 0, 65536, 65536],
+        [0, 0, 0, 0, 0, 0, 65536, 65536],
+        [0, 0, 0, 0, 0, 0, 65536, 65536],
+        [0, 0, 0, 65536, 0, 0, 65536, 65536],
+        [0, 0, 0, 0, 0, 0, 65536, 65536],
+        [0, 0, 65536, 65536, 65536, 65536, 65536, 65536],
+        [0, 0, 65536, 65536, 65536, 65536, 65536, 65536],
+        [0, 0, 65536, 65536, 65536, 65536, 65536, 65536]
+      ],
+      "layers": [
+        [
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 0, 0, 0, 0, 1, 1],
+          [0, 0, 1, 1, 1, 1, 1, 1],
+          [0, 0, 1, 1, 1, 1, 1, 1]
+        ],
+        [
+          [5, 5, 5, null, null, null, 2, 2],
+          [5, 5, 5, null, null, null, 2, 2],
+          [null, null, null, null, null, null, 2, 2],
+          [null, null, null, 4, null, null, 2, 2],
+          [null, null, null, null, null, null, 2, 2],
+          [null, null, 2, 2, 2, 2, 2, 2],
+          [null, null, 2, 2, 2, 2, 2, 2],
+          [null, null, 2, 2, 2, 2, 2, 2]
+        ],
+        [
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, null, null, null, null, 3, 3],
+          [null, null, 3, 3, 3, 3, 3, 3],
+          [null, null, 3, 3, 3, 3, 3, 3],
+          [null, null, 3, 3, 3, 3, 3, 3],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [2, 1],
+      "cells": [
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null]
+      ],
+      "layers": [
+        [
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null],
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null],
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null],
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null]
+        ],
+        [
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [-1, 2],
+      "cells": [
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, 0, 0],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null]
+      ],
+      "layers": [
+        [
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, 0, 0],
+          [null, null, null, null, null, null, 6, 7],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ],
+        [
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, 9, 8],
+          [null, null, null, null, null, null, 10, 11],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [0, 2],
+      "cells": [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null]
+      ],
+      "layers": [
+        [
+          [1, 1, 1, 1, 1, 1, 1, 1],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [6, 7, 6, 7, 6, 7, 6, 7],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ],
+        [
+          [10, 11, 10, 11, 10, 11, 10, 11],
+          [9, 8, 9, 8, 9, 8, 9, 8],
+          [10, 11, 10, 11, 10, 11, 10, 11],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [1, 2],
+      "cells": [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null]
+      ],
+      "layers": [
+        [
+          [0, 0, 1, 1, 1, 1, 1, 1],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 6, 7, 6, 7, 6, 7],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ],
+        [
+          [null, null, 10, 11, 10, 11, 10, 11],
+          [null, null, 9, 8, 9, 8, 9, 8],
+          [null, null, 10, 11, 10, 11, 10, 11],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    },
+    {
+      "at": [2, 2],
+      "cells": [
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [0, 0, 0, 0, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null]
+      ],
+      "layers": [
+        [
+          [6, 7, 6, 7, null, null, null, null],
+          [0, 0, 0, 0, null, null, null, null],
+          [6, 7, 6, 7, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ],
+        [
+          [10, 11, 10, 11, null, null, null, null],
+          [9, 8, 9, 8, null, null, null, null],
+          [10, 11, 10, 11, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ],
+        [
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null],
+          [null, null, null, null, null, null, null, null]
+        ]
+      ]
+    }
+  ],
+  "border": {"size": [2, 2], "layers": [[null, null, null, null], [null, null, null, null], [null, null, null, null]]}
+}

@@ -1,0 +1,20 @@
+# Every text file is LF in every checkout, Windows included (autocrlf would give test data CRLF there); binary
+# files are detected and left alone. The rules below override this one.
+* text=auto eol=lf
+# Windows launchers need CRLF; the shell launchers and scripts need LF.
+*.cmd           text eol=crlf
+*.sh            text eol=lf
+scene-editor    text eol=lf
+map-editor      text eol=lf
+battle-editor   text eol=lf
+battle-structure text eol=lf
+battle-logic    text eol=lf
+encounter-editor text eol=lf
+event-editor    text eol=lf
+object-editor   text eol=lf
+location-editor text eol=lf
+script-editor   text eol=lf
+project-settings text eol=lf
+studio          text eol=lf
+capsule-studio  text eol=lf
+*.py            text eol=lf

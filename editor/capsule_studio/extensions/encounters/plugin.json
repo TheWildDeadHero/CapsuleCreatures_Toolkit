@@ -1,0 +1,13 @@
+{
+  "schema": "capsule.plugin/1",
+  "id": "studio.encounters",
+  "title": "Encounter editor",
+  "version": "2026.10.18.1056",
+  "api": 1,
+  "requires": {"capsule_studio": ">=2026.10.17.0000"},
+  "extension": {"module": "encounter_editor.extension"},
+  "cli": "encounters",
+  "editor": {
+    "notes": "The studio's encounter editor (D-12): the Encounters panel (the encounter-editor app, and a tab of the Studio's World page), the Encounter area brush, the Encounter tables overlay and hover text in the map's Map tab, the encounters command group. A built-in extension, loaded through the same plugin host as project plugins (capsule_studio.plugins)."
+  }
+}
