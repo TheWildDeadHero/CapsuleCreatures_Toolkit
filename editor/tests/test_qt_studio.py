@@ -126,7 +126,7 @@ class QtStudioTests(unittest.TestCase):
       self.assertEqual(w.windows["assets"].document.path, files["assets"])
       self.assertEqual(w.windows["scripts"].project.path, files["scripts"])
       self.assertEqual(w.windows["project"].document.path, self.manifest.resolve())
-      self.assertEqual(w.nav.item(0).toolTip(), str(Path("data") / "world.json"))
+      self.assertEqual(w.nav.item(0).toolTip(), "data/world.json")   # project paths show with "/" everywhere
       # Only the page in front shows: its menus join the Studio menu; only it has shortcuts.
       visible = [i for i in range(w.stack.count()) if w.stack.widget(i).isVisible()]
       self.assertEqual(visible, [0])
