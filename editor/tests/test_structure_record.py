@@ -367,7 +367,7 @@ class GameUseTests(BattleTestCase):
       game = self.dir / "game"
       data = game / "data"
       for f in BattleProject.open(self.dir / "battle.json").files():
-         out = data / f.relative_to(self.dir)
+         out = data / f.relative_to(self.dir.resolve())   # files() are resolved
          out.parent.mkdir(parents=True, exist_ok=True)
          out.write_bytes(f.read_bytes())
       project = write_project(game, targets)

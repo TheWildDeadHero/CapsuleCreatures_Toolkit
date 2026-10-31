@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ..core import engine, gba_memory, screen_graphics as sg, screen_plans as sp
+from ..core import engine, gba_memory, paths, screen_graphics as sg, screen_plans as sp
 from ..core.document import Document
 from .common import open_doc, parse_size
 from .main import CommandError
@@ -444,7 +444,7 @@ def cmd_plan_list(args: argparse.Namespace) -> None:
    """
    doc = open_doc(args.manifest)
    files = sp.plan_files(doc)
-   print("\n".join(str(p.relative_to(doc.base_dir)) for p in files) if files else "no screen plans")
+   print("\n".join(paths.shown(p, doc.base_dir) for p in files) if files else "no screen plans")
 
 
 def cmd_plan_new(args: argparse.Namespace) -> None:

@@ -41,6 +41,12 @@ License 2.0.
   without a display.
 - **Extensions**: pure-Python plugins that add panels, map tools, overlays,
   commands, validators and battle templates.
+- **Paths the same on every system**: manifests and the command line write
+  paths with `/` on Windows too; a manifest path is refused as absolute when
+  any system would read it so (`/x`, `C:\x`, `\\server\share`); a folder
+  reached through a link or a Windows short name gives the same relative
+  paths as its real place; a file on another drive than the manifest
+  (Windows) is refused with a message.
 - **The toolkit environment**: one pinned Python environment
   (`toolkit/.venv`), created on first use, with offline installs from wheel
   files.

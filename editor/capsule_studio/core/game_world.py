@@ -21,12 +21,11 @@ text. Nothing here depends on a user interface; the Studio's "Add world to game.
 """
 from __future__ import annotations
 
-import os
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Literal, NamedTuple
 
-from . import encounters, engine, importer, project, starter_world
+from . import encounters, engine, importer, paths, project, starter_world
 from .document import Document, DocumentError
 from .world import WORLD_SCHEMA, Project
 
@@ -170,7 +169,7 @@ def follow_battle(doc: Document, world: Project) -> str | None:
    current = encounters.battle_path(world)
    if current is not None and current.is_relative_to(game):
       return None
-   rel = Path(os.path.relpath(battle, world.base)).as_posix()
+   rel = paths.relative(battle, world.base)
    with world.world.edit("Battle data"):
       encounters.set_battle(world.world, rel)
    return f"battle data: {rel} (the game's)"

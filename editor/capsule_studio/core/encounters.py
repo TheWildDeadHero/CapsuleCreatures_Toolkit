@@ -23,13 +23,12 @@ document. Nothing here depends on a user interface.
 from __future__ import annotations
 
 import copy
-import os
 import types
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-from . import engine, maps
+from . import engine, maps, paths
 from .document import Document, DocumentError
 
 if TYPE_CHECKING:
@@ -255,12 +254,13 @@ def species(project: Project) -> tuple[list[str], int]:
 # -- files -------------------------------------------------------------------------------
 
 def _rel(from_dir: str | Path, path: str | Path) -> str:
-   """!A path relative to a folder, '/'-separated.
+   """!A path relative to a folder, '/'-separated (both resolved first).
    @param from_dir  folder
    @param path      target
    @return text
+   @throws DocumentError when the target is on another drive (Windows)
    """
-   return Path(os.path.relpath(path, from_dir)).as_posix()
+   return paths.relative(path, from_dir)
 
 
 def _open(project: Project, path: Path) -> Document:

@@ -46,8 +46,9 @@ class QtS6Tests(unittest.TestCase):
       """!Copies the screen sandbox; settings in the copy.
       @return None
       """
-      ## Temporary root.
-      self.root = copy_engine_apps(Path(tempfile.mkdtemp(prefix="capsule_qt_s6_")), ["sandbox_screen"],
+      ## Temporary root (resolved, as the editor resolves the files it opens: macOS /var is /private/var, Windows
+      # has short names).
+      self.root = copy_engine_apps(Path(tempfile.mkdtemp(prefix="capsule_qt_s6_")).resolve(), ["sandbox_screen"],
                                    ("data", "reference"))
       ## The copy's data folder.
       self.data = self.root / "sandbox_screen" / "data"

@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 from PySide6 import QtCore, QtWidgets
 
 from capsule_studio.core import encounters as enc
-from capsule_studio.core import engine
+from capsule_studio.core import engine, paths
 from capsule_studio.core.document import DocumentError
 from capsule_studio.ui.panel import EditorPanel
 from capsule_studio.ui.widgets import button
@@ -678,9 +678,8 @@ class EncounterPanel(EditorPanel):
                                                       "Battle data (*.json);;All files (*)")
       if not path:
          return
-      import os
-      rel = os.path.relpath(path, p.base)
-      self._edit("Battle data", lambda: enc.set_battle(p.world, rel), p.world)
+      # Resolved on both sides; another drive (Windows) is refused with a message by run_edit.
+      self._edit("Battle data", lambda: enc.set_battle(p.world, paths.relative(path, p.base)), p.world)
 
    def _ask(self, title: str, text: str, value: str = "") -> str | None:
       """!Asks for a name.

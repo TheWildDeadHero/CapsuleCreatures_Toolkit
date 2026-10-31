@@ -35,7 +35,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from . import engine
+from . import engine, paths
 from .document import Document, DocumentError
 
 if TYPE_CHECKING:
@@ -426,10 +426,7 @@ def set_scripts(project: Project, path: str | Path | None) -> None:
       data.pop("scripts", None)
       return
    p = Path(path)
-   if p.is_absolute():
-      import os
-      p = Path(os.path.relpath(p.resolve(), project.base.resolve()))
-   data["scripts"] = p.as_posix()
+   data["scripts"] = paths.relative(p, project.base) if paths.is_absolute_text(str(p)) else p.as_posix()
 
 
 def names(project: Project) -> dict[str, Any]:

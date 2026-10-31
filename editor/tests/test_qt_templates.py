@@ -46,7 +46,8 @@ class QtTemplateTests(unittest.TestCase):
       """!Makes the folder.
       @return None
       """
-      self.root = Path(tempfile.mkdtemp(prefix="capsule_qt_templates_"))
+      # Resolved, as the editor resolves the files it opens (macOS /var is /private/var; Windows short names).
+      self.root = Path(tempfile.mkdtemp(prefix="capsule_qt_templates_")).resolve()
       QtCore.QSettings.setPath(QtCore.QSettings.Format.NativeFormat, QtCore.QSettings.Scope.UserScope,
                                str(self.root / "settings"))
 

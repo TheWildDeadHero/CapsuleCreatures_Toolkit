@@ -552,7 +552,7 @@ def script_users(doc: Document, name: str) -> list[str]:
          continue
       for k, line in enumerate(text.splitlines(), 1):
          if pattern.search(line):
-            out.append(f"{path.relative_to(manifest.parent)}: line {k}")
+            out.append(f"{path.relative_to(manifest.parent).as_posix()}: line {k}")
    return out
 
 

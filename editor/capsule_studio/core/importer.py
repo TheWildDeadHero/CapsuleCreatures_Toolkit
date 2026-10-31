@@ -51,7 +51,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from . import field_rules, mapgroups, maps
+from . import field_rules, mapgroups, maps, paths
 from .document import Document, DocumentError
 
 if TYPE_CHECKING:
@@ -378,8 +378,10 @@ def _import_encounters(project: Project, source: Project, map_plan: dict[str, st
       raise ImportRefused(f"the world would have more than {enc.MAX_CONDITIONS} encounter conditions")
    battle = None
    if project.world.data.get("battle") is None and enc.battle_path(source) is not None:
-      import os
-      battle = Path(os.path.relpath(enc.battle_path(source), project.base)).as_posix()
+      try:
+         battle = paths.relative(enc.battle_path(source), project.base)
+      except DocumentError:   # another drive (Windows): no relative path leads there, so the world names none
+         lines.append("encounters: the source world's battle data is on another drive; this world names none")
    elif enc.battle_path(source) is not None and enc.battle_path(source) != enc.battle_path(project):
       lines.append("encounters: species are checked against this world's battle data (the source names other)")
    if add_methods or add_conditions or battle:

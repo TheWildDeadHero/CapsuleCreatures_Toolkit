@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import argparse
 
-from ..core import game_world, project
+from ..core import game_world, paths, project
 from ..core.document import DocumentError
 from .main import CommandError
 
@@ -104,10 +104,7 @@ def cmd_files(args: argparse.Namespace) -> int:
          print(f"{key}: (none)  {what}")
          continue
       path = files[key]
-      try:
-         shown = path.relative_to(base)
-      except ValueError:
-         shown = path
+      shown = paths.shown(path, base)   # "/" on every system, the absolute path when outside the game
       missing = not path.is_file()
       status = 1 if missing else status
       print(f"{key}: {shown}{'  (missing)' if missing else ''}  {what}")

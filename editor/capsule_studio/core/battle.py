@@ -48,7 +48,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from . import document, engine, expressions, logic, manifest_io, templates
+from . import document, engine, expressions, logic, manifest_io, paths, templates
 from .document import Document, DocumentError
 
 ## A parsed JSON object (a manifest, an entry of one of its lists, a compiled result).
@@ -497,9 +497,9 @@ def _named_file(battle: Document, rel: object, what: str) -> Path:
    @param rel     the manifest's value
    @param what    what it names (messages)
    @return absolute Path
-   @throws DocumentError when the value is not a relative path
+   @throws DocumentError when the value is not a relative path (absolute on any system: "/x", "C:/x", UNC)
    """
-   if not isinstance(rel, str) or not rel.strip() or Path(rel).is_absolute():
+   if not isinstance(rel, str) or not rel.strip() or paths.is_absolute_text(rel):
       raise DocumentError(f"{battle.path.name}: {what} must be a path relative to it, got {rel!r}")
    return (battle.path.parent / rel).resolve()
 

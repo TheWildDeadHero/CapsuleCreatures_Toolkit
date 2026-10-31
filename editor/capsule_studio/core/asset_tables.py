@@ -21,13 +21,12 @@ Qt-free; the Manifest and Text tables panels and `capsule-studio manifest ...` u
 from __future__ import annotations
 
 import json
-import os
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from . import engine
+from . import engine, paths
 from .document import Document, DocumentError
 
 ## Manifest keys this module edits, in the engine's order of reading (asset_compiler.expand_manifest()).
@@ -74,10 +73,10 @@ def _relative(doc: Document, path: str | Path) -> str:
    @return the relative path
    """
    p = Path(path)
-   if p.is_absolute():
+   if paths.is_absolute_text(str(p)):
       if doc.base_dir is None:
          raise DocumentError("save the manifest first: its paths are relative to its folder")
-      p = Path(os.path.relpath(p, doc.base_dir))
+      return paths.relative(p, doc.base_dir)
    return p.as_posix()
 
 
@@ -198,7 +197,8 @@ def tables(doc: Document) -> list[TableRef]:
             lang = str(json.loads(path.read_text(encoding="utf-8")).get("language", ""))
          except (OSError, ValueError, AttributeError):
             lang = ""
-         out.append(TableRef(path, os.path.relpath(path, doc.base_dir).replace(os.sep, "/"), lang, owner))
+         # The label from the resolved folder: the table is resolved (a linked folder would climb out and back).
+         out.append(TableRef(path, paths.relative(path, doc.base_dir, label=True), lang, owner))
       for rel in data.get("includes", []) or []:
          path = (owner.parent / str(rel)).resolve()
          if path in seen:
@@ -236,8 +236,7 @@ def translations(ref: TableRef, base: Path) -> list[TableRef]:
          continue
       lang = str(data.get("language", ""))
       if lang and lang != ref.language:
-         out.append(TableRef(candidate, os.path.relpath(candidate, base).replace(os.sep, "/"), lang, ref.owner,
-                             False))
+         out.append(TableRef(candidate, paths.relative(candidate, base, label=True), lang, ref.owner, False))
    return out
 
 

@@ -69,7 +69,7 @@ def check_folder(plugin_id: str, folder: str | Path) -> None:
    for f in sorted(folder.rglob("*")):
       if not f.is_file() or "__pycache__" in f.parts:
          continue
-      rel = f.relative_to(folder)
+      rel = f.relative_to(folder).as_posix()   # messages read the same on every system
       if _is_native(f):
          raise PurityError(f"plugin {plugin_id}: {rel} is a native binary; plugins are pure Python only (D-10)")
       if f.suffix == ".whl" and not f.name.endswith("-py3-none-any.whl"):
@@ -108,7 +108,7 @@ def check_sources(plugin_id: str, folder: str | Path, connector_files: Iterable[
    for f in sorted(folder.rglob("*.py")):
       if "__pycache__" in f.parts:
          continue
-      rel = f.relative_to(folder)
+      rel = f.relative_to(folder).as_posix()   # messages read the same on every system
       try:
          tree = ast.parse(f.read_text(encoding="utf-8"), str(f))
       except (SyntaxError, UnicodeDecodeError) as e:

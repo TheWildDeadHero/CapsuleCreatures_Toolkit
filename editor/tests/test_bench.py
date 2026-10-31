@@ -121,7 +121,7 @@ class ScenarioTests(BenchTestCase):
       loose = Path(tempfile.mkdtemp(prefix="capsule_bench_loose_"))
       self.addCleanup(shutil.rmtree, loose, True)
       for f in self.project.files():
-         out = loose / f.relative_to(self.battle_json.parent)
+         out = loose / f.relative_to(self.battle_json.resolve().parent)   # files() are resolved
          out.parent.mkdir(parents=True, exist_ok=True)
          shutil.copy(f, out)
       self.assertEqual(bench.game_folder(BattleProject.open(loose / "battle.json")), loose.resolve())

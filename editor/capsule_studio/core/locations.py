@@ -26,13 +26,12 @@ outside one.
 from __future__ import annotations
 
 import copy
-import os
 import re
 from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-from . import engine, events
+from . import engine, events, paths
 from .document import Document, DocumentError
 
 if TYPE_CHECKING:
@@ -216,9 +215,7 @@ def _rel(project: Project, path: str | Path) -> str:
    @return text
    """
    p = Path(path)
-   if p.is_absolute():
-      p = Path(os.path.relpath(p.resolve(), project.base.resolve()))
-   return p.as_posix()
+   return paths.relative(p, project.base) if paths.is_absolute_text(str(p)) else p.as_posix()
 
 
 def _world(project: Project) -> JsonDict:

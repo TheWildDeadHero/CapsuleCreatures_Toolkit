@@ -38,7 +38,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from . import engine, text_render, text_window
+from . import engine, paths, text_render, text_window
 from .document import Document, DocumentError
 
 ## A parsed JSON object (a style).
@@ -486,10 +486,10 @@ def _relative_path(value: Any) -> str:
    """!An image path as a manifest writes it.
    @param value  the path
    @return it with '/' separators
-   @throws DocumentError for an empty or absolute path
+   @throws DocumentError for an empty or absolute path (absolute on any system: "/x", "C:/x", UNC)
    """
    text = str(value or "").strip().replace("\\", "/")
-   if not text or Path(text).is_absolute():
+   if not text or paths.is_absolute_text(text):
       raise DocumentError("an image is a path relative to the manifest")
    return Path(text).as_posix()
 

@@ -49,7 +49,8 @@ class BattleTestCase(unittest.TestCase):
       """!Copies the data and opens it.
       @return None
       """
-      self.dir = Path(tempfile.mkdtemp(prefix="capsule_battle_"))
+      # Resolved, as the editor resolves the files it opens (macOS /var is /private/var; Windows short names).
+      self.dir = Path(tempfile.mkdtemp(prefix="capsule_battle_")).resolve()
       copy_battle_data(self.sample() / "battle.json", self.dir)
       self.project = BattleProject.open(self.dir / "battle.json")
 

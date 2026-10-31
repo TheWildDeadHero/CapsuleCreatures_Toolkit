@@ -28,7 +28,6 @@ interface: the command line (cli/sample_cmds.py) and the Studio's Open a sample.
 """
 from __future__ import annotations
 
-import os
 import re
 import shutil
 import sys
@@ -37,7 +36,7 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from . import engine, manifest_io, starter_scene, templates
+from . import engine, manifest_io, paths, starter_scene, templates
 from .document import DocumentError
 
 ## A parsed JSON value.
@@ -331,12 +330,12 @@ def _map_strings(value: JsonValue, change: Callable[[str], str | None]) -> tuple
 
 
 def _relative_to(target: Path, base: Path) -> str:
-   """!A path from a folder to a file, written with "/" (".." where it climbs).
+   """!A path from a folder to a file, written with "/" (".." where it climbs); both are resolved first (paths).
    @param target  the file
    @param base    the folder
    @return relative path
    """
-   return Path(os.path.relpath(target, base)).as_posix()
+   return paths.relative(target, base)
 
 
 def _rewrite(game: Path, file: Path, moved: dict[Path, Path], sample_folder: Path) -> int:
@@ -456,7 +455,8 @@ def outside_paths(folder: str | Path) -> list[str]:
 
          def note(value: str, out: list[str] = found, base: Path = base) -> None:
             """!Notes one text that is a path leading out (absolute ones only when they exist); changes nothing."""
-            if value.startswith("/") and len(value) <= PATH_MAX_CHARS and Path(value).exists():
+            # Absolute on any system (D-40 RX2): "/x", drive (C:) and UNC paths, so a Windows path is caught too.
+            if len(value) <= PATH_MAX_CHARS and paths.is_absolute_text(value) and Path(value).exists():
                out.append(value)
             elif _plain_relative(value) and ".." in PurePosixPath(value).parts and _leaves(base, value, game):
                out.append(value)

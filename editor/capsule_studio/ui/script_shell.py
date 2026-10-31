@@ -20,13 +20,12 @@ start (object_base), unused warnings (warn_unused) and the glitch switches.
 """
 from __future__ import annotations
 
-import os
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from ..core import engine, placeholders, script_words, scripts
+from ..core import engine, paths, placeholders, script_words, scripts
 from ..core.document import DocumentError
 from . import profiler
 from .editors.placeholders import PlaceholdersPanel
@@ -551,9 +550,14 @@ class ScriptWindow(QtWidgets.QMainWindow):
       if p is None or self._settings_loading is True:
          return
       games = [g.strip() for g in self.games.text().split(",") if g.strip()]
+      try:
+         assets, world = self._relative(self.assets.text().strip()), self._relative(self.world.text().strip())
+      except DocumentError as e:   # a file on another drive (Windows): no relative path leads there
+         QtWidgets.QMessageBox.warning(self, "Settings", str(e))
+         self._load_settings()
+         return
       wanted = {"game": self.game.text().strip() or None, "games": games or None,
-                "stack_depth": self.depth.value(), "assets": self._relative(self.assets.text().strip()),
-                "world": self._relative(self.world.text().strip()),
+                "stack_depth": self.depth.value(), "assets": assets, "world": world,
                 # [S2] I4: written only when they differ from the compiler's defaults
                 "object_base": self.object_base.value() or None,
                 "warn_unused": None if self.warn_unused.isChecked() else False}
@@ -585,12 +589,13 @@ class ScriptWindow(QtWidgets.QMainWindow):
       """!A manifest path setting, relative to scripts.json (P: paths stay relative).
       @param text  typed path, or ''
       @return relative POSIX path, or None when empty
+      @throws DocumentError when an absolute path is on another drive than scripts.json (Windows)
       """
       if not text:
          return None
       p = Path(text)
-      if p.is_absolute():
-         p = Path(os.path.relpath(p, self.project.path.parent))
+      if paths.is_absolute_text(text):
+         return paths.relative(p, self.project.path.parent)
       return p.as_posix()
 
    # -- checking ------------------------------------------------------------------
@@ -823,8 +828,8 @@ class ScriptWindow(QtWidgets.QMainWindow):
       if not path:
          return
       try:
-         rel = Path(os.path.relpath(Path(path).resolve(), self.project.path.parent.resolve())).as_posix()
-      except ValueError:   # another drive (Windows): a relative path is impossible
+         rel = paths.relative(path, self.project.path.parent)
+      except DocumentError:   # another drive (Windows): a relative path is impossible
          QtWidgets.QMessageBox.warning(self, "Add source", "Sources must be on the same drive as scripts.json.")
          return
       try:

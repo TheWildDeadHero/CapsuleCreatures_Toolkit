@@ -78,7 +78,7 @@ from typing import TYPE_CHECKING
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from ..core import game_world
+from ..core import game_world, paths
 from ..core import project as project_core
 from ..core.document import DocumentError
 from ..core.world import Project
@@ -515,10 +515,8 @@ class StudioWindow(QtWidgets.QMainWindow):
       item.setText(page.title + (" *" if name.endswith(" *") else ""))
       path = page.opened(w) if w is not None else None
       if path is not None and self._project_path is not None:
-         try:
-            path = path.relative_to(self._project_path.parent.parent)
-         except ValueError:   # a file outside the game (opened from the page's File menu)
-            pass
+         # Inside the game: its place there ("/" separators); outside (opened from the page's File menu): absolute.
+         path = paths.shown(path, self._project_path.parent.parent)
       item.setToolTip(str(path) if path is not None else "nothing open")
       if page_id == "project":
          self._update_title()   # the game's name may have changed

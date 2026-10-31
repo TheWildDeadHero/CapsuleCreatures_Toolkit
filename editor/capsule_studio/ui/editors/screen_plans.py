@@ -26,7 +26,7 @@ from typing import Any
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from ...core import engine, screen_graphics as sg, screen_plans as sp
+from ...core import engine, paths, screen_graphics as sg, screen_plans as sp
 from ...core.document import Document
 from ..panel import EditorPanel, PanelHost
 from ..qtimage import to_qimage
@@ -416,8 +416,7 @@ class ScreenPlanPanel(EditorPanel):
          if self.plan is not None and self.plan.path is not None and self.plan.path not in shown:
             shown.append(self.plan.path)
          for p in shown:
-            label = str(p.relative_to(doc.base_dir)) if doc is not None and doc.base_dir and \
-               p.is_relative_to(doc.base_dir) else str(p)
+            label = paths.shown(p, doc.base_dir) if doc is not None and doc.base_dir else str(p)
             self.plans.addItem(label, str(p))
          if self.plan is not None and self.plan.path is not None:
             self.plans.setCurrentIndex(self.plans.findData(str(self.plan.path)))

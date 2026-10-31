@@ -11,13 +11,11 @@ presenter_view plays it (core.battle.presenter_track()).
 """
 from __future__ import annotations
 
-import os
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from ....core import battle, codepage, engine
+from ....core import battle, codepage, engine, paths
 from ....core.document import DocumentError
 from ...widgets import button
 from ..battle_common import NONE_TEXT, TERM_SLOT, EntryPanel, combo, set_check, set_combo, set_spin, spin
@@ -495,7 +493,11 @@ class PresentersPanel(EntryPanel):
       path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Presenter sequence", str(base),
                                                       "Sequences (*.json);;All files (*)")
       if path:
-         rel = os.path.relpath(Path(path).resolve(), base.resolve()).replace(os.sep, "/")
+         try:
+            rel = paths.relative(path, base)
+         except DocumentError as e:   # another drive (Windows)
+            QtWidgets.QMessageBox.warning(self, "Presenter sequence", str(e))
+            return
          self._motion_changed(kind, "sequence", rel)
 
    # -- preview ---------------------------------------------------------------------------

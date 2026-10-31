@@ -138,7 +138,7 @@ def copy_battle_data(battle_json: Path, folder: Path) -> None:
    @param folder       target folder (the same relative layout)
    @return None
    """
-   base = battle_json.parent
+   base = battle_json.resolve().parent   # files() are resolved (macOS /var is /private/var; Windows short names)
    for f in BattleProject.open(battle_json).files():
       out = folder / f.relative_to(base)
       out.parent.mkdir(parents=True, exist_ok=True)

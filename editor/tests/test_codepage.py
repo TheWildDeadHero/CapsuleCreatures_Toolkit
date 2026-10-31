@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import io
 import json
-import os
 import shutil
 import sys
 import tempfile
@@ -41,7 +40,8 @@ class CodePageTestCase(unittest.TestCase):
       """!Writes the game.
       @return None
       """
-      self.dir = Path(tempfile.mkdtemp(prefix="capsule_codepage_"))
+      # Resolved, as the editor resolves the files it opens (macOS /var is /private/var; Windows short names).
+      self.dir = Path(tempfile.mkdtemp(prefix="capsule_codepage_")).resolve()
       self.project_json = self.dir / "reference" / "project.json"
       self.assets = self.dir / "data" / "assets.json"
       manifest_io.save(self.project_json, {"schema": "capsule.project/1", "name": "t",
@@ -75,9 +75,11 @@ class CodePageTestCase(unittest.TestCase):
       extra = self.dir / "data" / "text" / "extra_8x8.txt"
       extra.parent.mkdir(parents=True, exist_ok=True)
       extra.write_text(E_ACUTE_GLYPH, encoding="utf-8")
+      # A copy of the engine's font in the game: the temporary folder may be on another drive than the engine
+      # (Windows), where no relative path leads to it.
+      shutil.copyfile(engine.root() / codepage.DEFAULT_FONT, extra.parent / "default_8x8.txt")
       data = manifest_io.load(self.project_json)
-      base = os.path.relpath(engine.root() / codepage.DEFAULT_FONT, self.dir)
-      data["text"]["fonts"] = {"en": [base, "data/text/extra_8x8.txt"]}
+      data["text"]["fonts"] = {"en": ["data/text/default_8x8.txt", "data/text/extra_8x8.txt"]}
       manifest_io.save(self.project_json, data)
 
 

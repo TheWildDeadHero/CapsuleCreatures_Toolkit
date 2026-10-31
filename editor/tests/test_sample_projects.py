@@ -96,8 +96,8 @@ class SampleListTests(unittest.TestCase):
       """!A temporary folder.
       @return None
       """
-      ## The temporary folder.
-      self.root = Path(tempfile.mkdtemp(prefix="capsule_samples_"))
+      ## The temporary folder (resolved: macOS /var is /private/var, Windows has short names).
+      self.root = Path(tempfile.mkdtemp(prefix="capsule_samples_")).resolve()
 
    def tearDown(self) -> None:
       """!Removes the temporary folder.
@@ -129,9 +129,11 @@ class SampleListTests(unittest.TestCase):
       folder or a shared folder that is not a template is refused.
       @return None
       """
-      starter = engine.root() / "samples" / "starter"
+      # A copy of the Starter beside the app: the temporary folder may be on another drive than the engine
+      # (Windows), where no relative path leads to it.
+      shutil.copytree(engine.root() / "samples" / "starter", self.root / "shared" / "starter")
       good = {"schema": samples.SCHEMA, "id": "demo", "name": "Demo", "description": "One line.", "version": 1,
-              "shared": [{"from": os.path.relpath(starter, self.root / "demo"), "to": "data/starter"}]}
+              "shared": [{"from": "../shared/starter", "to": "data/starter"}]}
       path = write_sample(self.root / "demo", good)
       self.assertEqual(samples.load(path).shared[0].template.id, "starter")
       bad = [{"schema": "capsule.template/1"}, {"id": "other"}, {"description": "two\nlines"}, {"version": 0},
