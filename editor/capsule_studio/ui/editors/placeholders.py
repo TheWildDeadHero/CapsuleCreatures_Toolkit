@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any
 from PySide6 import QtCore, QtWidgets
 
 from ...core import placeholders as model
+from ..panes import split_box
 from ..widgets import button, set_enabled
 
 if TYPE_CHECKING:
@@ -89,6 +90,7 @@ class PlaceholdersPanel(QtWidgets.QWidget):
       row.addWidget(button("Remove term", lambda: self.remove_term(), "Remove the selected term (nothing may use it)"))
       lay.addLayout(row)
       lay.addWidget(self.status)
+      split_box(lay)   # [RZ] placeholders over terms: drag the boundary
 
    # -- reading ------------------------------------------------------------------------
 

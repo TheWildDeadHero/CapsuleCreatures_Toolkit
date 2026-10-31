@@ -31,6 +31,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core.document import DocumentError
 from ....core.structure import progression as model
 from ....core.structure import record
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import NONE_TEXT, STRUCTURE, BattlePanel, set_combo, set_spin
 from ..logic.expression_edit import FormulaEdit
@@ -197,6 +198,7 @@ class ProgressionPanel(BattlePanel):
       lower = QtWidgets.QHBoxLayout()
       lower.addWidget(form_box, 1)
       lower.addWidget(preview_box, 1)
+      split_box(lower, every=True)   # [RZ] form | preview
       outer = QtWidgets.QVBoxLayout(self)
       outer.addLayout(top)
       outer.addWidget(QtWidgets.QLabel("Generation of a new record, in random-draw order:"))
@@ -205,6 +207,7 @@ class ProgressionPanel(BattlePanel):
       outer.addLayout(buttons)
       outer.addLayout(lower, 1)
       outer.addWidget(self.errors)
+      split_box(outer)   # [RZ] generation table over the form and preview
       ## Input names the preview table shows.
       self._input_names = []
       ## Row the next refresh selects (an entry just added or moved), or None.

@@ -19,6 +19,7 @@ from PySide6 import QtWidgets
 from capsule_studio.core import engine, events, maps, override_sets
 from capsule_studio.ui.panel import EditorPanel
 from capsule_studio.ui.qtimage import to_qimage
+from capsule_studio.ui.panes import split_box
 from capsule_studio.ui.widgets import PixelView, button, set_enabled
 
 from . import maptools
@@ -156,6 +157,7 @@ class OverrideSetsPanel(EditorPanel):
       body.addLayout(left, LIST_STRETCH)
       body.addLayout(mid, FORM_STRETCH)
       body.addLayout(right, FORM_STRETCH)
+      split_box(body)   # [RZ] sets | cells | preview: the user drags the boundaries
       lay = QtWidgets.QVBoxLayout(self)
       lay.addLayout(top)
       lay.addLayout(body, 1)

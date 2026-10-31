@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import tilesets
+from ..panes import split_box
 from ..widgets import button, set_enabled
 from .tileset_targets import TargetsBox
 
@@ -125,6 +126,7 @@ class FixedBox(QtWidgets.QWidget):
       lay.addLayout(top)
       lay.addWidget(QtWidgets.QLabel("Raw entries of the chosen metatile"))
       lay.addWidget(self.entries)
+      split_box(lay)   # [RZ] placement and banks over the raw entries
 
    def fill(self, doc: Document | None) -> None:
       """!Shows a tileset's placement, banks and the chosen metatile's entries.
@@ -339,6 +341,7 @@ class AnimationBox(QtWidgets.QWidget):
       lay = QtWidgets.QHBoxLayout(self)
       lay.addLayout(left, LIST_STRETCH)
       lay.addLayout(right, FORM_STRETCH)
+      split_box(lay)   # [RZ] animations | form: the user drags the boundary
 
    def fill(self, doc: Document | None) -> None:
       """!Shows a tileset's animations.

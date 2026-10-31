@@ -25,6 +25,7 @@ from PySide6 import QtCore, QtWidgets
 from ...core import battle, codepage, engine
 from ...core.document import DocumentError
 from ..panel import EditorPanel
+from ..panes import split_box
 from ..widgets import ask, button
 
 if TYPE_CHECKING:
@@ -401,6 +402,7 @@ class EntryPanel(BattlePanel):
             scroll.setWidget(box)
             self.form_scroll = box = scroll
          layout.addWidget(box, stretch)
+      split_box(layout)   # [RZ] list | form: the user drags the boundary
 
    # -- subclass hooks ---------------------------------------------------------------
 

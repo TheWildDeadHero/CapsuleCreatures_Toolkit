@@ -36,6 +36,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core import bench, logic
 from ....core.document import Document, DocumentError
+from ...panes import splitter
 from ...widgets import DEBOUNCE_MS, button, is_enabled, report_failure, set_enabled
 from ..battle_common import BattlePanel, set_check, set_combo, set_spin
 
@@ -330,11 +331,9 @@ class BenchPanel(BattlePanel):
       # -- run --
       self._build_run_side()
 
-      split = QtWidgets.QSplitter()
-      for w, stretch in zip((left, self.form_area, self.run_side), COLUMN_STRETCH):
-         split.addWidget(w)
-         split.setStretchFactor(split.count() - 1, stretch)
-      split.setSizes(list(COLUMN_WIDTHS))
+      # [RZ] scenarios | form | run: panes the user resizes
+      split = splitter(QtCore.Qt.Orientation.Horizontal, [left, self.form_area, self.run_side], COLUMN_STRETCH,
+                       COLUMN_WIDTHS)
       lay = QtWidgets.QVBoxLayout(self)
       lay.addWidget(self.banner)
       lay.addWidget(split, 1)

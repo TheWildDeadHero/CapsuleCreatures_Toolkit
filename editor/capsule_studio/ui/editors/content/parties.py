@@ -22,6 +22,7 @@ from ....core import ai as ai_model
 from ....core import battle, engine
 from ....core.document import DocumentError
 from ....core.structure import passive_slots, record
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import (NONE_TEXT, TERM_SLOT, EntryPanel, combo, set_check, set_combo, set_spin,
                              set_spin_max, spin)
@@ -160,6 +161,7 @@ class PartiesPanel(EntryPanel):
       self.intro.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.TextSelectableByMouse)
       layout.addWidget(self.term_label("format", False, "Intro (first " + TERM_SLOT + ", foe side)"))
       layout.addWidget(self.intro)
+      split_box(layout)   # [RZ] presenters over members
 
    def _ensure_move_combos(self, slots: int) -> None:
       """!Makes one move combo per move slot (the layout's move_slots), adding or removing combos as needed.

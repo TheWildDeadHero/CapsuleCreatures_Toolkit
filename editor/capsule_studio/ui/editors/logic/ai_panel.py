@@ -19,6 +19,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core import ai as ai_model
 from ....core.document import DocumentError
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import CONTENT, BattlePanel
 
@@ -41,8 +42,6 @@ INDEX_COLUMN = 0
 RULE_COLUMN = 1
 ## Rule table column of the numbers.
 NUMBERS_COLUMN = 2
-## Width of the profile list, pixels.
-LIST_WIDTH = 200
 ## Title of each rule list's box.
 LIST_TITLES = {ai_model.RULES_KEY: "Scoring rules", ai_model.SWITCHING_KEY: "Switching rules",
                ai_model.ITEMS_KEY: "Item-use rules"}
@@ -285,7 +284,6 @@ class AiPanel(BattlePanel):
       self.selected = None
       ## The profiles.
       self.list = QtWidgets.QListWidget()
-      self.list.setMaximumWidth(LIST_WIDTH)
       self.list.currentTextChanged.connect(lambda text: self._picked(text))
       ## The rule lists of the selected profile.
       self.boxes = {which: RuleListBox(self, which) for which in ai_model.RULE_LISTS}
@@ -316,11 +314,13 @@ class AiPanel(BattlePanel):
       for box in self.boxes.values():
          right.addWidget(box, 1)
       right.addWidget(self.used_by)
+      split_box(right)   # [RZ] the rule lists, stacked: the user drags the boundaries
       note = QtWidgets.QLabel(NOTE)
       note.setWordWrap(True)
       body = QtWidgets.QHBoxLayout()
       body.addLayout(left)
       body.addLayout(right, 1)
+      split_box(body)   # [RZ] profiles | rules: the user drags the boundary
       lay = QtWidgets.QVBoxLayout(self)
       lay.addWidget(note)
       lay.addLayout(body, 1)

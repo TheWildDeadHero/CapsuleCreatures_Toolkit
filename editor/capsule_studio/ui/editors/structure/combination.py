@@ -29,6 +29,7 @@ from ....core import inventory
 from ....core.document import DocumentError
 from ....core.structure import combination as cb_model
 from ....core.structure import storage
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, set_check, set_combo, set_spin, set_spin_max
 
@@ -40,7 +41,7 @@ NOTE = ("A combination method makes one creature out of two or more: a script ru
         "player picks the inputs, each slot's requirement must hold, then the first result rule that matches names "
         "the result (none: refused). Its level, its moves and what the inputs leave it (the `on combine` logic: "
         "inherit ...) follow; consumed inputs go once it is placed.")
-## Width of the method list, pixels.
+## Starting width of the method list, pixels.
 LIST_WIDTH = 180
 ## What a preview input shows when it is empty.
 NO_INPUT = "(none)"
@@ -94,7 +95,6 @@ class CombinationPanel(BattlePanel):
       self.table_name = None
       ## The methods.
       self.list = QtWidgets.QListWidget()
-      self.list.setMaximumWidth(LIST_WIDTH)
       self.list.currentTextChanged.connect(lambda text: self._picked(text))
       ## The tabs.
       self.tabs = QtWidgets.QTabWidget()
@@ -126,6 +126,7 @@ class CombinationPanel(BattlePanel):
       body = QtWidgets.QHBoxLayout()
       body.addWidget(self.list)
       body.addLayout(right, 1)
+      split_box(body, [LIST_WIDTH, None])   # [RZ] list | form: the user drags the boundary
       lay = QtWidgets.QVBoxLayout(self)
       lay.addWidget(note)
       lay.addLayout(body, 1)

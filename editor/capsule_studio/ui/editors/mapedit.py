@@ -16,6 +16,7 @@ from ...core import mapgroups, maps, mapview
 from ...plugins import MapView, Registry
 from ..panel import EditorPanel
 from ..qtimage import to_qimage
+from ..panes import mark_panel, split_box
 from ..widgets import MetatileGrid, button, grid_area
 from .maptree import MapTree
 
@@ -126,7 +127,7 @@ CELL_TEXT_COLOR = QtGui.QColor(255, 255, 255)
 ## Left inset of that text, pixels.
 CELL_TEXT_INSET = 2
 
-## Height of the layer list, pixels.
+## Starting height of the layer list's pane, pixels (the user drags its boundary).
 LAYER_LIST_HEIGHT = 110
 ## The attribute field the value box starts on (its range is the field's highest value, core.maps.cell_fields()).
 COLLISION_FIELD = "collision"
@@ -649,6 +650,7 @@ class MapPanel(EditorPanel):
       bar.addStretch(1)
       ## Settings of the chosen extension tool (MapTool.options()).
       self.tool_options = QtWidgets.QStackedWidget()
+      mark_panel(self.tool_options, False)   # [RZ] the tool's option strip belongs to the canvas under it
       self.tool_options.addWidget(QtWidgets.QWidget())
       self.tool_options.setVisible(False)
       ## Options widgets built so far: tool id -> page index.
@@ -711,7 +713,6 @@ class MapPanel(EditorPanel):
       self.layer_list.setToolTip("The layer being painted. Unticking a tile layer hides it; unticking "
                                  "Attributes hides the attribute overlay")
       self.layer_list.currentRowChanged.connect(lambda *a: self._layer_chosen(*a))
-      self.layer_list.setMaximumHeight(LAYER_LIST_HEIGHT)
       self.layer_list.itemChanged.connect(lambda *a: self._layer_ticked(*a))
       ## Shows the attribute overlay (the Attributes row's tick).
       self.show_attributes = True
@@ -813,12 +814,14 @@ class MapPanel(EditorPanel):
       right.addWidget(self.all_metatiles)
       right.addWidget(grid_area(self.palette), 1)
       right.addWidget(self.errors)
+      split_box(right, [LAYER_LIST_HEIGHT, None, None])   # [RZ] layers / layer and border / palette, stacked
 
       layout = QtWidgets.QHBoxLayout(self)
       for part, stretch in ((left, LIST_STRETCH), (middle, MAP_STRETCH), (right, SIDE_STRETCH)):
          box = QtWidgets.QWidget()
          box.setLayout(part)
          layout.addWidget(box, stretch)
+      split_box(layout)   # [RZ] maps | map | side pane: the user drags the boundaries
       ## (revisions, map) the extension diagnostics were last found for.
       self._diag_key = None
       ## The extension diagnostics last shown, as text.

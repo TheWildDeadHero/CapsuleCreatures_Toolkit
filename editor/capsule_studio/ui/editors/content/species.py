@@ -28,6 +28,7 @@ from ....core import battle, engine
 from ....core.structure import chart, passive_slots, record, species_fields
 from ....core.structure import nursery as nursery_model
 from ....core.structure import stats as stat_model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import (NONE_TEXT, TERM_SLOT, EntryPanel, combo, set_combo, set_spin, set_spin_max,
                              spin)
@@ -196,6 +197,7 @@ class SpeciesPanel(EntryPanel):
       ## Transformations / Forms / Yields tabs.
       self.growth_tabs = SpeciesGrowthTabs(self)
       layout.addWidget(self.growth_tabs, 1)
+      split_box(layout)   # [RZ] form and learnset over the growth tabs
 
    def _stat_labels(self) -> list[str]:
       """!The battle's stats as the base row labels them: each stat's abbreviation, else its label.

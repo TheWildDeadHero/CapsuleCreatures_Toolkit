@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtWidgets
 
 from ....core import battle
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import FORM_STRETCH, LIST_STRETCH, BattlePanel
 from .json_edit import JsonEdit
@@ -87,6 +88,7 @@ class DataPanel(BattlePanel):
          box = QtWidgets.QWidget()
          box.setLayout(part)
          lay.addWidget(box, stretch)
+      split_box(lay)   # [RZ] list | JSON: the user drags the boundary
 
    def kind(self) -> str:
       """!The chosen kind or object.

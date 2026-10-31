@@ -16,6 +16,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ...core import audio, audio_render as ar, audio_song
 from ..panel import EditorPanel, PanelHost
+from ..panes import split_box, splitter
 from ..widgets import button
 from .audio_common import (WIDE_STRETCH, ChannelLanes, PianoRoll, RenderBar, WaveformView, document_of, fit_table,
                            problem_text, scroll, track_colour, zoom_slider)
@@ -24,7 +25,7 @@ from .audio_common import (WIDE_STRETCH, ChannelLanes, PianoRoll, RenderBar, Wav
 TRACK_COLUMNS = ("Track", "Notes", "Programs", "End", "Mute", "Solo")
 ## Column indices of the end, mute and solo columns.
 TRACK_END_COLUMN, MUTE_COLUMN, SOLO_COLUMN = 3, 4, 5
-## Height of the track table at most, pixels.
+## Starting height of the track table's pane, pixels (the user drags its boundary).
 TRACKS_HEIGHT = 170
 ## Channel table columns (Player state).
 CHANNEL_COLUMNS = ("Channel", "Player", "Track", "Key", "Velocity", "Priority", "Envelope", "Status")
@@ -36,7 +37,7 @@ ALL_TRACKS = "All tracks (text form)"
 REVERB_LEAVE = -1
 ## Layout stretch of the song list and the song.
 LIST_STRETCH, SONG_STRETCH = 1, 4
-## Width of the song list, pixels.
+## Starting width of the song list, pixels.
 LIST_WIDTH = 230
 ## Waveform buckets per pixel column (the WAV's peaks).
 WAVE_BUCKETS = 1200
@@ -81,7 +82,6 @@ class SongPanel(EditorPanel):
       lv.addWidget(self.filter)
       lv.addWidget(self.songs, 1)
       lv.addWidget(button("Export text form...", lambda: self.export_song(), "Write the song's .cseq text form"))
-      left.setMinimumWidth(LIST_WIDTH)
 
       # header
       ## The song's instrument set.
@@ -116,7 +116,6 @@ class SongPanel(EditorPanel):
       self.tracks.horizontalHeader().setStretchLastSection(False)
       self.tracks.verticalHeader().setVisible(False)
       self.tracks.itemChanged.connect(lambda item: self._track_item_changed(item))
-      self.tracks.setMaximumHeight(TRACKS_HEIGHT)
       fit_table(self.tracks, TRACK_END_COLUMN)
 
       ## The render bar.
@@ -169,6 +168,7 @@ class SongPanel(EditorPanel):
       sv.addWidget(scroll(self.lanes), WIDE_STRETCH)
       sv.addWidget(self.frame_label)
       sv.addWidget(self.channels, 1)
+      split_box(sv)   # [RZ] lanes over channels
       ## The timeline the render's state.jsonl gave, or None.
       self.timeline = None
       ## The latest render's WAV length, seconds.
@@ -194,11 +194,10 @@ class SongPanel(EditorPanel):
       rv.addWidget(self.tracks)
       rv.addWidget(self.bar)
       rv.addWidget(self.views, 1)
-      split = QtWidgets.QSplitter()
-      split.addWidget(left)
-      split.addWidget(right)
-      split.setStretchFactor(0, LIST_STRETCH)
-      split.setStretchFactor(1, SONG_STRETCH)
+      split_box(rv, [TRACKS_HEIGHT, None])   # [RZ] tracks over the song's views
+      # [RZ] list | song: the user drags the boundary (the list starts LIST_WIDTH wide)
+      split = splitter(QtCore.Qt.Orientation.Horizontal, [left, right], [LIST_STRETCH, SONG_STRETCH],
+                       [LIST_WIDTH, None])
       lay = QtWidgets.QVBoxLayout(self)
       lay.addWidget(split)
 

@@ -15,6 +15,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import mapview, sprites, tilesets
 from ..qtimage import to_qimage
+from ..panes import split_box
 from ..widgets import PixelView, button, set_enabled
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ FIRST_COLUMN, OFFSET_COLUMN, PHASE_COLUMN = 0, 1, 2
 OWN_PHASE = ""
 ## Preview zoom, pixels between targets and targets per preview row.
 PREVIEW_ZOOM, GAP, PER_ROW = 2, 4, 8
-## Smallest height of the target table, pixels (a few rows show).
+## Starting height of the target table's pane, pixels (a few rows show; the user drags its boundary).
 TABLE_HEIGHT = 120
 ## Playback timer interval, milliseconds.
 TICK_MS = 16
@@ -56,7 +57,6 @@ class TargetsBox(QtWidgets.QWidget):
                             "frame it shows while target 0 shows frame 0; phase: frames into the period at map entry "
                             "(empty: the animation's)")
       self.table.itemChanged.connect(lambda item: self._edited(item))
-      self.table.setMinimumHeight(TABLE_HEIGHT)
       ## The targets form on or off.
       self.use = QtWidgets.QCheckBox("Several targets (the frames stored once)")
       self.use.clicked.connect(lambda on: self._use_toggled(on))
@@ -93,6 +93,7 @@ class TargetsBox(QtWidgets.QWidget):
       lay.addWidget(self.info)
       lay.addWidget(self.view, 1)
       lay.addLayout(play)
+      split_box(lay, [TABLE_HEIGHT, None])   # [RZ] targets over their preview: drag the boundary
 
    # -- what is shown -----------------------------------------------------------------------------
 

@@ -39,6 +39,7 @@ from ....core import battle
 from ....core.document import Document, DocumentError
 from ....core.structure import record as model
 from ....core.structure import stats as stat_model
+from ...panes import split_box
 from ...widgets import ask, button
 from ..battle_common import STRUCTURE, BattlePanel
 from .record_preview import DerivedPreviewBox, TransferPreviewBox
@@ -300,6 +301,7 @@ class RecordPanel(BattlePanel):
          self.tabs.addTab(pages[key], title)
       lay.addWidget(self.tabs)
       lay.addWidget(self.errors)
+      split_box(lay)   # [RZ] roles over the record's tabs
 
    # -- reading ------------------------------------------------------------------------
 

@@ -43,6 +43,7 @@ from ....core.structure import nursery as nursery_model
 from ....core.structure import pockets as pocket_model
 from ....core.structure import step_effects as step_model
 from ....core.structure import storage as storage_model
+from ...panes import split_box
 from ...widgets import button, report_failure, set_enabled
 from ..battle_common import NONE_TEXT, BattlePanel, set_check, set_combo, set_spin_max
 
@@ -175,6 +176,8 @@ class TestSavePanel(BattlePanel):
       lay.addWidget(self._build_shapes())
       lay.addWidget(self.problems)
       lay.addWidget(self.errors)
+      split_box(lower)   # [RZ] steps | nursery
+      split_box(lay)   # [RZ] bag / boxes / steps and nursery / game, stacked: drag the boundaries
 
    def _build_boxes(self) -> QtWidgets.QGroupBox:
       """!Builds the Boxes box (G3): the current box, the boxed creatures and the Box / Unbox row.

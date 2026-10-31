@@ -37,6 +37,12 @@ License 2.0.
   structure and logic, with a damage calculator and the battle bench); the
   project settings (build settings, GBA memory, code page); the audio editor
   (songs, instruments, samples, MIDI import, sound effects).
+- **Panels that fit any window**: in the Studio and every editor, panels
+  side by side or stacked (lists, forms, canvases, previews, the Studio's
+  page list and the battle navigator) are split by handles the user drags
+  to resize them, and a panel whose content does not fit shows scroll bars
+  instead of being squashed or cut off, so every window can be made as
+  small as 800 x 540 (a small laptop screen) and still reaches everything.
 - **The command line**: `capsule-studio` does everything the editors do,
   without a display.
 - **Extensions**: pure-Python plugins that add panels, map tools, overlays,

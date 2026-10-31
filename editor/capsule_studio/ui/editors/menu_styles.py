@@ -28,6 +28,7 @@ from ...core import menu_styles, text_boxes
 from ...core.document import DocumentError
 from ..panel import EditorPanel
 from ..qtimage import to_qimage
+from ..panes import mark_panel, split_box
 from ..widgets import PixelView, button, set_enabled
 from .text_common import session_of
 
@@ -144,6 +145,7 @@ class MenuStylePanel(EditorPanel):
             holder.setLayout(part)
             part = holder
          layout.addWidget(part, stretch)
+      split_box(layout)   # [RZ] list | form | preview: the user drags the boundaries
 
    def _editor(self, f: menu_styles.MenuField) -> QtWidgets.QWidget:
       """!The editor of one menu setting: a combo for a word, a line for the sprite key, else a spin in the
@@ -185,6 +187,7 @@ class MenuStylePanel(EditorPanel):
       self.items = QtWidgets.QPlainTextEdit()
       self.items.setPlaceholderText("one option per line; text:KEY shows a text of the manifest's tables")
       self.items.setMaximumHeight(self.fontMetrics().height() * ITEM_ROWS)
+      mark_panel(self.items, False)   # [RZ] a few lines typed in a row of fields, not a pane
       self.items.setToolTip("The menu's options (the caller's, ui::Options::items): a line is a text, or text:KEY "
                             "for that text of the manifest's tables")
       ## Applies the options.

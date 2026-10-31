@@ -28,6 +28,7 @@ from typing import Any
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core import logic
+from ...panes import split_box
 from ...widgets import set_enabled
 from .catalog import ExpressionEdit, FunctionPicker, RefPicker
 
@@ -221,6 +222,7 @@ class BlockView(QtWidgets.QWidget):
       top = QtWidgets.QHBoxLayout()
       top.addLayout(left, TREE_STRETCH)
       top.addLayout(right, PALETTE_STRETCH)
+      split_box(top)   # [RZ] block tree | palette
       lay = QtWidgets.QVBoxLayout(self)
       lay.setContentsMargins(0, 0, 0, 0)
       lay.addLayout(top, 1)

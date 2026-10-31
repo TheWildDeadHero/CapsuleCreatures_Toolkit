@@ -17,6 +17,7 @@ from ...core import codepage, engine, preview, texts
 from ...core.document import DocumentError
 from ..panel import EditorPanel
 from ..qtimage import screen_qimage
+from ..panes import split_box
 from ..widgets import DEBOUNCE_MS, Debounce, PixelView, button, set_enabled
 
 if TYPE_CHECKING:
@@ -184,6 +185,7 @@ class TextPanel(EditorPanel):
          box = QtWidgets.QWidget()
          box.setLayout(part)
          layout.addWidget(box, stretch)
+      split_box(layout)   # [RZ] texts | editor | preview: the user drags the boundaries
       ## Applies typing as one undo step after a pause.
       self.commit = Debounce(self._commit, DEBOUNCE_MS, self)
 

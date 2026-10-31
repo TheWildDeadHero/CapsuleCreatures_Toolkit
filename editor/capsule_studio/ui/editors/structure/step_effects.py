@@ -20,6 +20,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core import logic
 from ....core.structure import step_effects as step_model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, set_combo, set_spin
 
@@ -33,7 +34,7 @@ NOTE = ("Every N steps of the walker a step effect runs the `on steps` handlers 
         "a role growing, a counter running down. The damage rule decides a member the run took to 0. The counter is "
         "a permanent script variable, so the save image holds it (record the save shapes when the list changes: "
         "script save-shapes).")
-## Width of the list, pixels.
+## Starting width of the list, pixels.
 LIST_WIDTH = 220
 ## The combo text of "no message" / "no script".
 NONE_TEXT = "(none)"
@@ -71,7 +72,6 @@ class StepEffectsPanel(BattlePanel):
       self.refs: list[str] = []
       ## The effects.
       self.list = QtWidgets.QListWidget()
-      self.list.setMaximumWidth(LIST_WIDTH)
       self.list.currentTextChanged.connect(lambda text: self._picked(text))
       ## What menus show.
       self.label = QtWidgets.QLineEdit()
@@ -137,6 +137,7 @@ class StepEffectsPanel(BattlePanel):
       body = QtWidgets.QHBoxLayout()
       body.addWidget(self.list)
       body.addLayout(right, 1)
+      split_box(body, [LIST_WIDTH, None])   # [RZ] list | form: the user drags the boundary
       lay = QtWidgets.QVBoxLayout(self)
       lay.addWidget(note)
       lay.addLayout(body, 1)

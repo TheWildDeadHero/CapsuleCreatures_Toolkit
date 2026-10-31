@@ -92,6 +92,7 @@ from .editors.structure.text import CodePageLinkPanel
 from .editors.structure.transformation import TransformationPanel
 from . import profiler
 from .panel import EditorPanel
+from .panes import NARROW, WIDE, fit_panel, splitter
 from .widgets import STATUS_MS, StartPage, ask, file_toolbar, headless, remember_file, report_failure
 
 if TYPE_CHECKING:
@@ -135,7 +136,7 @@ BATTLE_FILTER = "Battle data (battle.json *.json);;All files (*)"
 WINDOW_WIDTH = 1200
 ## Height of the window when it opens, pixels.
 WINDOW_HEIGHT = 780
-## Width of the navigator, pixels (titles and file names).
+## Starting width of the navigator, pixels (titles and file names; the user drags its boundary).
 NAV_WIDTH = 290
 ## Item data role of a navigator page: the index of its panel in BattleWindow.panels (groups have none).
 PANEL_ROLE = QtCore.Qt.ItemDataRole.UserRole
@@ -182,7 +183,6 @@ class BattleWindow(QtWidgets.QMainWindow):
       self.nav = QtWidgets.QTreeWidget()
       self.nav.setColumnCount(NAV_COLUMNS)
       self.nav.setHeaderHidden(True)
-      self.nav.setFixedWidth(NAV_WIDTH)
       self.nav.setRootIsDecorated(True)
       header = self.nav.header()
       header.setStretchLastSection(False)
@@ -211,13 +211,11 @@ class BattleWindow(QtWidgets.QMainWindow):
          "battle-editor", lambda path: self.open_battle(path),
          skip=("Continue without battle data", lambda: self.show_editor()), recent_title="Recent battle data")
       if len(self.panels) > 1:
-         body = QtWidgets.QWidget()
-         lay = QtWidgets.QHBoxLayout(body)
-         lay.setContentsMargins(0, 0, 0, 0)
-         lay.setSpacing(0)
-         lay.addWidget(self.nav)
-         lay.addWidget(self.stack, 1)
-         self.setCentralWidget(body)
+         # [RZ] the navigator and the page are panes: drag the boundary (the navigator starts NAV_WIDTH wide)
+         ## The navigator | page splitter.
+         self.split = splitter(QtCore.Qt.Orientation.Horizontal, [self.nav, self.stack], [NARROW, WIDE],
+                               [NAV_WIDTH, None])
+         self.setCentralWidget(self.split)
       else:   # one editor alone (battle-editor --panel): no navigator
          self.setCentralWidget(self.panels[0])
       self.nav.currentItemChanged.connect(lambda item, _old: self._nav_changed(item))
@@ -251,6 +249,7 @@ class BattleWindow(QtWidgets.QMainWindow):
          self.group_items[gid] = group_item
          for cls in members:
             panel = cls(self)
+            fit_panel(panel)   # [RZ] scroll bars instead of a window larger than the screen
             item = QtWidgets.QTreeWidgetItem([panel.title])
             item.setData(0, PANEL_ROLE, len(self.panels))
             group_item.addChild(item)

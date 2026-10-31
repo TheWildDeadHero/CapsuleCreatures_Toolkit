@@ -17,6 +17,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core.document import DocumentError
 from ....core.structure import flags as flag_model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel
 
@@ -319,6 +320,7 @@ class FlagsTagsPanel(BattlePanel):
       row = QtWidgets.QHBoxLayout()
       row.addWidget(self.flags, 1)
       row.addWidget(self.tags, 1)
+      split_box(row)   # [RZ] flags | tags
       lay.addLayout(row, 1)
       lay.addWidget(self.errors)
 

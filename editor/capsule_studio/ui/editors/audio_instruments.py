@@ -16,6 +16,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ...core import audio, audio_render as ar
 from ..panel import EditorPanel, PanelHost
+from ..panes import split_box, splitter
 from ..widgets import button
 from .audio_common import (WIDE_STRETCH, BankView, EnvelopeView, KeyStrip, RenderBar, document_of, fit_table,
                            problem_text, scroll)
@@ -30,7 +31,7 @@ SPLIT_COLUMNS = ("Keys", "Entry", "Plays")
 DRUM_COLUMNS = ("Key", "Name", "Voice")
 ## Frames the envelope preview holds a note by default, and the spin's range.
 DEFAULT_HELD, HELD_RANGE = 30, (1, 600)
-## Width of the set list, pixels.
+## Starting width of the set list, pixels.
 LIST_WIDTH = 220
 ## Layout stretches: sets, window, voice.
 SETS_STRETCH, WINDOW_STRETCH, VOICE_STRETCH = 1, 2, 2
@@ -85,7 +86,6 @@ class InstrumentPanel(EditorPanel):
       lv.addWidget(button("Add window of this bank", lambda: self.add_set(own=False),
                           "A new set reading the selected set's bank from the offset above"))
       lv.addWidget(button("Add bank", lambda: self.add_bank()))
-      left.setMinimumWidth(LIST_WIDTH)
 
       ## The window's voices.
       self.window = QtWidgets.QTableWidget(0, len(WINDOW_COLUMNS))
@@ -185,6 +185,7 @@ class InstrumentPanel(EditorPanel):
                                                                "instrument set"))
       sv.addLayout(row)
       sv.addWidget(self.split, 1)
+      split_box(sv)   # [RZ] keys over the split table
 
       # drums
       ## The drum set's keys.
@@ -212,6 +213,7 @@ class InstrumentPanel(EditorPanel):
       bv = QtWidgets.QVBoxLayout(banks)
       bv.addWidget(scroll(self.banks, True), WIDE_STRETCH)
       bv.addWidget(self.overlaps, 1)
+      split_box(bv)   # [RZ] bank windows over their overlaps
 
       ## The voice side's tabs.
       self.side = QtWidgets.QTabWidget()
@@ -219,14 +221,12 @@ class InstrumentPanel(EditorPanel):
       self.side.addTab(split, "Key split")
       self.side.addTab(drums, "Drum set")
       self.side.addTab(banks, "Bank windows")
-      splitter = QtWidgets.QSplitter()
-      splitter.addWidget(left)
-      splitter.addWidget(middle)
-      splitter.addWidget(self.side)
-      for i, s in enumerate((SETS_STRETCH, WINDOW_STRETCH, VOICE_STRETCH)):
-         splitter.setStretchFactor(i, s)
+      # [RZ] sets | window | voice: the user drags the boundaries (the sets start LIST_WIDTH wide)
+      panes = splitter(QtCore.Qt.Orientation.Horizontal, [left, middle, self.side],
+                       [SETS_STRETCH, WINDOW_STRETCH, VOICE_STRETCH],
+                       [LIST_WIDTH, None, None])
       lay = QtWidgets.QVBoxLayout(self)
-      lay.addWidget(splitter)
+      lay.addWidget(panes)
 
    # -- panel contract ---------------------------------------------------------------------------------------------
 

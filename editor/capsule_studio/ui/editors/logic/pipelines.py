@@ -35,6 +35,7 @@ from ....core import battle, engine, expressions, pipelines
 from ....core.document import DocumentError
 from ....core.structure import record
 from ....core.structure import turn as turn_model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import NONE_TEXT, BattlePanel, set_combo, set_spin, set_spin_max
 from .expression_edit import FormulaEdit
@@ -158,6 +159,7 @@ class PipelinesPointsPanel(BattlePanel):
       right.addWidget(self.right_tabs, 1)
       right.addWidget(self.errors)
       lay.addLayout(right, RIGHT_STRETCH)
+      split_box(lay)   # [RZ] steps | calculator and points
 
    # -- building -------------------------------------------------------------------------
 

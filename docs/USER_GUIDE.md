@@ -176,6 +176,14 @@ The World and Battle pages, which edit several files, add **Save all**
 edit, so what an editor accepts is what the build accepts; the status bar
 says when a file compiles.
 
+Panels side by side or stacked (the page list, a list beside its form, a map
+beside its layers and palette, a table over its preview) have a handle
+between them, drawn as two short lines: drag it to give one panel more room.
+The panels share a window's new space until you drag a handle; after that
+they keep the sizes you gave them. A panel whose content does not fit shows
+scroll bars, so the Studio and every editor work in a window as small as
+800 x 540.
+
 ### World
 
 The map editor and the world tools, on the game's world:

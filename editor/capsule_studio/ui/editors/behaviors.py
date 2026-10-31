@@ -12,6 +12,7 @@ from PySide6 import QtWidgets
 from ...core import behaviors as model
 from ...core import engine
 from ..panel import EditorPanel
+from ..panes import split_box
 from ..widgets import button, set_enabled
 from .battle_common import FORM_STRETCH, LIST_STRETCH
 from .record_widgets import NameChecks
@@ -93,6 +94,7 @@ class BehaviorsPanel(EditorPanel):
       lay = QtWidgets.QHBoxLayout(self)
       lay.addLayout(left, LIST_STRETCH)
       lay.addLayout(right, FORM_STRETCH)
+      split_box(lay)   # [RZ] list | form: the user drags the boundary
 
    def world(self) -> Document | None:
       """!The world Document.

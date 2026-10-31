@@ -17,7 +17,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from ..core import audio, audio_render as ar, bench, engine
 from ..core.document import DocumentError
@@ -28,6 +28,7 @@ from .editors.audio_midi import MidiPanel
 from .editors.audio_samples import SamplePanel
 from .editors.audio_songs import SongPanel
 from .editors.audio_sounds import SoundPanel
+from .panes import NARROW, WIDE, fit_panel, splitter
 from .widgets import STATUS_MS, Debounce, StartPage, file_toolbar, remember_file, report_failure
 
 if TYPE_CHECKING:
@@ -44,7 +45,7 @@ TOOL = "audio-editor"
 TITLE = "CapsuleCreatures Audio Editor"
 ## Width and height of the window when it opens, pixels.
 WINDOW_WIDTH, WINDOW_HEIGHT = 1400, 860
-## Height of the problems list, pixels.
+## Starting height of the problems list, pixels (the user drags its boundary).
 PROBLEMS_HEIGHT = 64
 
 
@@ -71,19 +72,18 @@ class AudioWindow(QtWidgets.QMainWindow):
       self.tabs = QtWidgets.QTabWidget()
       for cls in AUDIO_PANELS:
          panel = cls(self)
+         fit_panel(panel)   # [RZ] scroll bars instead of a window larger than the screen
          self.panels.append(panel)
          self.tabs.addTab(panel, panel.title)
       self.tabs.currentChanged.connect(lambda _i: self._tab_changed())
       ## The problems list.
       self.problem_list = QtWidgets.QListWidget()
-      self.problem_list.setMaximumHeight(PROBLEMS_HEIGHT)
       self.problem_list.setToolTip("What the engine's format.py finds in the manifest (the build refuses these)")
-      central = QtWidgets.QWidget()
-      lay = QtWidgets.QVBoxLayout(central)
-      lay.setContentsMargins(0, 0, 0, 0)
-      lay.addWidget(self.tabs, 1)
-      lay.addWidget(self.problem_list)
-      self.setCentralWidget(central)
+      # [RZ] the panels above, the problems below: drag the boundary (the list starts PROBLEMS_HEIGHT high)
+      ## The panels | problems splitter.
+      self.split = splitter(QtCore.Qt.Orientation.Vertical, [self.tabs, self.problem_list], [WIDE, NARROW],
+                            [None, PROBLEMS_HEIGHT])
+      self.setCentralWidget(self.split)
       ## Revalidates once edits pause.
       self._check_later = Debounce(lambda: self.check(), parent=self)
       ## Start page, shown until a manifest is open.

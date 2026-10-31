@@ -30,6 +30,7 @@ from ..core.document import DocumentError
 from . import profiler
 from .editors.placeholders import PlaceholdersPanel
 from .editors.script import CodeEditor
+from .panes import splitter
 from .widgets import STATUS_MS, Debounce, StartPage, button, file_toolbar, remember_file
 
 ## File dialog filter.
@@ -64,8 +65,6 @@ PROBLEM_WHERE_WIDTH = 200
 SOURCES_STRETCH = 4
 ## Stretch of the middle (sources and problems) against the outline and the settings (1 each).
 MIDDLE_STRETCH = 4
-## Index of the settings pane in the window's splitter (after the outline and the middle).
-SIDE_PANE = 2
 ## [S2] Rows of the glitch switch list before it scrolls.
 GLITCH_ROWS = 6
 
@@ -228,11 +227,7 @@ class ScriptWindow(QtWidgets.QMainWindow):
       self.problems.setColumnWidth(0, PROBLEM_SEVERITY_WIDTH)
       self.problems.setColumnWidth(1, PROBLEM_WHERE_WIDTH)
       self.problems.itemActivated.connect(lambda item, _c: self._jump_to_problem(item))
-      middle = QtWidgets.QSplitter(QtCore.Qt.Orientation.Vertical)
-      middle.addWidget(self.tabs)
-      middle.addWidget(self.problems)
-      middle.setStretchFactor(0, SOURCES_STRETCH)
-      middle.setStretchFactor(1, 1)
+      middle = splitter(QtCore.Qt.Orientation.Vertical, [self.tabs, self.problems], [SOURCES_STRETCH, 1])
       # Settings and tools.
       side = QtWidgets.QWidget()
       form = QtWidgets.QFormLayout(side)
@@ -308,13 +303,9 @@ class ScriptWindow(QtWidgets.QMainWindow):
       self.side_tabs.addTab(side, "Settings")
       self.side_tabs.addTab(self.placeholders, "Placeholders")
       self.side_tabs.currentChanged.connect(lambda _i: self._update_title())
-      split = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
-      split.addWidget(self.outline)
-      split.addWidget(middle)
-      split.addWidget(self.side_tabs)
-      split.setStretchFactor(0, 1)
-      split.setStretchFactor(1, MIDDLE_STRETCH)
-      split.setStretchFactor(SIDE_PANE, 1)
+      # [RZ] outline | sources and problems | settings: panes the user resizes; each scrolls when it does not fit
+      split = splitter(QtCore.Qt.Orientation.Horizontal, [self.outline, middle, self.side_tabs],
+                       [1, MIDDLE_STRETCH, 1])
       self.setCentralWidget(split)
 
    def _action(self, menu: QtWidgets.QMenu, text: str, slot: Callable[[], object],

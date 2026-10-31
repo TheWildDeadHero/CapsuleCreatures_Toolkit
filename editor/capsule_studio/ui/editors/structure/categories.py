@@ -23,6 +23,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ....core.document import DocumentError
 from ....core.structure import categories as cat_model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel
 
@@ -148,6 +149,7 @@ class CategoriesPanel(BattlePanel):
       row.addStretch(1)
       lay.addLayout(row)
       lay.addWidget(self.errors)
+      split_box(lay)   # [RZ] the three tables, stacked: the user drags the boundaries
 
    def rows(self) -> list[cat_model.CategoryRow]:
       """!The categories as the table shows them.

@@ -33,6 +33,7 @@ from ...core import engine, text_boxes, text_render, text_tables, text_window
 from ...core.document import Document, DocumentError
 from ..panel import EditorPanel
 from ..qtimage import to_qimage
+from ..panes import split_box
 from ..widgets import PixelView, button
 from .text_common import session_of
 
@@ -286,6 +287,7 @@ class TextBoxPanel(EditorPanel):
             holder.setLayout(part)
             part = holder
          layout.addWidget(part, stretch)
+      split_box(layout)   # [RZ] list | form | preview: the user drags the boundaries
 
    def _build_arrow(self) -> QtWidgets.QGroupBox:
       """!S5: the arrow image box (window "arrow_image", engine N3): the image, its height, steps and delay, and a

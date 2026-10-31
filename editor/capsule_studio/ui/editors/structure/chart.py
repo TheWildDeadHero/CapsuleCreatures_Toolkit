@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core.structure import chart as chart_model
+from ...panes import split_box
 from ...widgets import button
 from ..battle_common import NONE_TEXT, STRUCTURE, BattlePanel, set_combo
 
@@ -199,6 +200,7 @@ class TiersChartPanel(BattlePanel):
       lay.addLayout(brush_row)
       lay.addWidget(self.grid, GRID_STRETCH)
       lay.addWidget(self.errors)
+      split_box(lay)   # [RZ] tiers over the chart
 
    # -- reading ------------------------------------------------------------------------
 

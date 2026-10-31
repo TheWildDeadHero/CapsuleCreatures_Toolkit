@@ -23,6 +23,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from ...core import engine, screen_graphics as sg
 from ..panel import EditorPanel, PanelHost
 from ..qtimage import to_qimage
+from ..panes import split_box
 from ..widgets import HALF, PixelView, button, set_enabled
 from .content.json_edit import JsonEdit
 
@@ -181,11 +182,13 @@ class ScreenGraphicsPanel(EditorPanel):
       right.addLayout(opts)
       right.addWidget(area, 1)
       right.addWidget(self.picker)
+      split_box(right)   # [RZ] picture over the tile picker
 
       lay = QtWidgets.QHBoxLayout(self)
       lay.addLayout(left, LIST_STRETCH)
       lay.addLayout(mid, FORM_STRETCH)
       lay.addLayout(right, PREVIEW_STRETCH)
+      split_box(lay)   # [RZ] list | form | picture: the user drags the boundaries
       self.refresh()
 
    # -- forms ---------------------------------------------------------------------------------------------------

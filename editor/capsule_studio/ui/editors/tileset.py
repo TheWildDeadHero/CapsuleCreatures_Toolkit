@@ -16,6 +16,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from ...core import mapview, tilesets
 from ..panel import EditorPanel
 from ..qtimage import load_rgba, to_qimage
+from ..panes import mark_panel, split_box
 from ..widgets import MetatileGrid, PixelView, button, grid_area
 from .tileset_fixed import AnimationBox, FixedBox
 
@@ -590,6 +591,7 @@ class TilesetPanel(EditorPanel):
       middle.addLayout(bank_row)
       middle.addLayout(row)
       middle.addWidget(self.format_tabs, FORMAT_TABS_STRETCH)
+      split_box(middle)   # [RZ] the sheet over its formats: the user drags the boundary
 
       # -- right: metatiles
       ## Metatiles of the tileset (pictures; the name is the tooltip and mt_label).
@@ -600,6 +602,7 @@ class TilesetPanel(EditorPanel):
       self.maker = MetatileCanvas(self)
       ## The metatile at twice its size.
       self.preview = PixelView(METATILE_PREVIEW_ZOOM)
+      mark_panel(self.preview, False)   # [RZ] a fixed-size swatch beside the maker, not a pane
       self.preview.setFixedSize(METATILE_PREVIEW_SIZE, METATILE_PREVIEW_SIZE)
       self.mt_grid.setAcceptDrops(True)
       self.mt_grid.installEventFilter(self)
@@ -637,6 +640,8 @@ class TilesetPanel(EditorPanel):
          box = QtWidgets.QWidget()
          box.setLayout(part)
          layout.addWidget(box, stretch)
+      split_box(left)   # [RZ] tilesets over sheets
+      split_box(layout)   # [RZ] lists | sheet | metatiles: the user drags the boundaries
 
    # -- documents ---------------------------------------------------------------------
 

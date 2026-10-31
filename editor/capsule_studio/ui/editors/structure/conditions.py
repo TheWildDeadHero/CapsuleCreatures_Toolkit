@@ -24,6 +24,7 @@ from PySide6 import QtWidgets
 from ....core import battle, holders
 from ....core.document import DocumentError
 from ....core.structure import conditions as cond_model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import (FORM_STRETCH, LIST_STRETCH, NONE_TEXT, STRUCTURE, BattlePanel,
                              set_check, set_combo, set_spin)
@@ -153,6 +154,7 @@ class ConditionTab(QtWidgets.QWidget):
       box.setLayout(left)
       lay.addWidget(box, LIST_STRETCH)
       lay.addWidget(scroll, FORM_STRETCH)
+      split_box(lay)   # [RZ] list | form: the user drags the boundary
 
    # -- the form -----------------------------------------------------------------------
 

@@ -10,7 +10,8 @@ disabled widget, scroll bars too). For each panel shown, every visible scroll ar
   - has no ScrollBarAlwaysOff policy, unless ALWAYS_OFF_ALLOWED lists the case with its reason;
   - when it overflows: moves with its scroll bar's value and stays there, and moves with the mouse wheel over the
     view and over every value field in it (combo boxes, spin boxes, sliders), which keep their values
-    (ui/widgets.py WheelGuard).
+    (ui/widgets.py WheelGuard). Scroll areas nest since D-40 RZ (a splitter pane's fit area inside its panel's,
+    ui/panes.py): a field or point counts for the innermost area it is in, which is the one the wheel scrolls.
 The Object editor, where the developer found the lock, is also checked on its own: wheeling over its whole form
 scrolls the form and edits nothing.
 
@@ -68,6 +69,9 @@ OBJECT_ROW = 1
 if QtWidgets is not None:
    ## Value fields that must leave the wheel to the page while unfocused.
    FIELDS = (QtWidgets.QComboBox, QtWidgets.QAbstractSpinBox, QtWidgets.QSlider)
+   ## [RZ] Widgets that take the wheel themselves (a tab bar changes tabs, a scroll bar moves): a page's corner over
+   ## one (a tab widget at the top of a splitter pane) says nothing about the page.
+   TAKE_WHEEL = (QtWidgets.QTabBar, QtWidgets.QScrollBar)
 
 
 def field_value(field: QtWidgets.QWidget) -> object:
@@ -80,6 +84,18 @@ def field_value(field: QtWidgets.QWidget) -> object:
    if isinstance(field, QtWidgets.QSlider):
       return field.value()
    return field.text()
+
+
+def scrolling_page(widget: QtWidgets.QWidget) -> QtWidgets.QAbstractScrollArea | None:
+   """![RZ] The innermost scroll area a widget is in (ui/widgets.py scrolling_page(); a viewport counts as its area's).
+   @param widget  QWidget
+   @return the scroll area, or None
+   """
+   from capsule_studio.ui import widgets
+   parent = widget.parentWidget()
+   if isinstance(parent, QtWidgets.QAbstractScrollArea) and widget is parent.viewport():
+      return parent
+   return widgets.scrolling_page(widget)
 
 
 def wheel(over: QtWidgets.QWidget, local: QtCore.QPoint, notches: int = -1) -> QtWidgets.QWidget | None:
@@ -220,7 +236,11 @@ class ScrollingTests(unittest.TestCase):
       corner = QtCore.QPoint(*CORNER)
       top = area.window()
       hit = top.childAt(top.mapFromGlobal(area.viewport().mapToGlobal(corner)))
-      if hit is not None and (hit is area.viewport() or area.viewport().isAncestorOf(hit)):
+      # [RZ] areas nest (a pane's fit area in a panel's): the wheel goes to the innermost one under the pointer
+      if hit is not None and (hit is area.viewport() or area.viewport().isAncestorOf(hit)) and \
+            scrolling_page(hit) in (area, None) and not isinstance(hit, TAKE_WHEEL):
+         if hit.hasFocus():
+            area.setFocus()   # [RZ] a field the window focused when it showed steps with the wheel, as it should
          wheel(area.viewport(), corner)
          self.settle()
          if bar.value() == 0:
@@ -257,14 +277,19 @@ class ScrollingTests(unittest.TestCase):
          try:
             if not isinstance(field, FIELDS) or not field.isVisible() or not field.isEnabled():
                continue
+            if scrolling_page(field) is not area:
+               continue   # [RZ] in a scroll area inside this one (a pane in a panel): the wheel scrolls that one
          except RuntimeError:   # a refresh rebuilt the form (after a wheel that edited something)
             continue
          if isinstance(area, QtWidgets.QScrollArea):
-            area.ensureWidgetVisible(field, 0, 0)
-            self.settle()
+            self.reveal(field)   # [RZ] every page around it scrolls to it, the area's too when areas nest
          centre = field.mapTo(view, field.rect().center())
          if not shown.contains(centre) or bar.maximum() <= 0:
             continue
+         top = view.window()
+         hit = top.childAt(top.mapFromGlobal(view.mapToGlobal(centre)))
+         if hit is None or not (hit is field or field.isAncestorOf(hit)):
+            continue   # [RZ] hidden behind the edge of a page around the area: no pointer reaches it there
          tried += 1
          if field.hasFocus():
             area.setFocus()
@@ -473,7 +498,8 @@ class ScrollingTests(unittest.TestCase):
       self.settle()
       ob.tree.setCurrentItem(ob.tree.topLevelItem(OBJECT_ROW))
       self.settle()
-      form = next(a for a in ob.findChildren(QtWidgets.QScrollArea) if a.isVisible())
+      from capsule_studio.ui.panes import is_fit_area
+      form = next(a for a in ob.findChildren(QtWidgets.QScrollArea) if a.isVisible() and not is_fit_area(a))
       bar = form.verticalScrollBar()
       self.assertGreater(bar.maximum(), 0)   # the form is taller than the view
       fields = [f for f in form.widget().findChildren(QtWidgets.QWidget) if isinstance(f, FIELDS) and f.isVisible()]

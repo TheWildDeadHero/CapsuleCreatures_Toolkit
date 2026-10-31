@@ -26,6 +26,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import field_rules as model
 from ..panel import EditorPanel
+from ..panes import split_box
 from ..widgets import button, headless, set_enabled
 from .battle_common import FORM_STRETCH, LIST_STRETCH, set_combo
 from .record_widgets import NameChecks
@@ -339,6 +340,7 @@ class ModesPanel(FieldPanel):
       lay = QtWidgets.QHBoxLayout(self)
       lay.addLayout(left, LIST_STRETCH)
       lay.addLayout(right, FORM_STRETCH)
+      split_box(lay)   # [RZ] modes | form: the user drags the boundary
 
    def rows(self) -> list[dict[str, Any]]:
       """!The modes.

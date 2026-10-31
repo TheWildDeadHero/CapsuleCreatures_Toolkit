@@ -26,6 +26,7 @@ from PySide6 import QtWidgets
 from capsule_studio.core import engine, events, map_field, maps, objects, script_words
 from capsule_studio.core.document import DocumentError
 from capsule_studio.ui.panel import EditorPanel
+from capsule_studio.ui.panes import split_box
 from capsule_studio.ui.widgets import button, lock_view, set_enabled, view_locked
 
 from . import maptools
@@ -554,6 +555,7 @@ class ObjectsPanel(EditorPanel):
       lay = QtWidgets.QHBoxLayout(self)
       lay.addLayout(left, LIST_STRETCH)
       lay.addWidget(scroll, FORM_STRETCH)
+      split_box(lay)   # [RZ] objects | form: the user drags the boundary
       self.refresh()
 
    # -- host ---------------------------------------------------------------------------------

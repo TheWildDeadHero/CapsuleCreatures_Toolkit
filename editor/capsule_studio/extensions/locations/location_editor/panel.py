@@ -25,6 +25,7 @@ from PySide6 import QtWidgets
 from capsule_studio.core import engine, locations
 from capsule_studio.core.document import DocumentError
 from capsule_studio.ui.panel import EditorPanel
+from capsule_studio.ui.panes import split_box
 from capsule_studio.ui.widgets import button, set_enabled
 
 if TYPE_CHECKING:
@@ -51,9 +52,9 @@ MAX_BANNER_FRAMES = locations.MAX_BANNER_FRAMES
 MAX_BANNER_SLIDE = locations.MAX_BANNER_SLIDE
 ## Tallest the banner style list grows (pixels).
 STYLE_LIST_HEIGHT = 110
-## Tallest the location list grows (pixels).
+## Starting height of the location list's pane (pixels; the user drags its boundary).
 LOCATION_LIST_HEIGHT = 130
-## Tallest the preview sequence list grows (pixels).
+## Starting height of the preview sequence list's pane (pixels; the user drags its boundary).
 SEQUENCE_LIST_HEIGHT = 90
 ## Stretch of the left column (transition and banner styles).
 LEFT_STRETCH = 2
@@ -152,7 +153,6 @@ class LocationsPanel(EditorPanel):
       ll = QtWidgets.QVBoxLayout(loc_box)
       ## The world's locations.
       self.loc_list = QtWidgets.QListWidget()
-      self.loc_list.setMaximumHeight(LOCATION_LIST_HEIGHT)
       self.loc_list.currentRowChanged.connect(lambda _r: self._location_chosen())
       ll.addWidget(self.loc_list)
       row = QtWidgets.QHBoxLayout()
@@ -184,7 +184,6 @@ class LocationsPanel(EditorPanel):
       ll.addWidget(QtWidgets.QLabel("Preview sequences (the last whose conditions all hold plays)"))
       ## The location's preview entries.
       self.seq_list = QtWidgets.QListWidget()
-      self.seq_list.setMaximumHeight(SEQUENCE_LIST_HEIGHT)
       self.seq_list.currentRowChanged.connect(lambda _r: self._sequence_chosen())
       ll.addWidget(self.seq_list)
       row = QtWidgets.QHBoxLayout()
@@ -203,6 +202,7 @@ class LocationsPanel(EditorPanel):
       qf.addRow("Sequence", self.seq_path)
       qf.addRow("When", self.seq_when)
       ll.addLayout(qf)
+      split_box(ll, [LOCATION_LIST_HEIGHT, SEQUENCE_LIST_HEIGHT])   # [RZ] locations over their sequences
       ## Location form widgets.
       self.loc_widgets = [self.loc_key, self.loc_name, self.loc_banner, self.loc_preview, self.seq_list]
 
@@ -243,6 +243,7 @@ class LocationsPanel(EditorPanel):
       lay = QtWidgets.QHBoxLayout(self)
       lay.addLayout(left, LEFT_STRETCH)
       lay.addLayout(right, RIGHT_STRETCH)
+      split_box(lay)   # [RZ] transition and banner styles | map and locations: drag the boundary
       self.refresh()
 
    # -- host ---------------------------------------------------------------------------------

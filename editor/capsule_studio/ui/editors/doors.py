@@ -22,6 +22,7 @@ from ...core import doors, engine, sprites
 from ...core.world import Project
 from ..panel import EditorPanel, PanelHost
 from ..qtimage import to_qimage
+from ..panes import split_box
 from ..widgets import PixelView, button, set_enabled
 
 if TYPE_CHECKING:
@@ -219,6 +220,7 @@ class DoorPanel(EditorPanel):
       self.sound_check = QtWidgets.QLabel()
       self.sound_check.setWordWrap(True)
       self.sound_check.setStyleSheet(f"color: {SOUND_WARNING_COLOR};")
+      split_box(timing)   # [RZ] open | close steps
       mid = QtWidgets.QVBoxLayout()
       mid.addLayout(self.form)
       mid.addWidget(self.error)
@@ -226,6 +228,7 @@ class DoorPanel(EditorPanel):
       mid.addLayout(entry_head)
       mid.addWidget(self.entries, 1)
       mid.addLayout(timing, 1)
+      split_box(mid)   # [RZ] entries over the steps
 
       # -- preview
       ## The world a door is previewed on.
@@ -279,6 +282,7 @@ class DoorPanel(EditorPanel):
          w = QtWidgets.QWidget()
          w.setLayout(part)
          lay.addWidget(w, stretch)
+      split_box(lay)   # [RZ] doors | form | preview: the user drags the boundaries
 
    # -- helpers ---------------------------------------------------------------------------------
 

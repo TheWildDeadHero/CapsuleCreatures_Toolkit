@@ -9,6 +9,7 @@ from PySide6 import QtWidgets
 from ...core import engine, preview, texts
 from ..panel import EditorPanel
 from ..qtimage import screen_qimage
+from ..panes import split_box
 from ..widgets import DEBOUNCE_MS, Debounce, PixelView, button, set_enabled
 
 if TYPE_CHECKING:
@@ -97,6 +98,7 @@ class CreditsPanel(EditorPanel):
          box.setLayout(part)
          layout.addWidget(box, stretch)
       layout.addWidget(self.view, PREVIEW_STRETCH)
+      split_box(layout)   # [RZ] pages | fields | preview: the user drags the boundaries
       ## Writes typing as one undo step after a pause.
       self.commit = Debounce(self._commit, DEBOUNCE_MS, self)
 

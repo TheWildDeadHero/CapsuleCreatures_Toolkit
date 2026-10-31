@@ -14,6 +14,7 @@ from PySide6 import QtCore, QtWidgets
 
 from ...core import audio, audio_render as ar
 from ..panel import EditorPanel, PanelHost
+from ..panes import splitter
 from ..widgets import button
 from .audio_common import RenderBar, WaveformView, document_of, grid_rows, problem_text
 
@@ -27,7 +28,7 @@ COUNT_MAX = 0x7FFFFFFF
 LOOKAHEAD_RANGE = (1, 8)
 ## Tune range (cents) and its decimals.
 TUNE_RANGE, TUNE_DECIMALS = (-1200.0, 1200.0), 1
-## Width of the sample list, pixels.
+## Starting width of the sample list, pixels.
 LIST_WIDTH = 220
 ## Ticks the Play note is held.
 PLAY_TICKS = 60
@@ -63,7 +64,6 @@ class SamplePanel(EditorPanel):
       lv.setContentsMargins(0, 0, 0, 0)
       lv.addWidget(QtWidgets.QLabel("Samples"))
       lv.addWidget(self.samples, 1)
-      left.setMinimumWidth(LIST_WIDTH)
 
       ## Header facts.
       self.info = QtWidgets.QLabel()
@@ -170,11 +170,9 @@ class SamplePanel(EditorPanel):
       rv.addWidget(self.wave, 1)
       rv.addWidget(self.bar)
       rv.addWidget(box)
-      split = QtWidgets.QSplitter()
-      split.addWidget(left)
-      split.addWidget(right)
-      split.setStretchFactor(0, LIST_STRETCH)
-      split.setStretchFactor(1, SAMPLE_STRETCH)
+      # [RZ] list | sample: the user drags the boundary (the list starts LIST_WIDTH wide)
+      split = splitter(QtCore.Qt.Orientation.Horizontal, [left, right], [LIST_STRETCH, SAMPLE_STRETCH],
+                       [LIST_WIDTH, None])
       lay = QtWidgets.QVBoxLayout(self)
       lay.addWidget(split)
 

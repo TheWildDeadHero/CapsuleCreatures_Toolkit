@@ -23,6 +23,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from ....core.document import DocumentError
 from ....core.structure import stages as stage_model
 from ....core.structure import stats as stat_model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import NONE_TEXT, STRUCTURE, BattlePanel
 
@@ -126,6 +127,7 @@ class StagesPanel(BattlePanel):
       lay.addWidget(self.entries_label)
       lay.addWidget(self.entries, ENTRIES_STRETCH)
       lay.addWidget(self.errors)
+      split_box(lay)   # [RZ] stages over their entries
 
    # -- reading ------------------------------------------------------------------------
 

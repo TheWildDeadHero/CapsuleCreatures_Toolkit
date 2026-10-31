@@ -15,6 +15,7 @@ from PySide6 import QtWidgets
 
 from ...core import engine, events, interactions
 from ..panel import EditorPanel
+from ..panes import split_box
 from ..widgets import button, set_enabled
 
 if TYPE_CHECKING:
@@ -118,6 +119,7 @@ class InteractionsPanel(EditorPanel):
       lay = QtWidgets.QHBoxLayout(self)
       lay.addLayout(left, TABLE_STRETCH)
       lay.addLayout(right, FORM_STRETCH)
+      split_box(lay)   # [RZ] rules | form: the user drags the boundary
       self.refresh()
 
    # -- host -------------------------------------------------------------------------------------------

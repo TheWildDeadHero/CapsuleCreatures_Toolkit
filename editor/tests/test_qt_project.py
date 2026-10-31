@@ -122,7 +122,9 @@ class QtProjectTests(unittest.TestCase):
       self.app.processEvents()
       self.assertTrue(w.start.isVisible())
       w.show_editor()
-      self.assertFalse(w.panels[0].isEnabled())
+      from capsule_studio.ui.widgets import is_enabled
+      # [RZ] greyed through its contents (set_enabled()): the panel holds a fit area, whose scroll bars stay on
+      self.assertFalse(is_enabled(w.panels[0]))
       w.close()
 
 

@@ -20,6 +20,7 @@ from PySide6 import QtWidgets
 from ...core import asset_tables, engine
 from ...core.document import DocumentError
 from ..panel import EditorPanel
+from ..panes import split_box
 from ..widgets import button
 from .text_common import session_of
 
@@ -100,6 +101,7 @@ class ManifestPanel(EditorPanel):
       holder = QtWidgets.QWidget()
       holder.setLayout(side)
       layout.addWidget(holder, 1)
+      split_box(layout, every=True)   # [RZ] the lists | languages and check: the user drags the boundaries
 
    def refresh(self) -> None:
       """!Re-reads the lists and what the manifest reaches.

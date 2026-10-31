@@ -26,6 +26,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core import battle
 from ....core.structure import nursery as nursery_model
 from ....core.structure import turn as model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, EntryPanel, set_check, set_combo, set_spin
 from ..content.presenters import PresenterPreview
@@ -140,6 +141,7 @@ class FormatsPanel(EntryPanel):
                              "Drop the format's own stands: each side stands at its first position"))
       tables.addLayout(left)
       tables.addLayout(right)
+      split_box(tables)   # [RZ] places | stands
       layout.addLayout(tables, TABLE_STRETCH)
       ## The battle screen with the places and stands.
       self.preview = PresenterPreview()
@@ -424,7 +426,9 @@ class TurnPanel(BattlePanel):
       each_row.addWidget(self.each)
       lay.addLayout(each_row)
       lay.addWidget(button("Engine default", lambda: self.reset(model.END_KEY), "The engine's phases"))
+      split_box(lay)   # [RZ] phases over their sources
       top.addWidget(group)
+      split_box(top, every=True)   # [RZ] brackets | order | end of turn
       outer = QtWidgets.QVBoxLayout(self)
       note = QtWidgets.QLabel("The turn: who acts first (brackets, then speed, then the tie rule), the order "
                               "hooks are dispatched in, and what the end of each turn runs. Grey: the engine's "

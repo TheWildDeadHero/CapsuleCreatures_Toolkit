@@ -18,6 +18,7 @@ from capsule_studio.core import encounters as enc
 from capsule_studio.core import engine, paths
 from capsule_studio.core.document import DocumentError
 from capsule_studio.ui.panel import EditorPanel
+from capsule_studio.ui.panes import split_box
 from capsule_studio.ui.widgets import button
 
 if TYPE_CHECKING:
@@ -78,9 +79,9 @@ MAX_PROBLEMS_SHOWN = 8
 NEW_ENTRY_LEVEL = 5
 ## Weight of a new entry.
 NEW_ENTRY_WEIGHT = 10
-## Tallest the method list grows (pixels).
+## Starting height of the method list (pixels; the user drags its boundary).
 METHOD_LIST_HEIGHT = 120
-## Tallest the condition list grows (pixels).
+## Starting height of the condition list (pixels; the user drags its boundary).
 CONDITION_LIST_HEIGHT = 100
 ## Stretch of the table list in the middle column.
 TABLE_LIST_STRETCH = 2
@@ -183,10 +184,8 @@ class EncounterPanel(EditorPanel):
       self.battle.setWordWrap(True)
       ## Methods.
       self.method_list = QtWidgets.QListWidget()
-      self.method_list.setMaximumHeight(METHOD_LIST_HEIGHT)
       ## Conditions.
       self.condition_list = QtWidgets.QListWidget()
-      self.condition_list.setMaximumHeight(CONDITION_LIST_HEIGHT)
       left = QtWidgets.QVBoxLayout()
       left.addWidget(QtWidgets.QLabel("Encounter files"))
       left.addWidget(self.files, 1)
@@ -214,7 +213,9 @@ class EncounterPanel(EditorPanel):
                        ("Remove", lambda: self.remove("condition", self.condition_list))):
          row.addWidget(button(text, fn))
       wl.addLayout(row)
+      split_box(wl, [METHOD_LIST_HEIGHT, CONDITION_LIST_HEIGHT])   # [RZ] methods over conditions: drag the boundary
       left.addWidget(world)
+      split_box(left)   # [RZ] files over the world's methods and conditions
 
       # -- middle: tables
       ## The file's tables.
@@ -327,6 +328,7 @@ class EncounterPanel(EditorPanel):
          box = QtWidgets.QWidget()
          box.setLayout(part)
          layout.addWidget(box, stretch)
+      split_box(layout)   # [RZ] files | tables | entries: the user drags the boundaries
 
    # -- documents ---------------------------------------------------------------------------
 

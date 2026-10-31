@@ -25,6 +25,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core.document import DocumentError
 from ....core.structure import progression
 from ....core.structure import record_preview as model
+from ...panes import split_box
 from ...widgets import button
 from ..battle_common import NONE_TEXT, set_combo
 
@@ -218,6 +219,7 @@ class DerivedPreviewBox(QtWidgets.QWidget):
       right.addWidget(self.results, 1)
       right.addWidget(self.message)
       lay.addLayout(right, RESULTS_STRETCH)
+      split_box(lay)   # [RZ] inputs | results
 
    def refresh(self) -> None:
       """!Re-reads the roles and the species; runs again after a first run.
@@ -292,6 +294,7 @@ class TransferPreviewBox(QtWidgets.QWidget):
       right.addWidget(self.results, 1)
       right.addWidget(self.message)
       lay.addLayout(right, RESULTS_STRETCH)
+      split_box(lay)   # [RZ] inputs | results
 
    def refresh(self) -> None:
       """!Re-reads the roles and the species.

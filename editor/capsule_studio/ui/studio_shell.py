@@ -84,6 +84,7 @@ from ..core.document import DocumentError
 from ..core.world import Project
 from ..plugins import registry
 from . import json_view, profiler
+from .panes import NARROW, WIDE, splitter
 from .widgets import StartPage, headless, remember_file, report_failure
 
 if TYPE_CHECKING:
@@ -115,7 +116,7 @@ NO_GAME = ("No game is open",
            "no game is open (Studio > Open project... or New game...)")
 ## Application title.
 TITLE = "CapsuleCreatures Studio"
-## Width of the page list, pixels.
+## Starting width of the page list, pixels (the user drags its boundary).
 NAV_WIDTH = 150
 ## Width of the window when it opens, pixels.
 WINDOW_WIDTH = 1500
@@ -277,7 +278,6 @@ class StudioWindow(QtWidgets.QMainWindow):
       self._skipped_menus = set()
       ## Page list.
       self.nav = QtWidgets.QListWidget()
-      self.nav.setFixedWidth(NAV_WIDTH)
       self.nav.setStyleSheet("QListWidget::item { padding: 6px 10px; }")
       for p in PAGES:
          item = QtWidgets.QListWidgetItem(p.title)
@@ -288,13 +288,11 @@ class StudioWindow(QtWidgets.QMainWindow):
       self.stack = QtWidgets.QStackedWidget()
       for p in PAGES:
          self.stack.addWidget(self._placeholder(p))
-      body = QtWidgets.QWidget()
-      lay = QtWidgets.QHBoxLayout(body)
-      lay.setContentsMargins(0, 0, 0, 0)
-      lay.setSpacing(0)
-      lay.addWidget(self.nav)
-      lay.addWidget(self.stack, 1)
-      self.setCentralWidget(body)
+      # [RZ] the page list and the page are panes: drag the boundary (the list starts NAV_WIDTH wide)
+      ## The page list | page splitter.
+      self.split = splitter(QtCore.Qt.Orientation.Horizontal, [self.nav, self.stack], [NARROW, WIDE],
+                            [NAV_WIDTH, None])
+      self.setCentralWidget(self.split)
       self._build_menu()
       ## Start page, shown until a project is open.
       self.start = StartPage(

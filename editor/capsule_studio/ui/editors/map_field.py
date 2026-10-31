@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtCore, QtWidgets
 
 from ...core import document, map_field as model
+from ..panes import split_box
 from ..widgets import button, set_enabled
 from .battle_common import set_check, set_combo
 from .field_rules import FieldPanel
@@ -33,14 +34,12 @@ NOTE = ("Field actions are used on what the walker faces: a behavior (water), or
         "Menu actions may need the map to carry a tag (a dark cave). A dark map draws a lit box around the walker "
         "(0: lit). Leaving an escape point (outdoors) for a map that is not one records where `escape` returns to. "
         "Flight points are the flight menu's places; `flight record NAME` marks one visited.")
-## Height of the name lists, pixels.
+## Height of the map's tag list, pixels (it sits in the map's form).
 LIST_HEIGHT = 110
 ## The name lists: (core key, title, what a name is called).
 NAME_LISTS = [(model.KINDS_KEY, "Object kinds", "object kind"), (model.TAGS_KEY, "Map tags", "map tag")]
 ## C8: the darkness level table's columns (the level, then core.map_field.LEVEL_FIELDS).
 LEVEL_COLUMNS = ["Level", "Lit half size (px)", "Brightness (0-16)"]
-## Height of the darkness level table, in name list heights.
-LEVELS_HEIGHT_LISTS = 2
 ## The level a new darkest level copies (the last), and what it takes off the lit box, pixels.
 NEW_LEVEL_STEP = 8
 
@@ -72,7 +71,6 @@ class MapFieldPanel(FieldPanel):
          box = QtWidgets.QGroupBox(title)
          lay = QtWidgets.QVBoxLayout(box)
          names = QtWidgets.QListWidget()
-         names.setMaximumHeight(LIST_HEIGHT)
          self.name_lists[key] = names
          row = QtWidgets.QHBoxLayout()
          row.addWidget(button("Add...", lambda k=key, w=what: self.add_name(k, None, w)))
@@ -113,7 +111,6 @@ class MapFieldPanel(FieldPanel):
       self.levels.setHorizontalHeaderLabels(LEVEL_COLUMNS)
       self.levels.verticalHeader().setVisible(False)
       self.levels.horizontalHeader().setStretchLastSection(True)
-      self.levels.setMaximumHeight(LIST_HEIGHT * LEVELS_HEIGHT_LISTS)
       self.levels.cellChanged.connect(lambda r, c: self._level_edited(r, c))
       ## Says whether the levels are the engine's defaults.
       self.levels_note = QtWidgets.QLabel()
@@ -130,6 +127,7 @@ class MapFieldPanel(FieldPanel):
       map_row = QtWidgets.QHBoxLayout()
       map_row.addWidget(map_box, 1)
       map_row.addWidget(levels_box, 1)
+      split_box(map_row)   # [RZ] map | darkness levels
       # the flight points
       flight_box = QtWidgets.QGroupBox("Flight points")
       ## The flight points.
@@ -179,6 +177,8 @@ class MapFieldPanel(FieldPanel):
       lay.addLayout(map_row)
       lay.addWidget(flight_box, 1)
       lay.addWidget(self.errors)
+      split_box(names_row)   # [RZ] the name lists side by side
+      split_box(lay)   # [RZ] names / map and levels / flight points, stacked: the user drags the boundaries
 
    # -- reading -------------------------------------------------------------------------------------------------------
 

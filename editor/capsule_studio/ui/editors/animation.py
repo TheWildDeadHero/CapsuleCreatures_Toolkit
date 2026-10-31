@@ -12,6 +12,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from ...core import engine, imaging, sprite_grid, sprites
 from ..panel import EditorPanel, report_for
 from ..qtimage import indexed_qimage, load_rgba, to_qimage
+from ..panes import split_box
 from ..widgets import PaletteStrip, PixelView, button, set_enabled
 from .import_dialog import ImportDialog
 from .sprite_grid import GridBox
@@ -311,6 +312,7 @@ class AnimationPanel(EditorPanel):
          box = QtWidgets.QWidget()
          box.setLayout(part)
          frames_lay.addWidget(box, stretch)
+      split_box(frames_lay)   # [RZ] steps | playback
       ## [S3] The direction-grid view.
       self.grid_box = GridBox(self)
       ## The page shown: steps or grid.
@@ -318,6 +320,7 @@ class AnimationPanel(EditorPanel):
       self.pages.addWidget(self.frames_page)
       self.pages.addWidget(self.grid_box)
       layout.addWidget(self.pages, STEPS_STRETCH + PLAYBACK_STRETCH)
+      split_box(layout)   # [RZ] sprites | steps and playback: the user drags the boundary
 
    # -- refresh -------------------------------------------------------------
 

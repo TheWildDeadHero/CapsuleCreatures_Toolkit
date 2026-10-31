@@ -22,6 +22,7 @@ from PySide6 import QtWidgets
 from capsule_studio.core import doors, engine, events, maps
 from capsule_studio.core.document import DocumentError
 from capsule_studio.ui.panel import EditorPanel
+from capsule_studio.ui.panes import split_box
 from capsule_studio.ui.widgets import button, set_enabled
 
 from . import maptools
@@ -279,9 +280,11 @@ class EventsPanel(EditorPanel):
       left.addLayout(adds)
       left.addWidget(form_box)
       left.addWidget(self.problems)
+      split_box(left)   # [RZ] events over the chosen event's form
       lay = QtWidgets.QHBoxLayout(self)
       lay.addLayout(left, EVENTS_STRETCH)
       lay.addWidget(world, WORLD_STRETCH)
+      split_box(lay)   # [RZ] events | world: the user drags the boundary
       self.refresh()
 
    # -- host ---------------------------------------------------------------------------------

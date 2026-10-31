@@ -21,6 +21,7 @@ from ..core import engine
 from ..core.document import SCHEMA, Document, DocumentError
 from . import json_view
 from .editors import PANELS
+from .panes import fit_panel
 from .widgets import STATUS_MS, file_toolbar, report_failure
 
 if TYPE_CHECKING:
@@ -69,6 +70,7 @@ class EditorWindow(QtWidgets.QMainWindow):
       tabs = QtWidgets.QTabWidget()
       for cls in panel_classes or PANELS:
          self.panels.append(cls(self))
+         fit_panel(self.panels[-1])   # [RZ] scroll bars instead of a window larger than the screen
       if len(self.panels) > 1:
          for panel in self.panels:
             tabs.addTab(panel, panel.title)

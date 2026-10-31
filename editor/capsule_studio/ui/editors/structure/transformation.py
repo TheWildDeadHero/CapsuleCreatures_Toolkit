@@ -23,6 +23,7 @@ from PySide6 import QtCore, QtWidgets
 from ....core import battle
 from ....core.structure import species_fields
 from ....core.structure import transformation as model
+from ...panes import split_box
 from ...widgets import ask, button, set_enabled
 from ..battle_common import NONE_TEXT, STRUCTURE, BattlePanel, combo, set_check, set_combo, set_spin, spin
 
@@ -159,6 +160,7 @@ class TransformationPanel(BattlePanel):
       middle = QtWidgets.QHBoxLayout()
       middle.addWidget(ctx_box, 1)
       middle.addWidget(train_box, 1)
+      split_box(middle, every=True)   # [RZ] context values | training
       lay = QtWidgets.QVBoxLayout(self)
       lay.addWidget(note)
       lay.addWidget(top)
@@ -166,6 +168,7 @@ class TransformationPanel(BattlePanel):
       lay.addWidget(QtWidgets.QLabel("Rules"))
       lay.addWidget(self.rules, 1)
       lay.addWidget(self.errors)
+      split_box(lay)   # [RZ] context and training over the rules
 
    # -- reading -------------------------------------------------------------------------------------------------------
 

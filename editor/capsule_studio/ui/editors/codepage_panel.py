@@ -23,6 +23,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from ...core import codepage, engine
 from ...core.document import DocumentError
 from ..panel import EditorPanel
+from ..panes import split_box
 from ..widgets import button
 
 if TYPE_CHECKING:
@@ -43,7 +44,7 @@ FREE_COLOR = "#f4f4f4"
 CONTROL_COLOR = "#d0d0d8"
 ## Width of a grid column, pixels.
 COLUMN_WIDTH = 46
-## Height of the unmapped characters list, pixels.
+## Starting height of the unmapped characters list, pixels (the user drags its boundary).
 MISSING_LIST_HEIGHT = 140
 ## Places a list entry shows of where an unmapped character is used.
 USES_SHOWN = 3
@@ -134,7 +135,6 @@ class CodePagePanel(EditorPanel):
                            button("Unset", lambda: self.unset_char(), "Leave the code without a character")]
       ## Characters the game's texts use that the page lacks.
       self.missing_list = QtWidgets.QListWidget()
-      self.missing_list.setMaximumHeight(MISSING_LIST_HEIGHT)
       ## Unmapped-character buttons.
       self.missing_buttons = [
          button("Give it the selected code", lambda: self.map_missing(),
@@ -186,6 +186,8 @@ class CodePagePanel(EditorPanel):
       lay = QtWidgets.QHBoxLayout(self)
       lay.addLayout(left, GRID_STRETCH)
       lay.addLayout(right, LISTS_STRETCH)
+      split_box(right, [MISSING_LIST_HEIGHT, None])   # [RZ] missing characters over aliases: drag the boundary
+      split_box(lay)   # [RZ] code page | lists: the user drags the boundary
 
    # -- documents -------------------------------------------------------------------------
 

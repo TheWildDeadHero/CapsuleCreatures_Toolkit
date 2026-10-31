@@ -14,6 +14,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import audio, audio_render as ar
 from ..panel import EditorPanel, PanelHost
+from ..panes import split_box, splitter
 from ..widgets import button
 from .audio_common import (BACKGROUND, GRID, HALF, LABEL_INSET, LANE_HEIGHT, LANE_LABEL, TEXT, WIDE_STRETCH, ZOOM_RANGE,
                            RenderBar, colour, document_of, fit_table, problem_text, scroll, track_colour, zoom_of,
@@ -296,12 +297,9 @@ class SoundPanel(EditorPanel):
       self.chart_area = scroll(self.chart)
       prv.addWidget(self.chart_area, WIDE_STRETCH)
       prv.addWidget(self.outcome, 1)
+      split_box(prv)   # [RZ] the chart over its outcome
 
-      top = QtWidgets.QSplitter()
-      top.addWidget(table_box)
-      top.addWidget(players_box)
-      top.setStretchFactor(0, HALF)
-      top.setStretchFactor(1, 1)
+      top = splitter(QtCore.Qt.Orientation.Horizontal, [table_box, players_box], [HALF, 1])   # [RZ] table | players
       clip_widget = QtWidgets.QWidget()
       clip_widget.setLayout(clip_column)
       ## The panel's pages.

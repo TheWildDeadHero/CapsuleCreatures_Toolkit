@@ -29,6 +29,7 @@ from ...core import asset_tables, engine, text_boxes, text_render, text_tables
 from ...core.document import Document, DocumentError
 from ..panel import EditorPanel
 from ..qtimage import to_qimage
+from ..panes import split_box
 from ..widgets import DEBOUNCE_MS, Debounce, PixelView, button, set_enabled
 from .text_common import MarkupHighlighter, control_menu, session_of
 
@@ -212,6 +213,7 @@ class TextTablesPanel(EditorPanel):
       middle.addLayout(box_row)
       middle.addWidget(self.summary)
       middle.addWidget(languages, TEXT_STRETCH)
+      split_box(middle)   # [RZ] text / lines / languages, stacked
       ## The text box style the preview uses.
       self.style_box = QtWidgets.QComboBox()
       self.style_box.currentIndexChanged.connect(lambda _i: self._update_preview())
@@ -233,6 +235,7 @@ class TextTablesPanel(EditorPanel):
          holder = QtWidgets.QWidget()
          holder.setLayout(part)
          layout.addWidget(holder, stretch)
+      split_box(layout)   # [RZ] tables | editor | preview: the user drags the boundaries
       ## Commits typing as one undo step after a pause.
       self.commit = Debounce(lambda: self._commit(), DEBOUNCE_MS, self)
       ## Re-checks the table after edits.

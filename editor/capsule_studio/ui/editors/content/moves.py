@@ -25,6 +25,7 @@ from ....core import engine, holders
 from ....core.document import DocumentError
 from ....core.structure import categories as cat_model
 from ....core.structure import resources, stages
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..record_widgets import PointHandlersBox
 from ..battle_common import EntryPanel, combo, set_check, set_combo, set_spin, set_spin_max, spin
@@ -175,6 +176,7 @@ class MovesPanel(EntryPanel):
                                        in_logic=True)
       layout.addWidget(self.handlers)
       layout.addStretch(1)
+      split_box(layout)   # [RZ] the move's form over its point handlers
 
    def _flags_changed(self) -> None:
       """!A flag box was toggled: the checked flags in the manifest's order, then the flags the move has that the

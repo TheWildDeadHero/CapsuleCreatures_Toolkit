@@ -27,6 +27,7 @@ from ...core import engine, fonts, text_render
 from ...core.document import Document, DocumentError
 from ..panel import EditorPanel
 from ..qtimage import to_qimage
+from ..panes import split_box
 from ..widgets import PixelView, button
 from .text_common import session_of
 
@@ -307,6 +308,7 @@ class FontPanel(EditorPanel):
          holder = QtWidgets.QWidget()
          holder.setLayout(part)
          layout.addWidget(holder, stretch)
+      split_box(layout)   # [RZ] glyphs | editor | settings: the user drags the boundaries
 
    # -- documents --------------------------------------------------------------------------------------------------
 

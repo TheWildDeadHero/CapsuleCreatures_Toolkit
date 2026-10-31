@@ -32,6 +32,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ....core import logic
 from ....core.document import DocumentError
+from ...panes import splitter
 from ...widgets import button, set_enabled
 from ..battle_common import BattlePanel
 from ..script import CodeEditor
@@ -248,11 +249,8 @@ class EffectsPanel(BattlePanel):
       self.diag_list = QtWidgets.QListWidget()
       self.diag_list.itemActivated.connect(lambda item: self.go_to_diagnostic(self.diag_list.row(item)))
       self.diag_list.itemDoubleClicked.connect(lambda item: self.go_to_diagnostic(self.diag_list.row(item)))
-      text_page = QtWidgets.QSplitter(QtCore.Qt.Orientation.Vertical)
-      text_page.addWidget(self.code)
-      text_page.addWidget(self.diag_list)
-      text_page.setStretchFactor(0, 1)
-      text_page.setSizes(list(TEXT_SPLIT))
+      # [RZ] the code over its diagnostics: panes the user resizes
+      text_page = splitter(QtCore.Qt.Orientation.Vertical, [self.code, self.diag_list], [1, 0], TEXT_SPLIT)
       ## Block | text pages.
       self.stack = QtWidgets.QStackedWidget()
       self.stack.addWidget(self.blocks)
@@ -273,11 +271,8 @@ class EffectsPanel(BattlePanel):
       el.addWidget(self.stack, 1)
       el.addWidget(self.errors)
 
-      split = QtWidgets.QSplitter()
-      for w, stretch in zip((owners, handlers, editor), COLUMN_STRETCH):
-         split.addWidget(w)
-         split.setStretchFactor(split.count() - 1, stretch)
-      split.setSizes(list(COLUMN_WIDTHS))
+      # [RZ] owners | handlers | editor: panes the user resizes
+      split = splitter(QtCore.Qt.Orientation.Horizontal, [owners, handlers, editor], COLUMN_STRETCH, COLUMN_WIDTHS)
       lay = QtWidgets.QVBoxLayout(self)
       lay.addWidget(split)
 

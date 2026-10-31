@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ..core import preview
+from .panes import mark_panel
 
 if TYPE_CHECKING:
    from pathlib import Path
@@ -51,7 +52,7 @@ class PixelView(QtWidgets.QWidget):
       self.image = None
       self.zoom = zoom
       self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
-      self.setMinimumSize(PIXEL_VIEW_MIN_SIZE, PIXEL_VIEW_MIN_SIZE)
+      mark_panel(self)   # [RZ] a picture beside a form is a pane of its own (panes.split_box())
 
    def set_image(self, image: QtGui.QImage | None) -> None:
       """!Changes the image.
@@ -81,6 +82,14 @@ class PixelView(QtWidgets.QWidget):
          return QtCore.QSize(PIXEL_VIEW_EMPTY_SIZE, PIXEL_VIEW_EMPTY_SIZE)
       return QtCore.QSize(self.image.width() * self.zoom + PIXEL_VIEW_MARGIN,
                           self.image.height() * self.zoom + PIXEL_VIEW_MARGIN)
+
+   def minimumSizeHint(self) -> QtCore.QSize:
+      """![RZ] The whole image at the current zoom (at least PIXEL_VIEW_MIN_SIZE square): a layout never makes the
+      view smaller than its picture, so a pane too small for it scrolls (panes.scroll_wrap()) instead of cutting
+      the picture's edges off.
+      @return QSize
+      """
+      return self.sizeHint().expandedTo(QtCore.QSize(PIXEL_VIEW_MIN_SIZE, PIXEL_VIEW_MIN_SIZE))
 
    def paintEvent(self, event: QtGui.QPaintEvent) -> None:
       """!Draws the checkerboard and the image, centred.
@@ -314,8 +323,9 @@ class WheelGuard(QtCore.QObject):
    keyboard focus: the page stops scrolling there and the field's value changes (an edit, with an undo step)
    instead. Inside a scroll area this filter hands the wheel on to the page unless the field has the focus (the
    user clicked or tabbed into it, so the wheel steps it as before). Fields outside any scroll area keep Qt's
-   behaviour. Fields also stop taking the focus from the wheel alone (Qt.WheelFocus -> Qt.StrongFocus), or the
-   first wheel step over one would focus it and the next would change it.
+   behaviour; since D-40 RZ every hosted panel sits in a fit area (panes.fit_panel()), so every panel field leaves
+   the wheel to its page until it has the focus. Fields also stop taking the focus from the wheel alone
+   (Qt.WheelFocus -> Qt.StrongFocus), or the first wheel step over one would focus it and the next would change it.
    """
 
    def eventFilter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:

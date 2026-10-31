@@ -22,6 +22,7 @@ from . import profiler
 from .editors.build_settings import BuildSettingsPanel
 from .editors.codepage_panel import CodePagePanel
 from .editors.gba_memory import GbaMemoryPanel
+from .panes import fit_panel
 from .widgets import STATUS_MS, StartPage, file_toolbar, remember_file
 
 if TYPE_CHECKING:
@@ -57,6 +58,7 @@ class ProjectWindow(QtWidgets.QMainWindow):
       self.tabs = QtWidgets.QTabWidget()
       for cls in PROJECT_PANELS:
          panel = cls(self)
+         fit_panel(panel)   # [RZ] scroll bars instead of a window larger than the screen
          self.panels.append(panel)
          self.tabs.addTab(panel, panel.title)
       self.tabs.currentChanged.connect(lambda _i: self._tab_changed())

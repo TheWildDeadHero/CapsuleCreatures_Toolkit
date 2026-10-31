@@ -27,6 +27,7 @@ from ....core import battle, holders, inventory
 from ....core.structure import field_effects as fx_model
 from ....core.structure import pockets as pocket_model
 from ....core.structure import recruit as recruit_model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import BattlePanel, EntryPanel, combo, set_check, set_combo, set_spin, spin
 from ..record_widgets import PointHandlersBox
@@ -378,6 +379,7 @@ class ShopsTab(BattlePanel):
          box = QtWidgets.QWidget()
          box.setLayout(part)
          lay.addWidget(box, 1)
+      split_box(lay)   # [RZ] shops | what they sell
 
    def refresh(self) -> None:
       """!Re-reads the shops.

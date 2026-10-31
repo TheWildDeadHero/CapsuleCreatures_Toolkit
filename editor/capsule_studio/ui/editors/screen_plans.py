@@ -30,6 +30,7 @@ from ...core import engine, paths, screen_graphics as sg, screen_plans as sp
 from ...core.document import Document
 from ..panel import EditorPanel, PanelHost
 from ..qtimage import to_qimage
+from ..panes import split_box
 from ..widgets import PixelView, button, set_enabled
 
 ## A parsed JSON object.
@@ -200,6 +201,7 @@ class ScreenPlanPanel(EditorPanel):
       exit_row.addWidget(QtWidgets.QLabel("next"))
       exit_row.addWidget(self.exit_next, 1)
       left.addLayout(exit_row)
+      split_box(left)   # [RZ] items over frame steps
 
       # -- middle
       ## What the chosen item is.
@@ -262,11 +264,13 @@ class ScreenPlanPanel(EditorPanel):
       right.addWidget(self.call_text)
       right.addWidget(self.view, 1)
       right.addWidget(info, 1)
+      split_box(right)   # [RZ] picture over problems and memory
 
       cols = QtWidgets.QHBoxLayout()
       cols.addLayout(left, LEFT_STRETCH)
       cols.addLayout(middle, MIDDLE_STRETCH)
       cols.addLayout(right, RIGHT_STRETCH)
+      split_box(cols)   # [RZ] items | form | preview: the user drags the boundaries
       outer = QtWidgets.QVBoxLayout(self)
       outer.addLayout(top)
       outer.addLayout(cols, 1)

@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 from PySide6 import QtCore, QtWidgets
 
 from ....core.structure import delayed_hits as hit_model
+from ...panes import split_box
 from ...widgets import button, set_enabled
 from ..battle_common import STRUCTURE, BattlePanel, set_check, set_combo, set_spin
 from ..record_widgets import NameChecks
@@ -27,7 +28,7 @@ NOTE = ("A move's `delay_hit WHO TURNS NAME;` keeps a snapshot of its user at th
         "(the end-of-turn phase delayed), the move's land phase `damage;` works the hit out through the damage "
         "pipeline. The record says what the landing takes from the time of use, whether the hit has a type and "
         "may be critical, and its accuracy check when it lands.")
-## Width of the list, pixels.
+## Starting width of the list, pixels.
 LIST_WIDTH = 220
 
 
@@ -57,7 +58,6 @@ class DelayedHitsPanel(BattlePanel):
       self.selected = None
       ## The records.
       self.list = QtWidgets.QListWidget()
-      self.list.setMaximumWidth(LIST_WIDTH)
       self.list.currentTextChanged.connect(lambda text: self._picked(text))
       ## What the landing takes from the time of use.
       self.at_use = NameChecks(lambda names: self._set(lambda doc, n: hit_model.set_at_use(doc, n, names)))
@@ -106,6 +106,7 @@ class DelayedHitsPanel(BattlePanel):
       body = QtWidgets.QHBoxLayout()
       body.addWidget(self.list)
       body.addLayout(right, 1)
+      split_box(body, [LIST_WIDTH, None])   # [RZ] list | form: the user drags the boundary
       lay = QtWidgets.QVBoxLayout(self)
       lay.addWidget(note)
       lay.addLayout(body, 1)

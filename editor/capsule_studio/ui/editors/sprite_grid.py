@@ -18,6 +18,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import engine, sprite_grid, sprites
 from ..qtimage import to_qimage
+from ..panes import split_box
 from ..widgets import PixelView, button
 
 if TYPE_CHECKING:
@@ -165,6 +166,8 @@ class GridBox(QtWidgets.QWidget):
       body.addLayout(anim_col, 1)
       lay.addLayout(body, 1)
       lay.addLayout(walk)
+      split_box(body)   # [RZ] grid | animations
+      split_box(lay)   # [RZ] grid and animations over the walk previews
 
    # -- helpers -------------------------------------------------------------------------------
 

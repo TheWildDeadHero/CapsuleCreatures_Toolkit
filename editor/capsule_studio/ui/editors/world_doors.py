@@ -13,6 +13,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ...core import doors, draw_order, engine
 from ..panel import EditorPanel
+from ..panes import split_box
 from ..widgets import PixelView, button, set_enabled
 
 if TYPE_CHECKING:
@@ -197,6 +198,8 @@ class WorldDoorsPanel(EditorPanel):
       lay = QtWidgets.QHBoxLayout(self)
       lay.addWidget(bind_box, BINDINGS_STRETCH)
       lay.addLayout(right, ORDER_STRETCH)
+      split_box(top)   # [RZ] draw order | preview
+      split_box(lay)   # [RZ] door bindings | draw order and preview: the user drags the boundaries
 
    # -- host -------------------------------------------------------------------------------------------
 

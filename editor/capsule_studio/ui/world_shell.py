@@ -44,6 +44,7 @@ from .editors.world_doors import WorldDoorsPanel
 from .editors.world_interactions import InteractionsPanel
 from . import background, profiler
 from .panel import EditorPanel
+from .panes import fit_panel
 from .widgets import START_TITLE_EXTRA_POINTS, STATUS_MS, StartPage, button, file_toolbar, remember_file, \
    report_failure
 
@@ -189,6 +190,7 @@ class WorldWindow(QtWidgets.QMainWindow):
       for cls in WORLD_PANELS if panel_classes is None else panel_classes:
          if panel_ids is None or cls.panel_id in panel_ids:
             panel = cls(self)
+            fit_panel(panel)   # [RZ] scroll bars instead of a window larger than the screen
             self.panels.append(panel)
             self.tabs.addTab(panel, panel.title)
       self._sync_extension_panels()
@@ -237,6 +239,7 @@ class WorldWindow(QtWidgets.QMainWindow):
          except Exception as e:   # a broken extension panel must not stop the editor
             self.extensions.errors.append((spec.plugin, f"panel {pid}: {e}"))
             continue
+         fit_panel(panel)
          self._ext_panels[pid] = panel
          self.panels.append(panel)
          self.tabs.addTab(panel, spec.title)
