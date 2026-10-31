@@ -1,0 +1,9 @@
+{
+  "schema": "capsule.template/1",
+  "id": "blank",
+  "name": "Blank",
+  "description": "Neutral, minimal battle data that compiles: hit points, four stats (Health, Power, Guard, Speed), physical and support moves, one type and one trait, no condition records, no logic. Add the rest in the Structure and Content pages.",
+  "version": 1,
+  "editor": {"notes": "The studio's built-in Blank template (S10, D-23 section 3.5)."},
+  "parts": {"structure": ["structure.json"], "logic": ["ruleset.json"], "content": ["battle.json"]}
+}

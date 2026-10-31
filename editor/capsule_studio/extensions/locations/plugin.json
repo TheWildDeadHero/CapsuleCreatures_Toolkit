@@ -1,0 +1,13 @@
+{
+  "schema": "capsule.plugin/1",
+  "id": "studio.locations",
+  "title": "Locations editor",
+  "version": "2026.10.18.1056",
+  "api": 1,
+  "requires": {"capsule_studio": ">=2026.10.17.0000"},
+  "extension": {"module": "location_editor.extension"},
+  "cli": "locations",
+  "editor": {
+    "notes": "The studio's locations editor (D-17): the Locations panel (the location-editor app, and a tab of the Studio's World page: the world's default warp transition, banner styles, locations with their banner and previews, and a map's location), hover text, and the locations command group. A built-in extension, loaded through the same plugin host as project plugins (capsule_studio.plugins)."
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "schema": "capsule.tileset/2",
+  "id": "t1",
+  "sheets": [
+    {
+      "name": "Shapes",
+      "palette": "auto",
+      "image": "sheets/shapes_8x8.png",
+      "transparent": "#fff200"
+    }
+  ],
+  "metatiles": [
+    {
+      "name": "metatile",
+      "tiles": [
+        "Shapes:0",
+        "Shapes:1",
+        "Shapes:16",
+        "Shapes:17"
+      ]
+    },
+    {
+      "name": "metatile_2",
+      "tiles": [
+        "Shapes:96",
+        "Shapes:97",
+        "Shapes:112",
+        "Shapes:113"
+      ]
+    },
+    {
+      "name": "metatile_3",
+      "tiles": [
+        "Shapes:270",
+        "Shapes:271",
+        "Shapes:286",
+        "Shapes:287"
+      ]
+    },
+    {
+      "name": "metatile_4",
+      "tiles": [
+        "Shapes:164",
+        "Shapes:165",
+        "Shapes:180",
+        "Shapes:181"
+      ]
+    },
+    {
+      "name": "metatile_5",
+      "tiles": [
+        "Shapes:132",
+        "Shapes:133",
+        "Shapes:148",
+        "Shapes:149"
+      ]
+    },
+    {
+      "name": "metatile_6",
+      "tiles": [null, null, "Shapes:116", "Shapes:117"]
+    },
+    {
+      "name": "metatile_7",
+      "tiles": [
+        "Shapes:38",
+        "Shapes:39",
+        "Shapes:54",
+        "Shapes:55"
+      ]
+    },
+    {
+      "name": "metatile_8",
+      "tiles": [
+        "Shapes:192",
+        "Shapes:193",
+        "Shapes:208",
+        "Shapes:209"
+      ]
+    },
+    {
+      "name": "metatile_9",
+      "tiles": [
+        "Shapes:194",
+        "Shapes:195",
+        "Shapes:210",
+        "Shapes:211"
+      ]
+    },
+    {
+      "name": "metatile_10",
+      "tiles": [
+        "Shapes:160",
+        "Shapes:161",
+        "Shapes:176",
+        "Shapes:177"
+      ]
+    },
+    {
+      "name": "metatile_11",
+      "tiles": [
+        "Shapes:162",
+        "Shapes:163",
+        "Shapes:178",
+        "Shapes:179"
+      ]
+    },
+    {
+      "name": "metatile_12",
+      "tiles": [
+        "Shapes:128",
+        "Shapes:129",
+        "Shapes:144",
+        "Shapes:145"
+      ]
+    },
+    {
+      "name": "metatile_13",
+      "tiles": [
+        "Shapes:130",
+        "Shapes:131",
+        "Shapes:146",
+        "Shapes:147"
+      ]
+    }
+  ]
+}

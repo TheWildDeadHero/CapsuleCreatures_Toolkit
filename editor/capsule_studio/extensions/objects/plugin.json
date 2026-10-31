@@ -1,0 +1,13 @@
+{
+  "schema": "capsule.plugin/1",
+  "id": "studio.objects",
+  "title": "Map objects editor",
+  "version": "2026.10.18.1056",
+  "api": 1,
+  "requires": {"capsule_studio": ">=2026.10.17.0000"},
+  "extension": {"module": "object_editor.extension"},
+  "cli": "objects",
+  "editor": {
+    "notes": "The studio's map objects editor (B-21): the Objects panel (with event pages, triggers, movement options and move routes, D-17; the object-editor app, and a tab of the Studio's World page), the Objects map tool, the Map objects overlay and hover text in the Map tab, and the objects command group. A built-in extension, loaded through the same plugin host as project plugins (capsule_studio.plugins)."
+  }
+}

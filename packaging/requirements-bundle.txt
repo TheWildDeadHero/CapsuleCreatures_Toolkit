@@ -1,0 +1,13 @@
+# The tools that build the prebuilt studio bundle (build_bundle.py), pinned exactly. Install them next to the
+# studio's own pins (../toolkit/requirements/ui.txt) in the Python that will be bundled:
+#    python -m pip install --only-binary=:all: -r toolkit/toolkit/requirements/ui.txt -r requirements-bundle.txt
+# PyInstaller: one-folder bundles with Qt kept as separate shared libraries, maintained hooks for PySide6, builds
+# for Linux, Windows and macOS universal2 (D-40 RI; packaging/README.md says why this tool).
+pyinstaller==6.22.3
+pyinstaller-hooks-contrib==2026.8
+altgraph==0.17.5
+packaging==25.0
+setuptools==80.9.0
+macholib==1.16.3; sys_platform == "darwin"
+pefile==2024.8.26; sys_platform == "win32"
+pywin32-ctypes==0.2.3; sys_platform == "win32"

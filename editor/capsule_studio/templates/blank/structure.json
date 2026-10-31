@@ -1,0 +1,47 @@
+{
+  "schema": "capsule.structure/1",
+  "editor": {
+    "notes": "The studio's Blank template (S10, D-23 section 3.5): neutral and minimal. One pool (hit points), four stats, two move categories, one type, no condition records, no stages, no logic."
+  },
+  "monster_layout": {
+    "party_size": 6,
+    "move_slots": 4,
+    "roles": ["species_key", "experience", "level", "moves", "trait", "current_hp", "primary_status"]
+  },
+  "stats": [
+    {"name": "hp", "label": "Health", "formula": "stat_pool", "pool": true},
+    {"name": "power", "label": "Power", "formula": "stat_other"},
+    {"name": "guard", "label": "Guard", "formula": "stat_other"},
+    {"name": "speed", "label": "Speed", "formula": "stat_other", "order": true}
+  ],
+  "resources": [
+    {
+      "name": "hp",
+      "label": "Health",
+      "scope": "battler",
+      "stat": "hp",
+      "empty": "faint",
+      "persist": "current_hp"
+    }
+  ],
+  "rules": {
+    "stat_cap": 999,
+    "level_max": 100,
+    "rank_max": 1,
+    "self_hit": {"power": 1, "category": "physical"},
+    "fallback_move": null
+  },
+  "chart": {"tiers": [{"name": "normal", "q8": 256}], "combine": "multiply", "types_per_species": 1, "matchups": {}},
+  "categories": [{"name": "physical", "offense": "power", "defense": "guard"}, {"name": "support"}],
+  "statuses": [],
+  "volatiles": [],
+  "weathers": [],
+  "side_conditions": [],
+  "field_conditions": [],
+  "move_flags": [],
+  "growth": {"standard": "n*n"},
+  "formats": [{"name": "Single", "sides": [[0], [1]], "range": "all", "layout": [[64, 92], [176, 52]]}],
+  "learn": {"default_moves": "last_n_by_level"},
+  "exp_policy": {"share": "faced"},
+  "terms": {}
+}

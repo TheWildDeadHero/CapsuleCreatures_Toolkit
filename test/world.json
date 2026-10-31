@@ -1,0 +1,10 @@
+{
+  "schema": "capsule.world/1",
+  "id": "test",
+  "vehicle_classes": ["foot"],
+  "behaviors": [{"name": "normal"}],
+  "tilesets": {"t1": "tilesets/t1.json"},
+  "maps": {"Blank": "maps/Blank.json", "Anotha One": "maps/Anotha One.json"},
+  "start": {"map": "Blank", "x": 3, "y": 3, "facing": "down"},
+  "map_groups": [{"name": "Things", "maps": []}]
+}

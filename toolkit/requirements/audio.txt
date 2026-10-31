@@ -1,0 +1,6 @@
+# Packages for playing audio inside the editors (the Audio page and audio-editor):
+# Qt Multimedia, from PySide6-Addons, at the same version as ui.txt's PySide6.
+# Optional: when it cannot be installed (no wheel for this platform, an offline
+# wheel folder without it), the editors still start and Play hands the WAV to
+# the system's player, as they also do on a machine without an audio device.
+PySide6-Addons==6.11.2
