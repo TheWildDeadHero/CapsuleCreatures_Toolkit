@@ -1,10 +1,10 @@
-"""!The creature record of battle data (D-22 decision 2, D-23 §3.2 "Record"):
+"""!The creature record of battle data (§3.2 "Record"):
 the battle manifest's "monster_layout", edited role by role.
 
     "monster_layout": ["species_key", "seed", {"role": "stat_genes", "width": 4}, ...,
                        {"custom": "friendship", "width": 8, "default": 70}]
 
-or the object form, which battle data must use since E7 (D-22 decision 8: a
+or the object form, which battle data must use since the stage scaling (a
 battle states its party size)
 
     "monster_layout": {"party_size": 3, "move_slots": 6, "roles": [...]}
@@ -20,7 +20,7 @@ width, count, default) get the IDs 0x80 + their index among the custom
 roles, so moving one changes its ID. A bare retired role name (owner_secret,
 friendship, ...) is the custom role of that name and its old shape.
 
-A custom role with "stored": false (engine E13a) is computed on read: the
+A custom role with "stored": false is computed on read: the
 generation list's one derived or constant entry gives its value whenever it
 is read (battle::record_value()), so it never goes stale. It takes no record
 bits, is left out of the hash and the transfer, and its ID follows every
@@ -81,7 +81,7 @@ WIDTH_KEY = "width"
 COUNT_KEY = "count"
 ## Key of a custom role's default value.
 DEFAULT_KEY = "default"
-## Key of a custom role's "the record holds it" flag (E13a: false = computed on read).
+## Key of a custom role's "the record holds it" flag (false = computed on read).
 STORED_KEY = "stored"
 ## Properties set_role() changes.
 ROLE_PROPERTIES = (WIDTH_KEY, COUNT_KEY, DEFAULT_KEY)
@@ -106,11 +106,11 @@ COUNT_RULE_RETIRED = "retired"
 UNBOUNDED_RECORD_BYTES = 0xFFFF
 ## Location the compiler's messages name.
 WHERE = LAYOUT_KEY
-## Shown in the transfer column of a custom role when the engine has no record transfer (E2c) keys.
-TRANSFER_PENDING = "(transfer v2: E2c)"
+## Shown in the transfer column of a custom role when the engine has no record transfer keys.
+TRANSFER_PENDING = "(transfer v2)"
 ## Shown in the transfer column of an engine role that is not per stat: a transfer finds it by its fixed ID.
 TRANSFER_BY_ID = "by ID"
-## Shown in the transfer column of an unstored custom role (E13a: not transferred; the receiver computes it).
+## Shown in the transfer column of an unstored custom role (not transferred; the receiver computes it).
 TRANSFER_UNSTORED = "(computed on read: not transferred)"
 ## The effect compiler's structure list of the roles effect logic names (`holder.role(NAME)`).
 ROLE_LISTS = ("roles",)
@@ -197,7 +197,7 @@ def layout_value(doc: Document) -> Any:
 
 
 def party_size_stated(doc: Document) -> bool:
-   """!Whether the layout states its party size (the engine requires it since E7).
+   """!Whether the layout states its party size (the engine requires it since the stage scaling).
    @param doc  battle Document
    @return True for an object form with "party_size"
    """
@@ -206,7 +206,7 @@ def party_size_stated(doc: Document) -> bool:
 
 
 def move_slots_stated(doc: Document) -> bool:
-   """!Whether the layout states its move slots (the engine requires it since E8: battlec LAYOUT_REQUIRED).
+   """!Whether the layout states its move slots (the engine requires it since the resources: battlec LAYOUT_REQUIRED).
    @param doc  battle Document
    @return True for an object form with "move_slots"
    """
@@ -267,7 +267,7 @@ def _is_custom(entry: Any) -> bool:
 
 
 def is_stored(entry: Any) -> bool:
-   """!Whether the record holds a role (every role but a custom role with "stored": false, E13a).
+   """!Whether the record holds a role (every role but a custom role with "stored": false).
    @param entry  a monster_layout entry
    @return False for an unstored custom role
    """
@@ -275,7 +275,7 @@ def is_stored(entry: Any) -> bool:
 
 
 def unstored_roles(doc: Document) -> list[str]:
-   """!The unstored custom roles (computed on read, E13a), in record order.
+   """!The unstored custom roles (computed on read), in record order.
    @param doc  battle Document
    @return names
    """
@@ -437,7 +437,7 @@ def role_rows(doc: Document) -> list[RoleRow]:
            id (fixed for an engine role; 0x80 + the stored custom index; an unstored custom role's after every
            stored one's), width, width_max, width_editable, count, count_rule (an engine COUNT_RULES name, or
            COUNT_RULE_CUSTOM), count_max, count_editable, default (custom roles; else None), stored (False for
-           an unstored custom role, E13a), bits (width x count; 0 for an unstored role: no record bits),
+           an unstored custom role), bits (width x count; 0 for an unstored role: no record bits),
            required, legacy (a bare retired role name), transfer (keys as shown, or None: TRANSFER_PENDING),
            transfer_values (their 32-bit keys, or None)
    """
@@ -483,7 +483,7 @@ def role_rows(doc: Document) -> list[RoleRow]:
       ok = _is_int(row["width"]) and _is_int(row["count"])
       row["bits"] = (row["width"] * row["count"] if row["stored"] else 0) if ok else None
       if row["kind"] == KIND_UNKNOWN or not row["stored"]:
-         row["transfer"], row["transfer_values"] = [], []   # an unstored role is not transferred (E13a)
+         row["transfer"], row["transfer_values"] = [], []   # an unstored role is not transferred
       else:
          row["transfer"], row["transfer_values"] = _transfer_keys(doc, name, row["count_rule"])
       rows.append(row)
@@ -562,7 +562,7 @@ def _script_number(text: str) -> int | None:
 
 def stored_position_id(doc: Document, name: str) -> int | None:
    """!The ID a custom role has while the record stores it (0x80 + its index among the stored custom roles, the
-   roles before it in list order; C5: what an unstored role's ID becomes when it is stored again).
+   roles before it in list order; what an unstored role's ID becomes when it is stored again).
    @param doc   battle Document
    @param name  role name
    @return the ID, or None for an engine role or an unknown name
@@ -583,7 +583,7 @@ def role_users(doc: Document, name: str, removing: bool = False, storing: bool =
    @param name      role name
    @param removing  also list statements naming a custom role by ID from this role's on (removing a custom
                     role moves the IDs of the ones after it down; unstoring it too)
-   @param storing   with @p removing: the role is stored again (C5: the IDs move from its stored-position ID on,
+   @param storing   with @p removing: the role is stored again (the IDs move from its stored-position ID on,
                     stored_position_id(), which is below its unstored ID)
    @return one "scripts: ..." line per use (empty when nothing uses it, or the battle data is in no game)
    """
@@ -1077,7 +1077,7 @@ def add_custom_role(doc: Document, name: str, width: int, count: int | None = No
 def remove_role(doc: Document, name: str) -> None:
    """!Removes a role from the record (refused for the roles every battle needs, while a resource is persisted in
    it or reads its raises from it, while effect logic reads or writes it: `holder.role(NAME)`, core.logic, and
-   while a field rule's expression reads it: C8, core.structure.field_expressions).
+   while a field rule's expression reads it: the field effects, core.structure.field_expressions).
    @param doc   battle Document
    @param name  role name
    @return None
@@ -1087,14 +1087,14 @@ def remove_role(doc: Document, name: str) -> None:
       raise DocumentError(f"battles need the role {name!r}")
    held = resource_model.role_resources(doc, name)
    if held:
-      raise DocumentError(f"role {name!r} holds {', '.join(held)} (D-25): change that on the Resources page first")
+      raise DocumentError(f"role {name!r} holds {', '.join(held)}: change that on the Resources page first")
    users = logic.per_owner(logic.references(doc, ROLE_LISTS, name))
-   # C8: the field rules' expressions (lead rules, field action requirements) read custom roles too
+   # The field rules' expressions (lead rules, field action requirements) read custom roles too
    from . import combination, field_expressions   # local: core.structure imports this module
    users += field_expressions.follow_role(battle.merged(doc), name, None)
-   users += combination.follow_role(battle.merged(doc), name, None)   # B1: the combination expressions' ROLE.R
+   users += combination.follow_role(battle.merged(doc), name, None)   # the combination expressions' ROLE.R
    from . import nursery   # local: it imports this module
-   users += nursery.follow_role(battle.merged(doc), name, None)   # B2: the egg role and the hatch counter
+   users += nursery.follow_role(battle.merged(doc), name, None)   # the egg role and the hatch counter
    if users:
       raise DocumentError(f"role {name!r} is still used by: {', '.join(users[:battle.REFERENCES_SHOWN])}")
    custom = _is_custom(_listed(doc)[i])
@@ -1159,7 +1159,7 @@ def _custom_dict(doc: Document, i: int) -> JsonDict:
 
 def rename_role(doc: Document, old: str, new: str) -> bool:
    """!Renames a custom role, the resources persisted in it or reading their raises from it, the field rules'
-   expressions reading it (C8: core.structure.field_expressions) and the effect logic naming it (core.logic; engine
+   expressions reading it (core.structure.field_expressions) and the effect logic naming it (core.logic; engine
    roles keep their names; the hash folds a custom role's name, so saves made before
    no longer load).
    @param doc  battle Document
@@ -1179,15 +1179,15 @@ def rename_role(doc: Document, old: str, new: str) -> bool:
       @return None
       """
       _custom_dict(doc, i)[CUSTOM_KEY] = new
-      resource_model.rename_role(doc, old, new)   # the resources' persist / raises roles follow (D-25)
-      # C6: the recruit section's item role and the transformation's form role name custom roles too
+      resource_model.rename_role(doc, old, new)   # the resources' persist / raises roles follow
+      # The recruit section's item role and the transformation's form role name custom roles too
       from . import combination, field_expressions, recruit, transformation   # local: they import this module
       recruit.follow_role_rename(doc, old, new)
       transformation.follow_role_rename(doc, old, new)
-      field_expressions.follow_role(battle.merged(doc), old, new)   # C8: lead rules, field action requirements
-      combination.follow_role(battle.merged(doc), old, new)   # B1: the combination expressions' ROLE.R
+      field_expressions.follow_role(battle.merged(doc), old, new)   # lead rules, field action requirements
+      combination.follow_role(battle.merged(doc), old, new)   # the combination expressions' ROLE.R
       from . import nursery   # local: it imports this module
-      nursery.follow_role(battle.merged(doc), old, new)   # B2: the egg role and the hatch counter
+      nursery.follow_role(battle.merged(doc), old, new)   # the egg role and the hatch counter
 
    before, _error = compile_record(doc)
    _guarded(doc, rename)
@@ -1283,7 +1283,7 @@ def set_role(doc: Document, name: str, key: str, value: Any) -> bool:
 
 
 def stored_problem(doc: Document, name: str) -> str | None:
-   """!Why a custom role cannot be unstored (E13a: computed on read, it needs exactly one derived or constant
+   """!Why a custom role cannot be unstored (computed on read, it needs exactly one derived or constant
    generation entry, the engine's UNSTORED_KINDS; check_unstored() refuses anything else).
    @param doc   battle Document
    @param name  role name
@@ -1299,8 +1299,8 @@ def stored_problem(doc: Document, name: str) -> str | None:
 
 
 def set_stored(doc: Document, name: str, stored: bool) -> bool:
-   """!Whether the record holds a custom role (E13a "stored": false: computed on read from its derived or constant
-   generation entry; no record bits, out of the hash and the transfer, its ID after the stored custom roles').
+   """!Whether the record holds a custom role (the record fields "stored": false: computed on read from its derived or
+   constant generation entry; no record bits, out of the hash and the transfer, its ID after the stored custom roles').
    Turning it off is refused unless the role has exactly one derived or constant entry (stored_problem()); field
    scripts then read it as 0 (the editors ask, the CLI wants --force: role_users()).
    @param doc     battle Document
@@ -1339,7 +1339,7 @@ def set_stored(doc: Document, name: str, stored: bool) -> bool:
    return True
 
 
-# -- transfer defaults (E2c: monster_layout.transfer_defaults) ---------------------------------------------------------
+# -- transfer defaults (monster_layout.transfer_defaults) ---------------------------------------------------------
 
 ## The object form's transfer defaults: {stat name: value, or {per-stat role: value}}.
 TRANSFER_DEFAULTS_KEY = "transfer_defaults"

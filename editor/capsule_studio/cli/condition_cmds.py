@@ -1,6 +1,6 @@
 """!`capsule-studio battle FILE ...` actions for the condition records, move
 flags, tags, categories, passives / items and manifest point handlers
-(D-23 §3.4 `battle condition KIND ...`, `battle flag|tag ...`;
+(§3.4 `battle condition KIND ...`, `battle flag|tag ...`;
 core.structure.conditions, core.structure.flags, core.structure.categories,
 core.holders).
 
@@ -17,13 +17,13 @@ core.holders).
     battle FILE flag|tag add NAME [--at I] | remove NAME | rename OLD NEW | move NAME up|down
     battle FILE category list | add NAME [--offense S --defense S] [--at I] | damage NAME OFFENSE DEFENSE
                          (none none: non-damaging) | remove NAME | rename OLD NEW | move NAME up|down |
-                         mode move|type [--default CATEGORY] | type TYPE CATEGORY   (category_by_type, E11) |
-                         hit on|off [--default CATEGORY] | hit-type TYPE CATEGORY   (hit_category_by_type, C5)
+                         mode move|type [--default CATEGORY] | type TYPE CATEGORY   (category_by_type) |
+                         hit on|off [--default CATEGORY] | hit-type TYPE CATEGORY   (hit_category_by_type)
     battle FILE holder passives|items list | announce NAME on|off
     battle FILE handler LIST NAME list | add POINT [CODE] [--at I] | set INDEX [--point P] [--code C] |
                                  remove INDEX | move INDEX up|down
                          LIST: a list of the engine's OWNER_SOURCES (passives items statuses weathers: manifest
-                         handlers; E13b moves volatiles side_conditions: their .ceffect point members)
+                         handlers; effect handlers moves volatiles side_conditions: their .ceffect point members)
 
 Editing actions save only when the result compiles (battle_cmds.save_if_valid).
 """
@@ -149,7 +149,7 @@ def _register_names(s: argparse._SubParsersAction, which: str, word: str) -> Non
    r.set_defaults(run=cmd_names_rename)
    _add_move(a, cmd_names_move, word)
    if which == flags.TAGS_KEY:
-      r = a.add_parser("weather-suppress", help="the tag whose holders keep the weather from acting (C6): [NAME|none]")
+      r = a.add_parser("weather-suppress", help="the tag whose holders keep the weather from acting: [NAME|none]")
       r.add_argument("name", nargs="?")
       r.set_defaults(run=cmd_weather_suppress)
 
@@ -194,7 +194,7 @@ def _register_category(s: argparse._SubParsersAction) -> None:
    r.add_argument("type")
    r.add_argument("category")
    r.set_defaults(run=cmd_category_type)
-   r = a.add_parser("hit", help="move mode (C5): the category a damaging move hits with when the move_type point "
+   r = a.add_parser("hit", help="move mode: the category a damaging move hits with when the move_type point "
                                 "changed its type follows the hit type (on: each type its moves' most common one)")
    r.add_argument("value", choices=list(SWITCH))
    r.add_argument("--default", help="on: the category of a type without damaging moves (default: the first "
@@ -229,7 +229,7 @@ def _register_handler(s: argparse._SubParsersAction) -> None:
    @return None
    """
    q = s.add_parser("handler", help="an entry's point handlers: list | add | set | remove | move (moves, "
-                                    "volatiles, side conditions: their .ceffect point members, E13b)")
+                                    "volatiles, side conditions: their .ceffect point members)")
    # no fixed choices: the lists are the engine's (holders.handler_lists(), checked when the command runs)
    q.add_argument("list", metavar="LIST", help="a list whose entries hold point handlers (the engine's "
                                                "battle_compiler OWNER_SOURCES keys)")
@@ -402,7 +402,7 @@ def cmd_names_list(args: argparse.Namespace) -> int:
 
 
 def cmd_weather_suppress(args: argparse.Namespace) -> int:
-   """!Shows or names the weather-suppressing tag (C6).
+   """!Shows or names the weather-suppressing tag.
    @param args  parsed arguments
    @return 0 or 1
    """
@@ -566,7 +566,7 @@ def cmd_category_type(args: argparse.Namespace) -> int:
 
 
 def cmd_category_hit(args: argparse.Namespace) -> int:
-   """!Turns the hit types' categories on or off (structure hit_category_by_type, engine C5).
+   """!Turns the hit types' categories on or off (structure hit_category_by_type).
    @param args  parsed arguments
    @return 0 or 1
    """

@@ -1,4 +1,5 @@
-"""!Text box styles: asset kind "text_box" (engine C10, asset::TextBox) for the text box style editor [S2, S4].
+"""!Text box styles: asset kind "text_box" (asset::TextBox) for the text box style editor [the older studio, the field
+options].
 
 A style is an asset of the manifest: {"key": "text_box:NAME", "kind": "text_box", "font": "font:NAME", "fonts":
 {"n": "font:OTHER"}, "window": {...}, "frame": {...}}. "window" holds text::window::Config's settings (the layer,
@@ -12,20 +13,21 @@ struct's default; char_block left out is the layer's own block and arrow left ou
 Preview data (colours of the bank, the generated frame art's entries or a 24x24 frame picture) is the asset's
 editor data ("editor": {"preview": ...}: the compiler drops every "editor" key).
 
-S2 kept styles as manifest editor data ("editor": {"text_boxes": [...]}) with a C++ header export: legacy_styles()
-lists them and migrate() turns them into text_box assets (the header is gone: the engine builds asset::text_box()).
+Older studio kept styles as manifest editor data ("editor": {"text_boxes": [...]}) with a C++ header export:
+legacy_styles() lists them and migrate() turns them into text_box assets (the header is gone: the engine builds
+asset::text_box()).
 
 check() reports what the engine refuses (its compiler's message, a font that is no font asset of the manifest) or
 draws wrongly; frame_cells() places the frame's parts as window.cpp draw_frame() does; typing() types a text with
 core.text_window (window.cpp's typing and speed-up, frame by frame) and preview() draws the box on a 240x160 screen
 at a frame of it. fit_box() is the box a text table fits its authored texts in.
 
-S5 (engine N3): a style's art is engine data too: "palette" (the window bank's colours, entries 1-15), the window's
+A style's art is engine data too: "palette" (the window bank's colours, entries 1-15), the window's
 "arrow_image" ({image: an 8-pixel-wide palette PNG, height, steps, delay}: Config arrow_kind kArrowImage, the
 prompt arrow stepping through the image's rows at the pen), the frame's "image" (a 24x24 palette PNG of the nine
 parts) and "palette" (the frame bank's colours). They win over the editor's preview data (colors, frame_image),
-which stays for styles without them. A style's "menu" (ui::MenuStyle) is core.menu_styles'. kMaxTiles (256 since N3)
-is read from window.h like every other limit.
+which stays for styles without them. A style's "menu" (ui::MenuStyle) is core.menu_styles'. kMaxTiles (256 since the
+menus) is read from window.h like every other limit.
 
 Qt-free; the text box panel (ui/editors/text_boxes.py) and `capsule-studio text-box ...` use it.
 """
@@ -47,7 +49,7 @@ JsonDict = dict[str, Any]
 KIND = "text_box"
 ## The key prefix of a style.
 KEY_PREFIX = "text_box:"
-## S2's key of the styles in the asset manifest's "editor" object (legacy_styles(), migrate()).
+## The older studio's key of the styles in the asset manifest's "editor" object (legacy_styles(), migrate()).
 STYLES_KEY = "text_boxes"
 ## The editor data key of a style's preview settings.
 PREVIEW_KEY = "preview"
@@ -89,13 +91,13 @@ FRAME_LINE_PIXELS = 2
 BYTE_BITS = 8
 ## A legacy style's members the engine's text_box has no setting for (they came with window.h's Config).
 LEGACY_DROPPED = ("font_count",)
-## S5 (N3): a style's window bank colours (asset::TextBox::palette).
+## A style's window bank colours (asset::TextBox::palette).
 PALETTE_KEY = "palette"
-## S5 (N3): the window's arrow image object (asset_compiler TEXT_BOX_ARROW_KEYS).
+## The window's arrow image object (asset_compiler TEXT_BOX_ARROW_KEYS).
 ARROW_IMAGE_KEY = "arrow_image"
-## S5 (N3): the frame's art: its 24x24 image and its bank's colours (asset_compiler TEXT_BOX_FRAME_ART).
+## The frame's art: its 24x24 image and its bank's colours (asset_compiler TEXT_BOX_FRAME_ART).
 FRAME_IMAGE_KEY, FRAME_PALETTE_KEY = "image", "palette"
-## S5 (N3): the arrow image's settings and what a new one starts with (one step showing the image's top rows).
+## The arrow image's settings and what a new one starts with (one step showing the image's top rows).
 NEW_ARROW = {"steps": [0], "delay": 0}
 
 
@@ -204,7 +206,7 @@ def config_fields() -> list[Field]:
    """!The settings of a style: the engine compiler's text_box settings (TEXT_BOX_WINDOW, TEXT_BOX_FRAME, the word
    settings) in window.h's member order, with the header's defaults and comments (worked out once per engine and
    window.h version).
-   @return fields (window, then frame); [] without the engine's text_box (an engine before C10)
+   @return fields (window, then frame); [] without the engine's text_box (an older engine)
    """
    try:
       header = engine.root() / "include" / WINDOW_HEADER
@@ -286,14 +288,14 @@ class Limits:
 def limits() -> Limits:
    """!The engine's limits, from its headers.
    @return Limits
-   @throws DocumentError when the headers lack them (an engine before I4)
+   @throws DocumentError when the headers lack them (an older engine)
    """
    c = constants()
    need = ("kMaxTiles", "kNumBgs", "kTileSize", "kScreenWidth", "kScreenHeight", "kScreenBlockTiles",
            "kMapPaletteShift", "kMapTileMask")
    missing = [n for n in need if n not in c]
    if missing:
-      raise DocumentError(f"the engine's headers lack {', '.join(missing)} (text windows came with engine I4)")
+      raise DocumentError(f"the engine's headers lack {', '.join(missing)} (text windows came with a newer engine)")
    cell_range = _range("MapCell", _aliases())
    cell_bits = (cell_range[1] + 1).bit_length() - 1 if cell_range else BYTE_BITS + BYTE_BITS
    tile = c["kTileSize"]
@@ -440,12 +442,12 @@ def set_value(doc: Document, key: str, group: str, name: str, value: Any) -> Non
       raise DocumentError(f"a style has no setting {name!r}")
 
 
-## S5: the window's group key (the arrow image lives in it).
+## The window's group key (the arrow image lives in it).
 ART_GROUP_WINDOW = "window"
 
 
 def _set_art(style: JsonDict, group: str, name: str, value: Any) -> None:
-   """!S5 (N3): changes a piece of a style's art: its palette, the window's arrow image, the frame's image or palette
+   """!changes a piece of a style's art: its palette, the window's arrow image, the frame's image or palette
    (None: left out). Colours are hex colour texts; an image is a path relative to the manifest with '/' separators. The
    engine's compiler checks the rest (compile_style() with the manifest's folder: the images' sizes and indices).
    @param style  the style
@@ -495,7 +497,7 @@ def _relative_path(value: Any) -> str:
 
 
 def arrow_image(style: JsonDict) -> JsonDict | None:
-   """!S5 (N3): a style's arrow image settings as written.
+   """!A style's arrow image settings as written.
    @param style  the style
    @return {"image", "height", "steps", "delay"} (keys left out stay out), or None
    """
@@ -505,7 +507,7 @@ def arrow_image(style: JsonDict) -> JsonDict | None:
 
 
 def frame_image(style: JsonDict) -> str | None:
-   """!S5 (N3): the frame's image path.
+   """!The frame's image path.
    @param style  the style
    @return the path, or None
    """
@@ -515,7 +517,7 @@ def frame_image(style: JsonDict) -> str | None:
 
 
 def compiled_arrow(style: JsonDict, base: Path | None) -> JsonDict | None:
-   """!S5 (N3): a style's arrow image compiled by the engine (asset_compiler.compile_arrow_image()).
+   """!A style's arrow image compiled by the engine (asset_compiler.compile_arrow_image()).
    @param style  the style
    @param base   the manifest's folder (the image's path is relative to it), or None
    @return {"rows", "height", "steps", "delay"}, or None without an arrow image (or one the engine refuses: check())
@@ -638,10 +640,10 @@ def number(style: JsonDict, group: str, key: str) -> int:
 
 
 def settings(style: JsonDict, base: Path | None = None) -> dict[str, Any]:
-   """!A style's window settings for core.text_window (arrow left out when the style has none; S5: the arrow image's
+   """!A style's window settings for core.text_window (arrow left out when the style has none; the arrow image's
    when it has one the engine compiles).
    @param style  the style
-   @param base   S5: the manifest's folder (the arrow image), or None
+   @param base   the menu and text box styles: the manifest's folder (the arrow image), or None
    @return Config member -> number (arrow_rows / arrow_offsets: lists)
    """
    out: dict[str, Any] = {f.name: number(style, "window", f.name) for f in config_fields() if f.group == "window"}
@@ -655,10 +657,11 @@ def settings(style: JsonDict, base: Path | None = None) -> dict[str, Any]:
    return out
 
 
-# -- S2's editor-data styles ------------------------------------------------------------------------------------------
+# -- the older studio's editor-data styles
+# ------------------------------------------------------------------------------------------
 
 def legacy_styles(doc: Document) -> list[JsonDict]:
-   """!S2's text box styles kept as the manifest's editor data ("editor": {"text_boxes": [...]}).
+   """!The older studio's text box styles kept as the manifest's editor data ("editor": {"text_boxes": [...]}).
    @param doc  asset manifest Document
    @return the styles (live)
    """
@@ -676,9 +679,9 @@ def legacy_key(name: str) -> str:
 
 
 def migrate(doc: Document) -> list[tuple[str, str, list[str]]]:
-   """!Turns S2's editor-data styles into text_box assets (call inside Document.edit()): each style's window and
-   frame settings the engine takes (a value outside its range, the legacy-only members and an arrow of kNoArrow are
-   left out), its font, its preview data; the editor list is removed.
+   """!Turns the older studio's editor-data styles into text_box assets (call inside Document.edit()): each style's
+   window and frame settings the engine takes (a value outside its range, the legacy-only members and an arrow of
+   kNoArrow are left out), its font, its preview data; the editor list is removed.
    @param doc  asset manifest Document
    @return per style (its name, the new key, the settings left out)
    """
@@ -772,7 +775,8 @@ def font_keys(doc: Document) -> list[str]:
 def compile_style(style: JsonDict, base: Path | None = None) -> JsonDict:
    """!A style compiled by the engine (asset_compiler.compile_text_box()).
    @param style  the style
-   @param base   S5: the manifest's folder (N3: the arrow and frame images' paths are relative to it), or None: a
+   @param base   the menu and text box styles: the manifest's folder (the arrow and frame images' paths are relative to
+   it), or None: a
                  style with images is compiled without them (their settings only)
    @return its record
    @throws DocumentError with the compiler's message
@@ -799,7 +803,7 @@ def check(style: JsonDict, font: JsonDict | None = None, fonts: list[str] | None
    @param style  the style
    @param font   its compiled font (compile_proportional()), or None (the line checks are skipped)
    @param fonts  the manifest's font asset keys (font_keys()), or None (not checked)
-   @param base   S5: the manifest's folder (the art's images are checked), or None
+   @param base   the menu and text box styles: the manifest's folder (the art's images are checked), or None
    @return problems ("error: ..." refused or clipped, "warning: ..." drawn but off the screen / map)
    """
    out = []
@@ -859,8 +863,9 @@ def check(style: JsonDict, font: JsonDict | None = None, fonts: list[str] | None
 
 
 def _inked_rows(font: JsonDict) -> int:
-   """!How many rows from a glyph's top the font's glyphs draw (the lowest non-transparent row, plus one; S6b, C13a:
-   at most the font's glyph_height rows, text_render.glyph_rows(), the rows a window draws).
+   """!How many rows from a glyph's top the font's glyphs draw (the lowest non-transparent row, plus one; the text
+   windows and interactions, the text windows: at most the font's glyph_height rows, text_render.glyph_rows(), the rows
+   a window draws).
    @param font  compiled font
    @return rows (0 for a font without pixels)
    """
@@ -876,7 +881,7 @@ def _inked_rows(font: JsonDict) -> int:
 
 
 def storage(style: JsonDict) -> text_window.Storage:
-   """!S6b (engine C13c): the tile storage a window of this style needs from the game (window::attach(): its
+   """!The tile storage a window of this style needs from the game (window::attach(): its
    width x height cells, kWordsPerTile words each), e.g. a static TileBuffer<W, H> or a screen arena block.
    @param style  the style
    @return text_window.Storage
@@ -921,7 +926,7 @@ def _colors(style: JsonDict, stored: Any) -> list[tuple[int, int, int]]:
 
 
 def stored_palette(style: JsonDict) -> list[str] | None:
-   """!S5 (N3): the window bank's colours the style stores ("palette").
+   """!The window bank's colours the style stores ("palette").
    @param style  the style
    @return entries 1-15 as written, or None
    """
@@ -930,7 +935,7 @@ def stored_palette(style: JsonDict) -> list[str] | None:
 
 
 def frame_palette(style: JsonDict) -> list[str] | None:
-   """!S5 (N3): the frame bank's colours the style stores (frame "palette").
+   """!The frame bank's colours the style stores (frame "palette").
    @param style  the style
    @return entries 1-15 as written, or None
    """
@@ -940,7 +945,7 @@ def frame_palette(style: JsonDict) -> list[str] | None:
 
 
 def pens(style: JsonDict) -> text_render.Pens:
-   """!The entries and colours a style's text draws in (S5: its stored palette's colours win over the preview's).
+   """!The entries and colours a style's text draws in (its stored palette's colours win over the preview's).
    @param style  the style
    @return Pens
    """
@@ -949,7 +954,7 @@ def pens(style: JsonDict) -> text_render.Pens:
 
 
 def frame_pens(style: JsonDict) -> text_render.Pens:
-   """!S5 (N3): the colours the frame draws in: its own bank's (frame "palette"), else the window's.
+   """!The colours the frame draws in: its own bank's (frame "palette"), else the window's.
    @param style  the style
    @return Pens
    """
@@ -970,7 +975,7 @@ def frame_art(style: JsonDict, base: Path | None = None) -> list[list[list[int]]
    lim = limits()
    tile, columns, parts = lim.tile, lim.frame[0], lim.frame[1]
    preview = preview_data(style)
-   rel = frame_image(style) or preview.get("frame_image")   # S5: the frame's own image (engine N3 data) first
+   rel = frame_image(style) or preview.get("frame_image")   # the frame's own image (data) first
    if rel and base is not None:
       bm = engine.bitmap()
       try:
@@ -1016,7 +1021,7 @@ def typing(style: JsonDict, font: JsonDict, codes: list[int], keys: str = "advan
    @param keys          text_window.KEY_POLICIES: none, advance (a press at each wait), hold (Accept held)
    @param fonts         the Font control's compiled fonts by number, or None
    @param placeholders  what field placeholders show, or None
-   @param base          S5: the manifest's folder (the arrow image), or None
+   @param base          the menu and text box styles: the manifest's folder (the arrow image), or None
    @return text_window.Run
    """
    return text_window.run(settings(style, base), font, codes, keys, fonts, placeholders)
@@ -1089,12 +1094,12 @@ def draw_frame(canvas: text_render.Canvas, style: JsonDict, base: Path | None) -
                canvas.put(x * tile + c, y * tile + r, fp.color(entry))
 
 
-## S5: pixels between two steps in arrow_strip().
+## Pixels between two steps in arrow_strip().
 STRIP_GAP = 2
 
 
 def arrow_strip(style: JsonDict, base: Path | None) -> text_render.Canvas | None:
-   """!S5 (N3): the arrow image's steps side by side (each the rows a wait shows at that step, over the window's
+   """!The arrow image's steps side by side (each the rows a wait shows at that step, over the window's
    background, in the window's colours), as window.cpp step_image_arrow() draws them.
    @param style  the style
    @param base   the manifest's folder, or None

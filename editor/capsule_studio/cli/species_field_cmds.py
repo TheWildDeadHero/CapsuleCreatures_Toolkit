@@ -1,4 +1,4 @@
-"""!`capsule-studio battle FILE species-field ...` (engine E13a): the structure
+"""!`capsule-studio battle FILE species-field ...`: the structure
 manifest's species fields and each species' values of them
 (core.structure.species_fields).
 
@@ -15,9 +15,9 @@ manifest's species fields and each species' values of them
     battle FILE species-field value SPECIES [FIELD [VALUE]]
                                                   a species' values; set one (null or the field's default: the
                                                   species follows the default; a value name of a named field)
-    battle FILE species-field values NAME [A,B,C] B1: a field's value names (value k the k-th; "" none)
+    battle FILE species-field values NAME [A,B,C] the combination: a field's value names (value k the k-th; "" none)
     battle FILE species-field rename-value NAME OLD NEW
-                                                  B1: one value name; species, the default and the combination
+                                                  One value name; species, the default and the combination
                                                   methods follow
 
 Editing actions save only when the result compiles (battle_cmds.save_if_valid).
@@ -73,7 +73,7 @@ def register_actions(s: argparse._SubParsersAction) -> None:
    r.add_argument("field", nargs="?")
    r.add_argument("value", nargs="?")
    r.set_defaults(run=cmd_value)
-   r = a.add_parser("values", help="a field's value names (B1: group fields such as a race), or set them")
+   r = a.add_parser("values", help="a field's value names (group fields such as a race), or set them")
    r.add_argument("name")
    r.add_argument("names", nargs="?", help="comma separated (\"\": none)")
    r.set_defaults(run=cmd_values)

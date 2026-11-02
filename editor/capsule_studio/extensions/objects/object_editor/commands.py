@@ -1,9 +1,9 @@
 """!`capsule-studio objects ...`: everything the Objects panel and the Objects
-map tool do, from the command line (D-10 parity).
+map tool do, from the command line (parity).
 
 Objects are addressed as MAP OBJECT, OBJECT being a local ID (as `show`
 lists them) or a name; pages by their index (as `show` lists them). Changes
-are compiled with the engine before anything is saved. I3: `--args` gives a
+are compiled with the engine before anything is saved. `--args` gives a
 movement's settings as JSON (`--movement roam --args '{"choices": ["up",
 "down"], "delays": "short"}'`), `view MAP L R U D` a map's object view and
 `stacked MAP on|off` whether its objects may share a cell.
@@ -32,7 +32,7 @@ CommandRun = Callable[["argparse.Namespace"], int | None]
 CommandSetup = Callable[["argparse.ArgumentParser"], object]
 ## How an option's text is read: int, str, or "range", "bool", "letters" or "json" (see _value()).
 OptionType = type[int] | type[str] | str
-## An option's value: a number, a text, on / off, a range [x, y], self switch letters or a JSON object (I3).
+## An option's value: a number, a text, on / off, a range [x, y], self switch letters or a JSON object.
 OptionValue = int | str | bool | list[int] | list[str] | JsonDict
 ## An option table: (option, field, OptionType).
 OptionTable = list[tuple[str, str, OptionType]]
@@ -123,7 +123,7 @@ def _save(p: Project) -> None:
 def _value(opt: str, typ: OptionType, raw: str) -> OptionValue:
    """!One option's value.
    @param opt  option name (for messages)
-   @param typ  int, str, "range" (X,Y), "bool" (on / off), "letters" (A,B: self switches) or "json" (I3)
+   @param typ  int, str, "range" (X,Y), "bool" (on / off), "letters" (A,B: self switches) or "json"
    @param raw  the text
    @return the value
    """
@@ -133,7 +133,7 @@ def _value(opt: str, typ: OptionType, raw: str) -> OptionValue:
       return BOOLS[raw.lower()]
    if typ == "letters":
       return [x.strip().upper() for x in raw.split(",") if x.strip()]
-   if typ == "json":   # I3: a movement's settings
+   if typ == "json":   # a movement's settings
       try:
          return json.loads(raw)
       except ValueError:
@@ -413,7 +413,7 @@ def cmd_option(args: argparse.Namespace) -> None:
 
 
 def cmd_view(args: argparse.Namespace) -> None:
-   """!objects view (I3). @param args  parsed arguments
+   """!objects view. @param args  parsed arguments
    @return None
    """
    p = _open(args)
@@ -430,7 +430,7 @@ def cmd_view(args: argparse.Namespace) -> None:
 
 
 def cmd_stacked(args: argparse.Namespace) -> None:
-   """!objects stacked (I3). @param args  parsed arguments
+   """!objects stacked. @param args  parsed arguments
    @return None
    """
    p = _open(args)
@@ -470,9 +470,9 @@ def register(ctx: ExtensionContext) -> None:
    def page(q: argparse.ArgumentParser) -> None:
       q.add_argument("--page", type=int, help="a page of the object instead of the object itself")
 
-   add("view", "show or set a map's object view: LEFT RIGHT UP DOWN cells around the player (I3; - removes it)",
+   add("view", "show or set a map's object view: LEFT RIGHT UP DOWN cells around the player (- removes it)",
        lambda q: (q.add_argument("map"), q.add_argument("sides", nargs="*")), cmd_view)
-   add("stacked", "show or set whether a map's objects may share a cell (I3)",
+   add("stacked", "show or set whether a map's objects may share a cell",
        lambda q: (q.add_argument("map"), q.add_argument("value", nargs="?", help="on or off")), cmd_stacked)
    add("show", "list every map's objects, their routes and pages",
        lambda q: q.add_argument("--map", help="only this map"), cmd_show)

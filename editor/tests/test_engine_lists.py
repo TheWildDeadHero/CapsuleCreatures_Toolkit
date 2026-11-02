@@ -1,10 +1,10 @@
-"""!Guard (review F8, S15): the engine's choice lists are never copied into the
+"""!Guard (review F8): the engine's choice lists are never copied into the
 studio. Each name below is the engine's (battle_compiler, effect_compiler,
 bench_scenario re-exports); a studio module that assigns one again (a copy
 that drifts when the engine changes) fails this test. The studio reads them
 from the engine through core.engine.tool() instead.
 
-Guard (S11, D-22 A15): the Content pages (ui/editors/content/**) build every
+Guard (A15): the Content pages (ui/editors/content/**) build every
 widget from the compiled structure. Their module and class constants are
 presentation only (pixels, colours, columns, notes): a new constant fails
 until it is added to CONTENT_CONSTANTS here, and a literal list of names in
@@ -12,14 +12,14 @@ their code (a closed list such as a category, flag, stat or target list)
 fails unless CONTENT_LITERALS names it (table headings, widget and manifest
 keys the page itself writes). Former closed lists stay refused by name.
 
-Guard (S17, E13b's exports): the point handler owner lists, still motions,
+Guard (exports): the point handler owner lists, still motions,
 stat input roles, presenter texts and message rules are read from the engine
 (battle_compiler's re-exports where it has them), never copied.
 
-Guard (I2 / I3, the world format): the movements and their settings, the warp triggers, on_shift and the map,
-object, vehicle class and sprite limits are the engine's.
+Guard (the imported maps / the imported events and sprites, the world format): the movements and their settings, the
+warp triggers, on_shift and the map, object, vehicle class and sprite limits are the engine's.
 
-Guard (X1, the engine's exports): the manifest handler lists, the once / at
+Guard (the engine's exports): the manifest handler lists, the once / at
 most once phases, record_inputs(), the species field pattern, the hit's type
 (move_type_of(), point_runner(move_type=)), the logic kinds, the ruleset's
 unary operators, the bench's owner texts key and the map limits and cell
@@ -46,24 +46,24 @@ ENGINE_NAMES = ("TARGETS", "AI_FLAGS", "SUBJECTS", "BATTLER_SUBJECTS", "DECISIVE
                 "ANSWER_KINDS", "STOP_KINDS", "PASSIVE_SLOTS", "MAX_PASSIVE_SLOT", "DEFAULT_PASSIVE_SLOTS",
                 "COUNTER_ALIASES", "COUNTER_ALIAS_KEYS", "GENERATOR_NAME", "RNG_NAME", "OPTIONAL_MESSAGES",
                 "REGEN_RANGE", "MAX_FORMULAS",
-                # S17 (E13b's exports): the point handler owner lists and the former copies of them, the still
+                # The effect handlers' exports: the point handler owner lists and the former copies of them, the still
                 # motions, the stat input roles, the presenter texts, the retired messages, the layers' priority
                 "OWNER_SOURCES", "OWNER_KINDS", "HANDLER_OWNERS", "POINT_OWNER_LISTS", "HANDLER_LISTS",
                 "HANDLER_KINDS", "STILL_MOTIONS", "STAT_INPUT_ROLES", "PRESENTER_TEXTS", "BATTLE_ENTRY_TEXTS",
                 "RETIRED_MESSAGES", "MAX_PRIORITY",
-                # X1 (the engine's exports): the former copies and guesses of them
+                # The engine's exports: the former copies and guesses of them
                 "MANIFEST_HANDLER_LISTS", "EFFECT_RECORD", "ONCE_PHASES", "AT_MOST_ONCE_PHASES", "SPECIES_FIELD_NAME",
                 "KIND_LISTS", "UNARY_OPERATORS", "INVERT", "OWNER_TEXTS_KEY", "MAX_LAYERS", "MAX_METATILES",
                 "MAX_BEHAVIORS", "MAX_BORDER", "MAX_BORDER_SIZE", "CELL_FIELDS", "MAX_LAYER_PRIORITY",
                 "MAX_COLLISION", "ATTRIBUTE_TOPS",
-                # G1 (D-26 section 1): the AI rules and their numbers, bound_to, the delayed hits' names
+                # The AI rules and their numbers, bound_to, the delayed hits' names
                 "AI_RULES", "AI_SWITCH_RULES", "AI_RULE_ARGS", "AI_SWITCH_ARGS", "MAX_AI_PROFILES", "MAX_AI_RULES",
                 "AI_DEFAULT_PROFILE", "BOUND_TO", "DELAYED_AT_USE", "DELAYED_HIT_FLAGS", "DELAYED_DEFAULT_FLAGS",
                 "DEFAULT_MISS_MESSAGE", "DELAYED_MAX_ACCURACY",
-                # G4 (D-26 section 4): the growth triggers and limits, the form and training names
+                # The growth triggers and limits, the form and training names
                 "ITEM_TRIGGERS", "UNCANCELLABLE", "TIME_OF_DAY", "CONTEXT_SOURCES", "MAX_CONTEXT_VALUES",
                 "MAX_TRANSFORMS", "MAX_FORMS", "BASE_FORM", "TRAIN_GAIN_ARGS", "MAX_TRAINING",
-                # I2 / I3 (the world format): the movements and their settings, the warp triggers, the animation
+                # The world format: the movements and their settings, the warp triggers, the animation
                 # shift words and the map, object, vehicle and sprite limits (core.objects / events / tilesets / maps /
                 # field_rules / sprites read them; objects.py's MOVEMENTS / MAX_OBJECTS / MAX_RANGE copies are gone)
                 "MOVEMENTS", "MOVEMENT_ARGS", "DELAYS", "PACES", "WARP_TRIGGERS", "DYNAMIC_TO", "ON_SHIFT",
@@ -71,52 +71,52 @@ ENGINE_NAMES = ("TARGETS", "AI_FLAGS", "SUBJECTS", "BATTLER_SUBJECTS", "DECISIVE
                 "MAX_FLIP", "STEP_ENTRIES", "MAX_TILES", "MAX_PALETTES", "BANK_COLORS", "MAX_ENTRY")
 ## Names only some modules may not assign (another module's name means something else): {name: module paths}.
 ## MESSAGE_KEY: the engine's message key pattern in core/messages.py (core.structure.conditions' is a text key).
-## FIELDS / BEHAVIOR_MASK (X1): the map compiler's cell fields in core/maps.py (other modules' FIELDS are their own).
+## FIELDS / BEHAVIOR_MASK: the map compiler's cell fields in core/maps.py (other modules' FIELDS are their own).
 MODULE_NAMES = {"KINDS": ("core/structure/conditions.py",), "MESSAGE_KEY": ("core/messages.py",),
                 "FIELDS": ("core/maps.py",), "BEHAVIOR_MASK": ("core/maps.py",),
-                # G4: the growth triggers (the map objects' and encounters' TRIGGERS are their own)
+                # The growth triggers (the map objects' and encounters' TRIGGERS are their own)
                 "TRIGGERS": ("core/species_growth.py", "core/structure/transformation.py",
                              "ui/editors/content/species_growth.py", "ui/editors/structure/transformation.py",
                              "cli/growth_cmds.py")}
 ## Studio modules that read an engine export through battle_compiler (its re-exports), not the battlec part that
-## defines it (S17): {module path: battlec modules it must not import}.
+## defines it: {module path: battlec modules it must not import}.
 REEXPORTED = {"core/messages.py": ("battlec.texts",), "core/battle.py": ("battlec.presenters",),
               "core/codepage.py": ("battlec.presenters",), "core/structure/record.py": ("battlec.rules",),
-              # X1
+              # The after-battle screens
               "core/structure/turn.py": ("battlec.turn",), "core/structure/progression.py": ("battlec.progression",),
               "core/structure/record_preview.py": ("battlec.progression",),
               "core/structure/species_fields.py": ("battlec.content",), "core/pipelines.py": ("battlec.pipelines",),
               "core/logic.py": ("battlec.pipelines", "battlec.logic"), "core/holders.py": ("battlec.pipelines",)}
 ## The studio modules that read a battlec part, with the names they read there: none of them is re-exported by
-## battle_compiler (X1; a re-exported one is read from battle_compiler instead): {module path: (part, names)}.
+## battle_compiler (a re-exported one is read from battle_compiler instead): {module path: (part, names)}.
 INTERNAL_READS = {"core/structure/resources.py": ("battlec.resources", ("RESOURCE_NAME", "STORAGE_ROLE_BITS")),
                   "core/structure/record.py": ("battlec.layout", ("MAX_ROLE_BITS", "ROLE_SHAPES", "CUSTOM_NAME",
                                                                   "role_key", "stat_key", "ROLE_KEY_PREFIX")),
                   "core/structure/conditions.py": ("battlec.layout", ("status_id_bits",)),
                   "core/structure/chart.py": ("battlec.chart", ("DEFAULT_TYPES_PER_SPECIES", "exponent_of")),
                   "core/structure/passive_slots.py": ("battlec.content", ("PASSIVE_SLOT_NAME",)),
-                  # C8: the per-stat roles a field rule's expression reads (ROLE.NAME of a stat)
+                  # The per-stat roles a field rule's expression reads (ROLE.NAME of a stat)
                   "core/structure/field_expressions.py": ("battlec.layout", ("PER_STAT_ROLES",))}
 ## A read of a battlec part through core.engine.tool().
 BATTLEC_READ = re.compile(r'tool\("(?P<part>battlec\.[a-z_]+)"\)')
-## The Content pages' package (S11).
+## The Content pages' package.
 CONTENT = PACKAGE / "ui" / "editors" / "content"
 ## The constants the Content pages may define, by file: presentation only (no engine or game data). A new one is
 ## reviewed and added here; a list, count or range of the engine's or the game's comes from the compiled data.
 CONTENT_CONSTANTS = {
    "data.py": {"JSON_LISTS", "JSON_OBJECTS"},
-   # G2: the Items tab's bag box (presentation) and the Test save (Bag) page's table, file filter and colours
-   # G3: the Items tab's Recruit row starts at a bonus of x1 (presentation: the bonus the spin shows first)
+   # The Items tab's bag box (presentation) and the Test save (Bag) page's table, file filter and colours
+   # The Items tab's Recruit row starts at a bonus of x1 (presentation: the bonus the spin shows first)
    "holders.py": {"NO_POCKET", "FLAG_BOXES", "USE_TEXT_HEIGHT", "NEW_RECRUIT_BONUS"},
    "test_save.py": {"SLOT_COLUMNS", "ITEM_COLUMN", "COUNT_COLUMN", "IMAGE_FILTER", "PROBLEM_COLOR", "OK_COLOR",
-                    # G3: the Boxes box's table
+                    # The Boxes box's table
                     "BOXED_COLUMNS", "SLOT_COLUMN", "BOX_COLUMN", "SPECIES_COLUMN", "LEVEL_COLUMN",
-                    # F3: the Step counters box's table
+                    # The Step counters box's table
                     "STEP_COLUMNS", "STEP_NAME_COLUMN", "STEP_COUNT_COLUMN", "STEP_EVERY_COLUMN",
                     "STEP_LEFT_COLUMN",
-                    # B2: the boxed egg column and the Nursery box's table
+                    # The boxed egg column and the Nursery box's table
                     "EGG_COLUMN", "HELD_COLUMNS", "EMPTY_SLOT", "MAX_GAINED_SPIN",
-                    # S5: the Game box's size spin (Qt's int), hex rows shown and save file filter
+                    # The Game box's size spin (Qt's int), hex rows shown and save file filter
                     "MAX_BLOCK_SPIN", "GAME_HEX_ROWS", "SAVE_FILE_FILTER"},
    "messages.py": {"COLUMNS", "ID_COLUMN", "KEY_COLUMN", "KIND_COLUMN", "ARGS_COLUMN", "TEXT_COLUMN",
                    "PROBLEM_COLUMN", "ABSENT_TEXT", "ABSENT_COLOR", "PROBLEM_COLOR", "WITHIN_COLOR", "NOTE"},
@@ -126,11 +126,11 @@ CONTENT_CONSTANTS = {
    "presenters.py": {"NO_PARTY", "PREVIEW_CUES", "HOLD_FRAMES", "FRAME_MS", "PREVIEW_ZOOM", "BATTLER_BOX",
                      "STAND_MARK", "UNKNOWN_SIZE", "PREVIEW_COLORS", "LABEL_OFFSET", "CAPTION_MARGIN", "OPAQUE"},
    "type_chart.py": {"CHART_HEADER_LETTERS"},
-   # G4: the Species page's growth tabs (headings, typed-text separators, colours, table height)
+   # The Species page's growth tabs (headings, typed-text separators, colours, table height)
    "species_growth.py": {"RULE_HEADINGS", "FORM_HEADINGS", "LIST_SEPARATOR", "ASSIGN", "STAT_DOT", "FIRES_COLOR",
                          "TABLE_ROWS", "ROW_PIXELS"},
 }
-## The former closed lists, counts and ranges of the Content pages (D-22 A15, S11): never defined again.
+## The former closed lists, counts and ranges of the Content pages (A15): never defined again.
 RETIRED_CONTENT_NAMES = ("CATEGORIES", "MOVE_FLAGS", "STAT_LABELS", "TYPE_SLOTS", "ABILITY_SLOTS", "MAX_GENES",
                          "MEMBER_MOVES", "MAX_CRIT_STAGE", "CHART_TEXT", "MAX_EXP_YIELD", "MAX_LEVEL",
                          "MIN_LEVEL_MAX", "DEFAULT_PREVIEW_LEVEL", "MAX_ACCURACY", "DEFAULT_ACCURACY", "MAX_BASE",
@@ -220,7 +220,7 @@ class EngineListGuardTests(unittest.TestCase):
 
    def test_content_builds_from_the_structure(self) -> None:
       """!The Content pages define presentation constants only (CONTENT_CONSTANTS), none of the former closed lists,
-      and no literal list of names beyond CONTENT_LITERALS (S11, D-22 A15).
+      and no literal list of names beyond CONTENT_LITERALS (A15).
       @return None
       """
       constants, literals = [], []
@@ -268,8 +268,8 @@ class EngineListGuardTests(unittest.TestCase):
       self.assertIsNone(ASSIGNMENT.match("x = TARGETS"))
 
    def test_reexports_read(self) -> None:
-      """!The modules that read E13b's re-exports take them from battle_compiler, and what they give is the
-      engine's (S17).
+      """!The modules that read the effect handlers' re-exports take them from battle_compiler, and what they give is
+      the engine's.
       @return None
       """
       for rel, parts in REEXPORTED.items():
@@ -290,10 +290,10 @@ class EngineListGuardTests(unittest.TestCase):
       self.assertEqual([conditions.list_key(k) for k in conditions.handler_kinds()],
                        [key for key in bc.OWNER_KINDS if key in [conditions.list_key(k) for k in conditions.kinds()]])
 
-   def test_x1_exports_read(self) -> None:
-      """!What the studio gives for X1's exports is the engine's (the manifest handler lists, the phases' notes, the
-      logic kinds, the unary operators, the owner texts key, the map limits and cell fields), and the damage trace
-      takes the hit's type from move_type_of() without copying the compiled data.
+   def test_after_battle_exports_read(self) -> None:
+      """!What the studio gives for the after-battle screens' exports is the engine's (the manifest handler lists, the
+      phases' notes, the logic kinds, the unary operators, the owner texts key, the map limits and cell fields), and the
+      damage trace takes the hit's type from move_type_of() without copying the compiled data.
       @return None
       """
       from capsule_studio.core import bench, expressions, holders, logic, maps
@@ -322,7 +322,7 @@ class EngineListGuardTests(unittest.TestCase):
 
    def test_internal_reads(self) -> None:
       """!A module reads a battlec part only as INTERNAL_READS lists, and only for names battle_compiler does not
-      re-export (X1: a new export fails here until the module switches to battle_compiler).
+      re-export (a new export fails here until the module switches to battle_compiler).
       @return None
       """
       found = {}
@@ -340,17 +340,17 @@ class EngineListGuardTests(unittest.TestCase):
          self.assertIn(names[0], (PACKAGE / rel).read_text(encoding="utf-8"), rel)
 
    def test_engine_has_them(self) -> None:
-      """!The engine exports what the studio reads instead (C1).
+      """!The engine exports what the studio reads instead.
       @return None
       """
       bc = engine.tool("battle_compiler")
       for name in ("TARGETS", "AI_FLAGS", "BATTLER_SUBJECTS", "DECISIVE", "DRAWS_PER_KIND", "EACH_PHASES",
                    "LOGIC_KINDS", "DEFAULT_PASSIVE_SLOTS", "OPTIONAL_MESSAGES", "REGEN_RANGE", "MAX_FORMULAS",
                    "PRESENTER_TEXTS", "STILL_MOTIONS", "STAT_INPUT_ROLES", "MESSAGE_KEY", "RETIRED_MESSAGES",
-                   # X1
+                   # The after-battle screens
                    "OWNER_SOURCES", "OWNER_KINDS", "MANIFEST_HANDLER_LISTS", "ONCE_PHASES", "AT_MOST_ONCE_PHASES",
                    "record_inputs", "species_inputs", "SPECIES_FIELD_NAME", "move_type_of",
-                   # G1
+                   # The AI profiles
                    "AI_RULES", "AI_SWITCH_RULES", "AI_RULE_ARGS", "AI_SWITCH_ARGS", "MAX_AI_PROFILES", "MAX_AI_RULES",
                    "AI_DEFAULT_PROFILE", "compile_ai_profiles", "party_profile", "BOUND_TO", "MAX_BOUND",
                    "DELAYED_AT_USE", "DELAYED_HIT_FLAGS", "DELAYED_DEFAULT_FLAGS", "DEFAULT_MISS_MESSAGE",
@@ -366,6 +366,30 @@ class EngineListGuardTests(unittest.TestCase):
       for name in ("MAX_LAYERS", "MAX_METATILES", "MAX_BEHAVIORS", "MAX_BORDER_SIZE", "CELL_FIELDS", "BEHAVIOR_MASK",
                    "MAX_PRIORITY"):
          self.assertTrue(hasattr(mc, name), name)
+
+
+
+class HeaderConstantTest(unittest.TestCase):
+   """!header_constant() reads any C++ integer literal (a hex one used to read as 0)."""
+
+   def test_literals(self) -> None:
+      """!Hex, binary, octal, separated and suffixed literals give their values."""
+      cases = {"0x10u": 16, "0X1F": 31, "0b101": 5, "010": 8, "1'000": 1000, "64": 64, "0": 0}
+      for text, value in cases.items():
+         m = re.match(engine._INT_LITERAL, text)
+         self.assertIsNotNone(m, text)
+         self.assertEqual(engine.cpp_int(m.group(1)), value, text)
+
+   def test_engine_header(self) -> None:
+      """!A constant of the engine's own headers (kBlendMax in video.h) reads as its value."""
+      try:
+         text = (engine.root() / "include" / "capsule" / "hal" / "video.h").read_text(encoding="utf-8")
+      except (OSError, engine.EngineNotFound):
+         self.skipTest("no engine checkout")
+      m = re.search(r"\bkBlendMax\s*=\s*" + engine._INT_LITERAL, text)
+      if m is None:
+         self.skipTest("kBlendMax not in video.h")
+      self.assertGreater(engine.header_constant("capsule/hal/video.h", "kBlendMax", 0), 0)
 
 
 if __name__ == "__main__":

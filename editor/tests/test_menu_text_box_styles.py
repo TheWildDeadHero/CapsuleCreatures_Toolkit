@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!S5 (engine N1 / N2 / N3) without Qt: text box styles' art as engine data (core.text_boxes: palette, the frame's
+"""!menu and text box styles without Qt: text box styles' art as engine data (core.text_boxes: palette, the frame's
 image and palette, the window's arrow image compiled by the engine, typed by core.text_window as window.cpp steps
 it; window::kMaxTiles read from the engine), menu styles (core.menu_styles: the settings from the compiler and
 menu.h, the edits and their refusals, and the menu run frame by frame against the engine's own ui_tests.cpp
@@ -7,10 +7,10 @@ expectations: the repeat counter, a column's delay / wrap / sounds / one action 
 grid, a list against the middle-row model, the arrows' bounce and visibility, print_at() / fill() and the arrow
 image's steps), the `text-box` commands for both, a test save's Game section (core.game_block: set / poke / from a
 save file / clear, checked, written into the exported image's Game section by the engine's payload and assemble,
-`testsave game`), the route steps' help (core.script_words.route_step_help(): engine N2's in_place and speed) and
+`testsave game`), the route steps' help (core.script_words.route_step_help(): the map view's in_place and speed) and
 any JSON shown read-only (core.json_view).
 
-Uses copies of the engine's N3 fixture (tests/data/ui: a font, a two-arrow sprite, text box styles with menus, a
+Uses copies of the menus fixture (tests/data/ui: a font, a two-arrow sprite, text box styles with menus, a
 message box with an arrow image) and of the Starter sample (test_battle.BattleTestCase) for the test saves.
 """
 from __future__ import annotations
@@ -88,7 +88,7 @@ def bit(*names: str) -> int:
 
 
 class UiCase(unittest.TestCase):
-   """!Base: a copy of the engine's N3 fixture (tests/data/ui) per test."""
+   """!Base: a copy of the menus fixture (tests/data/ui) per test."""
 
    def setUp(self) -> None:
       """!Copies the fixture and opens its manifest.
@@ -473,7 +473,7 @@ class MenuTests(UiCase):
 
 
 class GameBlockTests(BattleTestCase):
-   """!A test save's Game section (engine N3)."""
+   """!A test save's Game section."""
 
    def test_set_check_export_and_read_back(self) -> None:
       """!The block is set, checked, written into the image's Game section (the engine's game_payload()) next to the
@@ -549,7 +549,7 @@ class HelpAndViewTests(unittest.TestCase):
    """!The route steps' help and the read-only JSON view."""
 
    def test_route_step_help(self) -> None:
-      """!in_place and speed say what engine N2 made them do; the help shows only inside a route or movement.
+      """!in_place and speed say what map view made them do; the help shows only inside a route or movement.
       @return None
       """
       helps = script_words.route_step_help()
@@ -564,7 +564,7 @@ class HelpAndViewTests(unittest.TestCase):
       manifest's schema is the studio's; a file that is no JSON is refused.
       @return None
       """
-      root = Path(tempfile.mkdtemp(prefix="capsule_s5_json_"))
+      root = Path(tempfile.mkdtemp(prefix="capsule_styles_json_"))
       try:
          n = json_view.CHUNK * 2 + 1
          data = {"schema": "capsule_import.menus/1", "multichoice": [{"id": i} for i in range(n)], "max_width": 28}

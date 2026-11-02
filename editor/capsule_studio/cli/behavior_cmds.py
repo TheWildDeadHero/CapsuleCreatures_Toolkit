@@ -1,5 +1,5 @@
 """!`capsule-studio behaviors WORLD ...`: the world's behaviors (core.behaviors): list them, add one, and set what a
-behavior is (solid, the movement modes that enter it, slide / ledge / push / counter (I3), its walls (I2)). Changes
+behavior is (solid, the movement modes that enter it, slide / ledge / push / counter, its walls). Changes
 are compiled with the engine before the world is saved."""
 from __future__ import annotations
 
@@ -36,9 +36,9 @@ def register(sub: argparse._SubParsersAction) -> None:
    q.set_defaults(run=cmd_add)
    q = a.add_parser("set", help="change a behavior")
    q.add_argument("name")
-   q.add_argument("--kind", help="none, slide, ledge, push or counter (I3)")
+   q.add_argument("--kind", help="none, slide, ledge, push or counter")
    q.add_argument("--direction", help="a ledge's or push's direction")
-   q.add_argument("--walls", help="sides that are walls, comma-separated (I2), or none")
+   q.add_argument("--walls", help="sides that are walls, comma-separated, or none")
    q.add_argument("--solid", help="on or off")
    q.add_argument("--passable", help="movement modes that enter it, comma-separated, or every")
    q.set_defaults(run=cmd_set)

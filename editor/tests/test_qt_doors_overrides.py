@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!S3 (D-30, engine DS1) Qt panels on a copy of the sandbox: the scene editor's Doors tab and the Animation tab's
+"""!The doors and overrides Qt panels on a copy of the sandbox: the scene editor's Doors tab and the Animation tab's
 direction-grid view, the World page's Doors and draw order tab, Override sets tab (with its map tool), the Events
 tab's door chooser, the Tileset tab's animation targets and the script editor's override completion. Skipped when
 PySide6 is missing; uses Qt's offscreen platform.
@@ -31,8 +31,8 @@ HUT, HUT_CELL = "door:HUT", (27, 20)
 
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
-class QtD30Tests(unittest.TestCase):
-   """!Drives the D-30 panels."""
+class QtDoorsOverridesTests(unittest.TestCase):
+   """!Drives the doors and overrides panels."""
 
    @classmethod
    def setUpClass(cls) -> None:
@@ -46,7 +46,7 @@ class QtD30Tests(unittest.TestCase):
       @return None
       """
       ## Temporary root.
-      self.root = copy_engine_apps(Path(tempfile.mkdtemp(prefix="capsule_qt_d30_")), ["sandbox_map"])
+      self.root = copy_engine_apps(Path(tempfile.mkdtemp(prefix="capsule_qt_doors_overrides_")), ["sandbox_map"])
       ## The copy's data folder.
       self.data = self.root / "sandbox_map" / "data"
       QtCore.QSettings.setPath(QtCore.QSettings.Format.NativeFormat, QtCore.QSettings.Scope.UserScope,

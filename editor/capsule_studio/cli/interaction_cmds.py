@@ -1,4 +1,4 @@
-"""![S6b] `capsule-studio interactions WORLD ...` (engine C13b): the world's cell interaction rules (core.interactions),
+"""!`capsule-studio interactions WORLD ...`: the world's cell interaction rules (core.interactions),
 everything the World page's Interactions panel does: list them, add, change, remove and reorder a rule, and check
 them as the build's map compiler does. Changes are compiled with the engine before anything is saved."""
 from __future__ import annotations
@@ -24,7 +24,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    @return None
    """
    p = sub.add_parser("interactions", help="the world's cell interaction rules: facing a cell of a behavior runs a "
-                                           "script (engine C13b) (S6b)")
+                                           "script")
    p.add_argument("world")
    s = p.add_subparsers(dest="interaction_command", metavar="ACTION")
    s.required = True

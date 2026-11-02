@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""!The I4 editors' windows on a large imported game [S2] (Qt, offscreen): skipped unless CAPSULE_IMPORTED_CONTENT
-names an importer's output folder for one game (see test_i4_content.py). Nothing is saved there. Times are printed
-(stderr). With CAPSULE_SHOTS=FOLDER the tests save pictures: the script editor on a map's script, the text table
-editor with a fit warning (a line typed too long, not saved), the font viewer, the text box style editor
-(S4: CAPSULE_TEXT_BOX_STYLE=KEY: the text_box asset shown, else the manifest's first; a new style when it has none).
+"""!The text and script editors' windows on a large imported game (Qt, offscreen): skipped unless
+CAPSULE_IMPORTED_CONTENT names an importer's output folder for one game (see test_imported_content.py). Nothing is saved
+there. Times are printed (stderr). With CAPSULE_SHOTS=FOLDER the tests save pictures: the script editor on a map's
+script, the text table editor with a fit warning (a line typed too long, not saved), the font viewer, the text box style
+editor (CAPSULE_TEXT_BOX_STYLE=KEY: the text_box asset shown, else the manifest's first; a new style when it has none).
 """
 from __future__ import annotations
 
@@ -22,11 +22,11 @@ try:
 except ImportError:   # the headless toolkit (core only)
    QtWidgets = None
 
-from test_i4_content import CONTENT, CONTENT_ENV, SLOW_SECONDS, timed  # noqa: E402
+from test_imported_content import CONTENT, CONTENT_ENV, SLOW_SECONDS, timed  # noqa: E402
 
 ## Folder of the pictures, or None.
 SHOTS = Path(os.environ["CAPSULE_SHOTS"]) if os.environ.get("CAPSULE_SHOTS") else None
-## S4: the text box style shown (a text_box asset's key), or None (the first).
+## The text box style shown (a text_box asset's key), or None (the first).
 STYLE_KEY = os.environ.get("CAPSULE_TEXT_BOX_STYLE")
 ## Size of the windows in the pictures.
 SHOT_SIZE = (1500, 900)

@@ -1,4 +1,4 @@
-"""!`capsule-studio battle FILE resource ...` (D-25): the structure
+"""!`capsule-studio battle FILE resource ...`: the structure
 manifest's resources (core.structure.resources) and the moves' costs and
 bases.
 
@@ -38,7 +38,7 @@ def register_actions(s: argparse._SubParsersAction) -> None:
    @param s  the battle group's subparsers
    @return None
    """
-   q = s.add_parser("resource", help="the resources (D-25): list | add | remove | rename | move | scope | set | "
+   q = s.add_parser("resource", help="the resources: list | add | remove | rename | move | scope | set | "
                                      "cost | base")
    a = q.add_subparsers(dest="resource_command", metavar="ACTION")
    a.required = True

@@ -1,9 +1,10 @@
-"""!The words of the .cscript language for the script editor's colours, completion and statement templates [S2].
+"""!The words of the .cscript language for the script editor's colours, completion and statement templates [the older
+studio].
 
 Every list comes from the engine's compilers (tools/script_compiler.py, tools/route_compiler.py): their keyword set,
-statement words (engine I4: I4_WORDS and the kind lists of each statement, MSGBOX_KINDS, MSG_FLAGS, TRANSITIONS,
-TRIGGER_KINDS, CONDITION_KINDS, OBJECT_WORDS, ...; S4: C10's FACE_WORDS and LIFETIMES), and the route steps of the
-route compiler's step table (its docstring, the one place the step words are listed; DIRECTIONS and OPTIONS are
+statement words (PORT_WORDS and the kind lists of each statement, MSGBOX_KINDS, MSG_FLAGS, TRANSITIONS,
+TRIGGER_KINDS, CONDITION_KINDS, OBJECT_WORDS, ...; the field options' FACE_WORDS and LIFETIMES), and the route steps of
+the route compiler's step table (its docstring, the one place the step words are listed; DIRECTIONS and OPTIONS are
 exports). A word only the engine's parser spells (a statement's modifier such as `fade ... speed N swap`) is in
 MODIFIERS here, and the tests compile every STATEMENT_TEMPLATES entry with the engine's compiler, so a template that
 no longer parses fails a test.
@@ -26,7 +27,7 @@ from . import engine
 ## Statement modifiers the engine's parser spells inline (not exported): word -> the statements they follow.
 MODIFIERS = {"all": ("lock", "release"), "on": ("visible",), "off": ("visible",), "speed": ("fade",),
              "swap": ("fade",), "repeat": ("route",), "skip": ("route",), "nowait": ("route",)}
-## Statement templates (I4, D-29): word -> an example statement; NAME-like words are the declared names a template
+## Statement templates: word -> an example statement; NAME-like words are the declared names a template
 ## takes (the tests declare them: TEMPLATE_DECLARATIONS). Inserted by Script > Insert statement.
 STATEMENT_TEMPLATES = {
    "lock": "lock all;", "release": "release all;", "wait_msg": "wait_msg;", "wait_state": "wait_state;",
@@ -36,10 +37,10 @@ STATEMENT_TEMPLATES = {
    "sound": "sound se 9;", "wait_sound": "wait_sound se;", "mart": "mart shop_list;",
    "msg": 'msg "Hello" nowait;', "msgbox": 'msgbox npc "Hello";', "call": "call other loose;",
    "warp": "warp town 1 2 nowait;", "wait_moves": "wait_moves last;", "route": "route 1 walk_up nowait;",
-   "override": "override apply SET_NAME;",   # S3 (DS1, D-30): a cell override set of the manifest's world
-   "face": "face selected opposite_player;",   # S4 (C10): the talked-to object turns its back on the player
+   "override": "override apply SET_NAME;",   # a cell override set of the manifest's world
+   "face": "face selected opposite_player;",   # the talked-to object turns its back on the player
 }
-## S3: templates naming the manifest's world's data (their NAME word is a set of the world: the tests compile them
+## Templates naming the manifest's world's data (their NAME word is a set of the world: the tests compile them
 ## against a world that has one).
 WORLD_TEMPLATES = {"override": "SET_NAME"}
 ## The declarations the templates name (prepended when the tests compile them).
@@ -70,7 +71,7 @@ ESCAPE_LENGTH = 2
 CONTEXT_KINDS = ("top", "script", "route", "map_scripts", "mart")
 ## Declared-name kinds completions() may offer (core.scripts.Outline kinds).
 NAME_KINDS = ("script", "flag", "var", "const", "native", "map", "movement", "mart", "step", "override")
-## S3: the name kind of the world's override sets (`override apply|clear NAME`; core.scripts.CheckResult).
+## The name kind of the world's override sets (`override apply|clear NAME`; core.scripts.CheckResult).
 OVERRIDE_NAMES = "override"
 
 
@@ -109,9 +110,9 @@ def statement_kinds() -> dict[str, list[str]]:
       "sound": list(_export(sc, "SOUND_KINDS")), "wait_sound": list(_export(sc, "SOUND_WAITS")),
       "set_template": list(_export(sc, "TEMPLATE_KINDS")), "msgbox": list(_export(sc, "MSGBOX_KINDS")),
       "msg": list(_export(sc, "MSG_FLAGS")), "warp": list(_export(sc, "TRANSITIONS")),
-      # S3 (DS1): `override apply|clear NAME`, apply first (the compiler lists clear first: its byte order)
+      # `override apply|clear NAME`, apply first (the compiler lists clear first: its byte order)
       "override": sorted(_export(sc, "OVERRIDE_KINDS")),
-      # S4 (C10): `face OBJ down|up|left|right|player|self|opposite_player`
+      # `face OBJ down|up|left|right|player|self|opposite_player`
       "face": [str(d) for d in _export(sc, "DIRECTIONS")] + [str(w) for w in _export(sc, "FACE_WORDS", {})]}
    loose, nowait = _export(sc, "LOOSE_WORD", None), _export(sc, "WARP_NOWAIT_WORD", None)
    if loose:
@@ -121,7 +122,7 @@ def statement_kinds() -> dict[str, list[str]]:
    for word, statements in MODIFIERS.items():
       for s in statements:
          out.setdefault(s, []).append(word)
-   # the engine's F1 / F2 statements: their kind words (FIELD_EFFECT_KINDS, ...)
+   # the engine's F1 / field actions statements: their kind words (FIELD_EFFECT_KINDS, ...)
    for word_export, kinds_export in (("FIELD_EFFECT_WORD", "FIELD_EFFECT_KINDS"),
                                      ("FIELD_ACTION_WORD", "FIELD_ACTION_KINDS"), ("FLIGHT_WORD", "FLIGHT_KINDS")):
       word = _export(sc, word_export, None)
@@ -131,7 +132,8 @@ def statement_kinds() -> dict[str, list[str]]:
 
 
 def statement_words() -> list[str]:
-   """!Words that start a statement: the compiler's keywords that do, its I4 statement words and the F1 / F2 ones.
+   """!Words that start a statement: the compiler's keywords that do, its script port statement words and the F1 / field
+   actions ones.
    @return words
    """
    sc = compiler()
@@ -139,7 +141,7 @@ def statement_words() -> list[str]:
                        "not", "game", "cancel", "waits", "value", "yes", "no", "true", "false", "self", "player"}
    lifetimes = set(_export(sc, "LIFETIMES")) | set(_export(sc, "TYPES"))
    words = [w for w in sorted(sc.KEYWORDS) if w not in declaration_only and w not in lifetimes]
-   words += [str(w) for w in _export(sc, "I4_WORDS")]
+   words += [str(w) for w in _export(sc, "PORT_WORDS")]
    for export in ("FIELD_EFFECT_WORD", "FIELD_ACTION_WORD", "FLIGHT_WORD", "DARKNESS_WORD", "ESCAPE_WORD"):
       word = _export(sc, export, None)
       if word:
@@ -148,7 +150,7 @@ def statement_words() -> list[str]:
 
 
 def declaration_words() -> list[str]:
-   """!Words that start a declaration (the top level): the compiler's own and I4's movement / mart / step.
+   """!Words that start a declaration (the top level): the compiler's own and the script ports' movement / mart / step.
    @return words
    """
    sc = compiler()
@@ -161,14 +163,15 @@ def declaration_words() -> list[str]:
 
 
 def trigger_kinds() -> list[str]:
-   """!The map_scripts trigger kinds, in the engine's TriggerKind order (I4: on_resume, on_warp_into, ...).
+   """!The map_scripts trigger kinds, in the engine's TriggerKind order (on_resume, on_warp_into, ...).
    @return kinds
    """
    return [str(k) for k in compiler().TRIGGER_KINDS]
 
 
 def condition_kinds() -> list[str]:
-   """!The trigger kinds whose entries take a condition (`on_frame <cond> -> s`, I4 `on_warp_into <cond> -> s`).
+   """!The trigger kinds whose entries take a condition (`on_frame <cond> -> s`, the script ports `on_warp_into <cond>
+   -> s`).
    @return kinds
    """
    sc = compiler()
@@ -235,21 +238,21 @@ def route_steps() -> RouteSteps:
    return out
 
 
-## S5: the engine header of move routes (its table's "Does" column: what each step does at run time).
+## The engine header of move routes (its table's "Does" column: what each step does at run time).
 ROUTE_HEADER = "capsule/script/route.h"
-## S5: a row of route.h's step table: `/// | Op | Arguments | Does |`.
+## A row of route.h's step table: `/// | Op | Arguments | Does |`.
 ROUTE_ROW = re.compile(r"^///\s*\|\s*(?P<ops>[^|]+?)\s*\|\s*(?P<args>[^|]*?)\s*\|\s*(?P<does>[^|]+?)\s*\|\s*$")
-## S5 (engine N2): what a step does at run time that route.h's table does not say yet (its InPlace row still reads
-## "stands"; N2 plays the walk animation in place).
-RUNTIME_NOTES = {"in_place": "engine N2: the mover walks in place: its walk animation plays for the step's time"}
-## S5: a CamelCase opcode's word boundaries (InPlace -> in_place).
+## What a step does at run time that route.h's table does not say yet (its InPlace row still reads
+## "stands"; map view plays the walk animation in place).
+RUNTIME_NOTES = {"in_place": "the mover walks in place: its walk animation plays for the step's time"}
+## A CamelCase opcode's word boundaries (InPlace -> in_place).
 CAMEL_BOUNDARY = re.compile(r"(?<=[a-z])(?=[A-Z])")
 
 
 def route_step_help() -> dict[str, str]:
-   """!S5: what each route step word does: its line of the route compiler's step table (the syntax and the
+   """!what each route step word does: its line of the route compiler's step table (the syntax and the
    description), the run-time behaviour of route.h's table for the opcode of the same name (`InPlace` -> `in_place`;
-   N2: Speed applies to the walker's route steps too) and RUNTIME_NOTES.
+   Speed applies to the walker's route steps too) and RUNTIME_NOTES.
    @return step word -> help text (lines)
    """
    rc = route_compiler()
@@ -281,7 +284,7 @@ def route_step_help() -> dict[str, str]:
 
 
 def word_help(text: str, word: str) -> str | None:
-   """!S5: the help a word shows under the mouse: a route step's (route_step_help()) inside a route or movement block.
+   """!The help a word shows under the mouse: a route step's (route_step_help()) inside a route or movement block.
    @param text  the source up to the word
    @param word  the word
    @return help text, or None
@@ -303,7 +306,7 @@ def keyword_words() -> list[str]:
    for step, args in route_steps().steps.items():
       words += [step] + args
    words += [str(w) for w in _export(sc, "OBJECT_WORDS", {})]
-   words += [str(w) for w in _export(sc, "LIFETIMES")]   # S4: declarations' lifetimes (C10 session)
+   words += [str(w) for w in _export(sc, "LIFETIMES")]   # declarations' lifetimes (session)
    glitch = _export(sc, "GLITCH_WORD", None)
    if glitch:
       words.append(str(glitch))
@@ -429,8 +432,8 @@ def _names(names: Mapping[str, Sequence[str]], *kinds: str) -> list[str]:
 
 
 def _declaration_candidates(words: Sequence[str]) -> list[str]:
-   """!S4: the words after a flag or variable declaration's name: `flag NAME : LIFETIME`, `var NAME : TYPE
-   [LIFETIME]` (the compiler's LIFETIMES, C10 session; its TYPES).
+   """!The words after a flag or variable declaration's name: `flag NAME : LIFETIME`, `var NAME : TYPE
+   [LIFETIME]` (the compiler's LIFETIMES, field options session; its TYPES).
    @param words  the declaration's words so far
    @return words
    """
@@ -493,7 +496,7 @@ def _candidates(ctx: Context, names: Mapping[str, Sequence[str]]) -> list[str]:
    if words[-1] == "(" and len(words) >= SECOND_OPERAND_AT:
       return {"flag": _names(names, "flag"), "var": _names(names, "var"),
               "script": _names(names, "script")}.get(words[:-1][-1], [])
-   if first == "override":   # S3: `override apply|clear NAME`, NAME a set of the manifest's world
+   if first == "override":   # `override apply|clear NAME`, NAME a set of the manifest's world
       return kinds.get(first, []) if len(words) == 1 else _names(names, OVERRIDE_NAMES) \
          if len(words) == SECOND_OPERAND_AT else []
    if first == str(_export(sc, "MART_WORD", "mart")) and len(words) == 1:
@@ -513,7 +516,7 @@ def _candidates(ctx: Context, names: Mapping[str, Sequence[str]]) -> list[str]:
 
 
 def check_names(result: object) -> dict[str, list[str]]:
-   """!S3: the names a check declared, by NAME_KINDS kind, for completions(): its outline's and the override sets of
+   """!The names a check declared, by NAME_KINDS kind, for completions(): its outline's and the override sets of
    the manifest's world.
    @param result  core.scripts.CheckResult, or None
    @return {kind: names}

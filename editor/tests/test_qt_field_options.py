@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""!S4 (engine C10) Qt panels on copies of the engine's C10 and D-30 fixtures: the Events tab's Runs row (an
-immediate trigger, a waiting script refused with a message), the text tables panel's Languages box (en and fr side
-by side, the missing key, the fallback's text), the Manifest panel's build language and fallback, the script
+"""!The field options Qt panels on copies of the field options and doors and overrides fixtures: the Events tab's Runs
+row (an immediate trigger, a waiting script refused with a message), the text tables panel's Languages box (en and fr
+side by side, the missing key, the fallback's text), the Manifest panel's build language and fallback, the script
 editor's vm switches and session lifetime, and the Doors tab's sound check. Skipped when PySide6 is missing; uses
 Qt's offscreen platform. With CAPSULE_SHOTS=FOLDER it saves pictures of the Events tab and the Languages box.
 """
@@ -30,17 +30,17 @@ from capsule_studio.plugins.registry import STUDIO_HOSTS  # noqa: E402
 SHOTS = Path(os.environ["CAPSULE_SHOTS"]) if os.environ.get("CAPSULE_SHOTS") else None
 ## Size of the windows in the pictures.
 SHOT_SIZE = (1500, 900)
-## The C10 map with the triggers, and its immediate trigger's index.
+## The field options map with the triggers, and its immediate trigger's index.
 PLAIN, IMMEDIATE = "plain", 0
 ## A fixture script that waits.
 WAITING_SCRIPT = "pauses"
 ## The key only the English table has.
-ONLY_EN = "text:C10.ONLY_EN"
+ONLY_EN = "text:FIELD_OPTIONS.ONLY_EN"
 
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
-class QtS4Tests(unittest.TestCase):
-   """!Drives the S4 panels."""
+class QtFieldOptionsTests(unittest.TestCase):
+   """!Drives the field options panels."""
 
    @classmethod
    def setUpClass(cls) -> None:
@@ -50,16 +50,16 @@ class QtS4Tests(unittest.TestCase):
       cls.app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
    def setUp(self) -> None:
-      """!Copies tests/data/c10 and tests/data/d30.
+      """!Copies tests/data/field_options and tests/data/doors_overrides.
       @return None
       """
       ## Temporary root.
       self.root = Path(tempfile.mkdtemp(prefix="capsule_qt_s4_"))
       data = engine.root() / "tests" / "data"
-      for name in ("c10", "d30"):
+      for name in ("field_options", "doors_overrides"):
          shutil.copytree(data / name, self.root / name)
-      ## The C10 fixture's folder.
-      self.c10 = self.root / "c10"
+      ## The field options fixture's folder.
+      self.field_options = self.root / "field_options"
       QtCore.QSettings.setPath(QtCore.QSettings.Format.NativeFormat, QtCore.QSettings.Scope.UserScope,
                                str(self.root / "settings"))
 
@@ -94,7 +94,7 @@ class QtS4Tests(unittest.TestCase):
       @return None
       """
       from capsule_studio.ui.world_shell import WORLD_PANELS, WorldWindow
-      w = WorldWindow(WORLD_PANELS, str(self.c10 / "world.json"), STUDIO_HOSTS, "World")
+      w = WorldWindow(WORLD_PANELS, str(self.field_options / "world.json"), STUDIO_HOSTS, "World")
       w.resize(*SHOT_SIZE)
       w.show()
       self.settle()
@@ -137,7 +137,7 @@ class QtS4Tests(unittest.TestCase):
       from capsule_studio.ui.editors.manifest import ManifestPanel
       from capsule_studio.ui.editors.text_tables import FALLBACK_COLOR, TextTablesPanel
       from capsule_studio.ui.shell import EditorWindow
-      e = EditorWindow([TextTablesPanel, ManifestPanel], self.c10 / "assets.json")
+      e = EditorWindow([TextTablesPanel, ManifestPanel], self.field_options / "assets.json")
       e.resize(*SHOT_SIZE)
       e.show()
       self.settle()
@@ -177,7 +177,7 @@ class QtS4Tests(unittest.TestCase):
       @return None
       """
       from capsule_studio.ui.script_shell import ScriptWindow
-      s = ScriptWindow(str(self.c10 / "scripts" / "scripts.json"))
+      s = ScriptWindow(str(self.field_options / "scripts" / "scripts.json"))
       s.show()
       self.settle()
       self.assertEqual(s.vm_boxes["resume"].currentText(), "next_frame")
@@ -194,7 +194,7 @@ class QtS4Tests(unittest.TestCase):
       @return None
       """
       from capsule_studio.ui.shell import EditorWindow
-      e = EditorWindow(None, str(self.root / "d30" / "assets.json"))
+      e = EditorWindow(None, str(self.root / "doors_overrides" / "assets.json"))
       e.show()
       self.settle()
       dp = next(p for p in e.panels if p.panel_id == "doors")

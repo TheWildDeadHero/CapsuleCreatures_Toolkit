@@ -1,6 +1,6 @@
-"""!A test save's Game section [S5] (engine N3: capsule::save::Section::Game, id 5; save::GameBlock): a game's own
-block of the save image (its bytes as they are, with the game's version of their layout), next to the engine's
-bag, party, boxes, script banks and nursery.
+"""!A test save's Game section [the menu and text box styles] (capsule::save::Section::Game, id 5; save::GameBlock): a
+game's own block of the save image (its bytes as they are, with the game's version of their layout), next to the
+engine's bag, party, boxes, script banks and nursery.
 
 The block's size and version are the game's C++ (capsule::save::game_block_bytes() and the version it passes in
 its GameBlock), so a test save states them: {"game": {"version": V, "size": N, "bytes": "hex"}} (bytes past the
@@ -9,7 +9,7 @@ another shape and left out), so set() takes them from the game, or from_image() 
 wrote (an engine save image: the newest valid copy's Game section). image() writes the test save's image with the
 section: the engine's tools/save_layout.py image() for the other sections, its game_payload() for this one and its
 assemble() for the whole (save_layout's own image() has no Game argument). available() says whether the engine's
-save layout has the section (an engine before N3 has none).
+save layout has the section (an older engine has none).
 
 Qt-free; the Test save page's Game box (ui/editors/content/test_save.py) and `testsave game` use it.
 """
@@ -51,7 +51,7 @@ def tool() -> Any:
 
 
 def available() -> bool:
-   """!Whether the engine's save layout has a Game section (engine N3).
+   """!Whether the engine's save layout has a Game section.
    @return True when it does
    """
    try:
@@ -108,7 +108,7 @@ def set_game(save: Document, version: int, size: int, data: bytes = b"") -> None
    @throws DocumentError for a version, size or data the engine would not load
    """
    if not available():
-      raise DocumentError("the engine's save layout has no Game section (it came with engine N3)")
+      raise DocumentError("the engine's save layout has no Game section (it came with a newer engine)")
    if isinstance(version, bool) or not isinstance(version, int) or not 0 <= version <= MAX_VERSION:
       raise DocumentError(f"a game block's version is 0-{MAX_VERSION}")
    if isinstance(size, bool) or not isinstance(size, int) or size < 1:
@@ -153,7 +153,7 @@ def check_game(save: Document) -> list[str]:
       return []
    out = []
    if not available():
-      out.append("game: the engine's save layout has no Game section (engine N3)")
+      out.append("game: the engine's save layout has no Game section")
    version, size = g.get(VERSION_KEY), g.get(SIZE_KEY)
    if isinstance(version, bool) or not isinstance(version, int) or not 0 <= version <= MAX_VERSION:
       out.append(f"game: version {version!r} (0-{MAX_VERSION})")

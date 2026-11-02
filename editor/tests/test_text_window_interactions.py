@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!S6b (engine C13a / C13b / C13c) without Qt: the text window port (core.text_window) held to the engine's own
+"""!text windows and interactions without Qt: the text window port (core.text_window) held to the engine's own
 handheld rules test (tests/text_window_tests.cpp handheld_rules(): glyphs clipped to their width, their glyph_height
 rows and the window, 0 pixels in the background; Fill, Clear, SkipTo, ClearTo, MinSpacing; ShiftDown from the text's
 start; a Clear typed as a glyph) and line_width(); the bare previews (core.text_render) drawing what the window port
@@ -9,7 +9,7 @@ tile storage (core.text_window.storage(), text boxes, screen plan windows, their
 interaction rules (core.interactions: edits refused as the map compiler refuses them, problems() equal to the build's
 message, rules that never run, the commands).
 
-Uses text_fixture.py's game, a copy of the engine's screen sandbox and of its C13b interaction fixture.
+Uses text_fixture.py's game, a copy of the engine's screen sandbox and of its cell interactions interaction fixture.
 """
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ from capsule_studio.core import engine, fonts, interactions, text_boxes, text_re
 from capsule_studio.core import screen_plans as sp  # noqa: E402
 from capsule_studio.core.document import Document, DocumentError  # noqa: E402
 from capsule_studio.core.world import Project  # noqa: E402
-from test_s6_formats import S6Case, list_plan  # noqa: E402
+from test_screen_graphics_plans import S6Case, list_plan  # noqa: E402
 
 ## The engine test font's codes (tests/text_window_tests.cpp kA, kB, kC).
 A, B, C = ord("A"), ord("B"), ord("C")
@@ -48,8 +48,8 @@ WINDOW = {"width": 2, "height": 1, "lines": 2, "ink": INK, "shadow": SHADOW, "ba
 WIDTH_PX, HEIGHT_PX = 16, 8
 ## A wider window for the preview comparisons: 4 x 2 cells, two lines, a margin.
 WIDE = dict(WINDOW, width=4, height=2, left=2, top=1)
-## The engine fixtures the interaction tests copy (C13b names D-30's tileset).
-INTERACTION_FIXTURES = ("c13b", "d30")
+## The engine fixtures the interaction tests copy (names doors and overrides tileset).
+INTERACTION_FIXTURES = ("cell_interactions", "doors_overrides")
 
 
 def font(glyph_height: int = 0) -> dict:
@@ -236,7 +236,7 @@ class FontTests(unittest.TestCase):
       @return None
       """
       ## Temporary folder.
-      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_s6b_font_"))
+      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_text_window_font_"))
       ## The game.
       self.game = fx.make_game(self.tmp)
       ## The engine's default code page.
@@ -304,7 +304,7 @@ class BoxStorageTests(unittest.TestCase):
       """!The panel's and `text-box show`'s line.
       @return None
       """
-      tmp = Path(tempfile.mkdtemp(prefix="capsule_s6b_box_"))
+      tmp = Path(tempfile.mkdtemp(prefix="capsule_text_window_box_"))
       try:
          game = fx.make_game(tmp)
          doc = Document.open(game.assets)
@@ -419,14 +419,14 @@ class PlanTests(S6Case):
 
 
 class InteractionTests(unittest.TestCase):
-   """!core.interactions on a copy of the engine's C13b fixture."""
+   """!core.interactions on a copy of the cell interactions fixture."""
 
    def setUp(self) -> None:
       """!Copies the fixture.
       @return None
       """
       ## Temporary root.
-      self.root = Path(tempfile.mkdtemp(prefix="capsule_s6b_rules_"))
+      self.root = Path(tempfile.mkdtemp(prefix="capsule_interactions_rules_"))
       for name in INTERACTION_FIXTURES:
          shutil.copytree(engine.root() / "tests" / "data" / name, self.root / name)
       ## The world file.

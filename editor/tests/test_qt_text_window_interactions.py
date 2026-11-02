@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!S6b (engine C13a / C13b / C13c) Qt panels: the font panel's glyph height (kept, edited, the rows below it shown
+"""!The text windows and interactions Qt panels: the font panel's glyph height (kept, edited, the rows below it shown
 as not drawn), the text box panel's window storage line, the screen plan panel's exit choosers, Exit timing tab and
 window buffer line, and the World page's Interactions tab (a rule added from the form after the chosen one, moved,
 changed, removed, undone; the compiler's verdict under the form). Skipped when PySide6 is missing; uses Qt's
@@ -28,8 +28,8 @@ from capsule_studio.core import engine, fonts, interactions, screen_plans as sp 
 from capsule_studio.plugins.registry import STUDIO_HOSTS  # noqa: E402
 from sample_data import copy_engine_apps  # noqa: E402
 
-## The engine fixtures the Interactions tab opens (C13b names D-30's tileset).
-INTERACTION_FIXTURES = ("c13b", "d30")
+## The engine fixtures the Interactions tab opens (names doors and overrides tileset).
+INTERACTION_FIXTURES = ("cell_interactions", "doors_overrides")
 ## The fixture's rules.
 FIXTURE_RULES = 7
 ## The glyph height the font test sets.
@@ -38,7 +38,7 @@ GLYPH_HEIGHT = 3
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
 class QtS6bTests(unittest.TestCase):
-   """!Drives the S6b panel parts."""
+   """!Drives the text windows and interactions panel parts."""
 
    @classmethod
    def setUpClass(cls) -> None:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!S6 (engine UC / UM, D-33) Qt panels: the scene editor's Screen graphics tab (a tilemap painted by clicking its
+"""!The screen graphics and plans Qt panels: the scene editor's Screen graphics tab (a tilemap painted by clicking its
 preview with a tile picked from the strip, a palette colour set, a PNG imported) and Screen plans tab (a plan made,
 its items added and edited through the generated form, a transition played, undo on the plan, saved with the
 manifest), the project settings window's GBA memory tab (a build folder's checks and reserve written, a build log's
@@ -25,15 +25,16 @@ except ImportError:   # the headless toolkit (core only)
 
 from capsule_studio.core import gba_memory, indexed_png, screen_graphics as sg, screen_plans as sp  # noqa: E402
 from sample_data import copy_engine_apps  # noqa: E402
-from test_s6_formats import BG_PALETTE, CURSOR, OBJ_PALETTE, OVER, PATTERN_MAP, PATTERN_TILES, REPORT  # noqa: E402
+from test_screen_graphics_plans import (BG_PALETTE, CURSOR, OBJ_PALETTE, OVER, PATTERN_MAP,  # noqa: E402
+                                        PATTERN_TILES, REPORT)
 
 ## Where the screenshots go when CAPSULE_SHOTS names a folder.
 SHOTS_ENV = "CAPSULE_SHOTS"
 
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
-class QtS6Tests(unittest.TestCase):
-   """!Drives the S6 panels."""
+class QtScreenGraphicsPlansTests(unittest.TestCase):
+   """!Drives the screen graphics and plans panels."""
 
    @classmethod
    def setUpClass(cls) -> None:
@@ -111,7 +112,7 @@ class QtS6Tests(unittest.TestCase):
       p._view_clicked(5 * sg.TILE, 2 * sg.TILE)       # cell 5, 2
       cells = w.document.get("tilemap:BOX")["cells"]
       self.assertEqual(cells[2 * 32 + 5:2 * 32 + 7], [0x1003, 0x1003])
-      self.shot(w, "s6_graphics_tilemap.png")
+      self.shot(w, "screens_graphics_tilemap.png")
       w.undo()
       self.assertEqual(w.document.get("tilemap:BOX")["cells"][2 * 32 + 5], 0)
       p.key = OBJ_PALETTE
@@ -166,7 +167,7 @@ class QtS6Tests(unittest.TestCase):
       p.slider.setValue(p.slider.maximum())
       self.assertIn("call 23 of 23, BG 16", p.call_text.text())
       p.guides.setChecked(True)
-      self.shot(w, "s6_plan_panel.png")
+      self.shot(w, "screens_plan_panel.png")
       p.chosen = ("layers", 0)
       p._fill_form()
       self.assertTrue(p.set_field("screen_block", 0))   # the map over the pattern's tiles
@@ -218,7 +219,7 @@ class QtS6Tests(unittest.TestCase):
       self.assertEqual(mem.table.item(1, 6).text(), "NO")
       self.assertIn("screen arena", mem.notes.text())
       w.tabs.setCurrentWidget(mem)
-      self.shot(w, "s6_gba_memory.png")
+      self.shot(w, "screens_gba_memory.png")
       bs = panels["build"]
       use, value = bs.rows["screen_arena_bytes"]
       self.assertEqual(value.singleStep(), 4)

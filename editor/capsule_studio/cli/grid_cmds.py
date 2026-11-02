@@ -1,4 +1,4 @@
-"""![S3] `capsule-studio sprite grid MANIFEST KEY ...`: direction-grid sprite sheets (D-30 section 3; registered by
+"""!`capsule-studio sprite grid MANIFEST KEY ...`: direction-grid sprite sheets (registered by
 sprite_cmds): columns down / up / left (/ right), right mirroring left, named rows, animations by rows, the walk of
 each direction and the ROM the grid saves. Each change is compiled with the engine before the manifest is saved."""
 from __future__ import annotations
@@ -23,7 +23,7 @@ def register(s: argparse._SubParsersAction) -> None:
    @param s  the sprite group's subparsers
    @return None
    """
-   p = s.add_parser("grid", help="direction-grid sprites (D-30): columns down/up/left(/right), named rows (S3)")
+   p = s.add_parser("grid", help="direction-grid sprites: columns down/up/left(/right), named rows")
    p.add_argument("manifest")
    p.add_argument("key")
    g = p.add_subparsers(dest="grid_command", metavar="ACTION")

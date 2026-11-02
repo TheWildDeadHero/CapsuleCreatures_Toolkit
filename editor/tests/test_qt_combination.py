@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""!Smoke tests of the B1 pages: Structure > Combination (the method list, the tabs editing the Starter's Merge Altar
-and a new method, the preview on typed species and on a test save's boxed creatures, a rename following the logic and
-the scripts, a refused removal) and the Species page's named field values and Combine moves tab. Each opens a copy of
-the map sandbox laid out as one game (sample_data.make_field_game) and edits through the widgets. Skipped when
+"""!Smoke tests of the combination pages: Structure > Combination (the method list, the tabs editing the Starter's Merge
+Altar and a new method, the preview on typed species and on a test save's boxed creatures, a rename following the logic
+and the scripts, a refused removal) and the Species page's named field values and Combine moves tab. Each opens a copy
+of the map sandbox laid out as one game (sample_data.make_field_game) and edits through the widgets. Skipped when
 PySide6 is missing; uses Qt's offscreen platform. CAPSULE_SHOTS=FOLDER saves a picture of each page there.
 """
 from __future__ import annotations
@@ -41,7 +41,7 @@ TABS = ["Method", "Slots", "Tables", "Rules", "Moves", "Messages"]
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
 class CombinationPageTests(unittest.TestCase):
-   """!The Combination page and the Species page's B1 parts."""
+   """!The Combination page and the Species page's combination parts."""
 
    @classmethod
    def setUpClass(cls) -> None:
@@ -133,7 +133,7 @@ class CombinationPageTests(unittest.TestCase):
       la.setValue(FIT_LEVEL)
       lb.setValue(FIT_LEVEL)
       self.assertIn(f"-> {GLIMMET}", panel.run_preview())
-      self.shot(w, panel, "b1_studio_combination")
+      self.shot(w, panel, "studio_combination")
       la.setValue(UNFIT_LEVEL)
       a.setCurrentText(SPROUTLE)
       self.assertIn("refused: unfit", panel.run_preview())
@@ -151,7 +151,7 @@ class CombinationPageTests(unittest.TestCase):
       panel._fill_preview_inputs()
       # the grid: the Light x Darkness cell gives Cosmic
       panel.tabs.setCurrentIndex(TABS.index("Tables"))
-      self.shot(w, panel, "b1_studio_combination_tables")
+      self.shot(w, panel, "studio_combination_tables")
       # a refused removal (merge_rule and the sandbox script name it)
       self.assertFalse(panel.remove_method())
       self.assertEqual(panel.names(), [ALTAR, GROVE])
@@ -175,7 +175,7 @@ class CombinationPageTests(unittest.TestCase):
       self.assertTrue(panel.set_source("known", True, 2))
       self.settle()
       panel.tabs.setCurrentIndex(TABS.index("Rules"))
-      self.shot(w, panel, "b1_studio_combination_new")
+      self.shot(w, panel, "studio_combination_new")
       self.assertIsNone(p.error_now())
       # a rename of the altar follows the logic and the scripts; one undo step brings it back
       panel.list.setCurrentRow(0)
@@ -191,7 +191,7 @@ class CombinationPageTests(unittest.TestCase):
       self.assertIn(ALTAR, panel.names())
 
    def test_move_source_from(self) -> None:
-      """!C9: the Moves tab's From column (one slot role per source, every input by default) and the push check.
+      """!The Moves tab's From column (one slot role per source, every input by default) and the push check.
       @return None
       """
       from capsule_studio.ui.editors.structure.combination import (ANY_INPUT_TEXT, SOURCE_FROM_COLUMN,
@@ -224,7 +224,7 @@ class CombinationPageTests(unittest.TestCase):
       self.assertTrue(panel.set_source("combine_moves", True, 0, False, ROLES[0]))
       self.settle()
       self.assertIsNone(p.error_now())
-      self.shot(w, panel, "c9_studio_move_sources")
+      self.shot(w, panel, "studio_move_sources")
 
    def test_species_parts(self) -> None:
       """!A named-values field shows as a combo of its names; the Combine moves tab adds, moves and removes.
@@ -267,7 +267,7 @@ class CombinationPageTests(unittest.TestCase):
       self.assertEqual(tabs.combine_move_names(), before)
       entry = battle.entry(p.battle, "species", BREEZLE)
       self.assertEqual(entry[battle.COMBINE_MOVES_KEY], before)
-      self.shot(w, panel, "b1_studio_species_combine")
+      self.shot(w, panel, "studio_species_combine")
 
 
 if __name__ == "__main__":
