@@ -4,7 +4,7 @@ the world's scripts manifest and step hooks (B-3).
 Shown on its own as the event editor app, and as a tab of the Studio's World
 page, where it follows the map chosen in the Map tab.
 The list shows the map's events; the form under it edits the chosen one
-(cell, level and the fields of its kind, a warp's transition and S3 door among them,
+(cell, level and the fields of its kind, a warp's transition and doors and overrides door among them,
 with the scripts, flags and variables the scripts manifest offers). The Events map tool places, moves
 and removes events by clicking. Every change goes through the host's
 run_edit() on the Document it changes, so Undo / Redo, the unsaved mark and
@@ -58,7 +58,7 @@ MAX_CELL = 16383
 ELEVATION_FIELD = "elevation"
 ## Highest warp number a warp may name.
 MAX_WARP = 254
-## S4: colour of the refused-run message.
+## Colour of the refused-run message.
 PROBLEM_COLOR = "#c03030"
 ## Smallest value a trigger's variable may hold (signed 32 bits).
 MIN_VALUE = -2**31
@@ -113,7 +113,7 @@ class EventsPanel(EditorPanel):
       self.area.setToolTip("The outdoor map whose area this map is in: leaving the area clears its area flags "
                            "and variables (B-2). Interiors name their town; outdoor maps are their own area.")
       self.area.currentIndexChanged.connect(lambda _i: self._area_chosen())
-      ## I3: the map's events and objects may stand on unpainted cells ("unpainted_events").
+      ## The map's events and objects may stand on unpainted cells ("unpainted_events").
       self.unpainted = QtWidgets.QCheckBox("Events on unpainted cells")
       self.unpainted.setToolTip("Lets this map's warps, triggers and objects stand on unpainted cells, and warps land "
                                 "on them (imported data kept as its source has it; the walker never steps onto such a "
@@ -165,7 +165,7 @@ class EventsPanel(EditorPanel):
       self.elevation.setSpecialValueText("any level")
       self.elevation.setKeyboardTracking(False)
       self.elevation.valueChanged.connect(lambda v: self._set(elevation=v))
-      ## Warp: destination map (I3: or "dynamic", the game decides when it fires).
+      ## Warp: destination map (or "dynamic", the game decides when it fires).
       self.to = QtWidgets.QComboBox()
       self.to.setToolTip(f"The map it lands on; {events.dynamic_to()!r}: the game decides when the warp fires (the "
                          "exit of a shared interior back to where the player came from)")
@@ -175,7 +175,7 @@ class EventsPanel(EditorPanel):
       self.warp.setRange(0, MAX_WARP)
       self.warp.setKeyboardTracking(False)
       self.warp.valueChanged.connect(lambda v: self._set(warp=v))
-      ## Warp: what fires it (I3: the engine's step, press, arrow, door, none).
+      ## Warp: what fires it (the engine's step, press, arrow, door, none).
       self.trigger = QtWidgets.QComboBox()
       self.trigger.addItems(events.warp_triggers())
       self.trigger.setToolTip("step: arriving on the cell warps; press: pressing the direction while standing "
@@ -190,11 +190,11 @@ class EventsPanel(EditorPanel):
       ## Warp: transition ("" = the world's default).
       self.transition = QtWidgets.QComboBox()
       self.transition.addItems([DEFAULT_TRANSITION] + events.TRANSITIONS)
-      self.transition.setToolTip("How the screen changes on this warp (D-17); the world's default when not set "
+      self.transition.setToolTip("How the screen changes on this warp; the world's default when not set "
                                  "(the Locations tab sets it)")
       self.transition.activated.connect(lambda _i: self._set(transition=None if self.transition.currentIndex() == 0
                                                              else self.transition.currentText()))
-      ## S3 (D-30): warp: the door animation it binds to its cell ("" none; an editable list of the game's doors).
+      ## Warp: the door animation it binds to its cell ("" none; an editable list of the game's doors).
       self.door = QtWidgets.QComboBox()
       self.door.setEditable(True)
       self.door.setToolTip("The door animation (an asset door:NAME of the game's asset manifest) this warp's cell "
@@ -216,7 +216,7 @@ class EventsPanel(EditorPanel):
       self.value.setRange(MIN_VALUE, MAX_VALUE)
       self.value.setKeyboardTracking(False)
       self.value.valueChanged.connect(lambda v: self._set(value=v) if self.var.currentText() else None)
-      ## S4 (engine C10): trigger: how it runs (step: locks the walker; immediate: to its end at once).
+      ## Trigger: how it runs (step: locks the walker; immediate: to its end at once).
       self.run_box = QtWidgets.QComboBox()
       self.run_box.addItems(events.trigger_runs())
       self.run_box.setToolTip("step: the walker stops and the script runs (it may show messages and wait); "
@@ -224,7 +224,7 @@ class EventsPanel(EditorPanel):
                               "cell's next events are still checked (its script may not wait)")
       self.run_box.activated.connect(lambda _i: self._set(run=None if self.run_box.currentText() == events.STEP
                                                          else self.run_box.currentText()))
-      ## S4: why the engine refuses the trigger's run (an immediate trigger whose script may wait), or empty.
+      ## Why the engine refuses the trigger's run (an immediate trigger whose script may wait), or empty.
       self.run_problem = QtWidgets.QLabel()
       self.run_problem.setWordWrap(True)
       self.run_problem.setStyleSheet(f"color: {PROBLEM_COLOR};")
@@ -459,7 +459,7 @@ class EventsPanel(EditorPanel):
       self.transition.setCurrentText(e.get("transition", DEFAULT_TRANSITION))
       self.door.clear()
       self.door.addItem("")
-      try:   # S3: the doors the game's asset manifests and the world's bindings name
+      try:   # the doors the game's asset manifests and the world's bindings name
          self.door.addItems(doors.door_keys(p))
       except ENGINE_ERRORS:
          pass
@@ -564,7 +564,7 @@ class EventsPanel(EditorPanel):
       self._edit(f"Change {events.KINDS[kind]}", lambda: events.set_event(doc, kind, i, **fields), doc)
 
    def _door_chosen(self) -> None:
-      """!S3: the warp's door changed ("" removes it).
+      """!The warp's door changed ("" removes it).
       @return None
       """
       text = self.door.currentText().strip()
@@ -586,7 +586,7 @@ class EventsPanel(EditorPanel):
          maptools.select(self.map_name, kind, i, [x, y])
 
    def _unpainted_toggled(self, on: bool) -> None:
-      """!The map's events may (or may not) stand on unpainted cells (I3).
+      """!The map's events may (or may not) stand on unpainted cells.
       @param on  checked
       @return None
       """
@@ -599,9 +599,9 @@ class EventsPanel(EditorPanel):
       @return None
       """
       trig = self.trigger.currentText()
-      if trig in events.DIRECTED:   # press, arrow, door (I3) take a direction
+      if trig in events.DIRECTED:   # press, arrow, door take a direction
          self._set(trigger=trig, direction=self.direction.currentText())
-      elif trig == "none":   # I3: a landing only
+      elif trig == "none":   # a landing only
          self._set(trigger=trig, direction=None)
       else:
          self._set(trigger=None, direction=None)

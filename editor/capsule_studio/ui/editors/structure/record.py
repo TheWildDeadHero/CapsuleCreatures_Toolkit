@@ -1,4 +1,4 @@
-"""!The Record panel (D-23 §3.2): the creature record's roles, the party size
+"""!The Record panel: the creature record's roles, the party size
 and move slots, a bit budget per target platform and the live layout hash.
 
 The role table lists the record in order: engine roles are greyed with
@@ -10,7 +10,7 @@ the custom roles. Drag a row (or use Up / Down) to reorder; every change is
 one undo step (core.structure.record) and is refused when the engine's
 compiler would refuse it.
 
-A custom role's Stored box (engine E13a) unticked makes it computed on
+A custom role's Stored box unticked makes it computed on
 read: its one derived or constant generation entry gives its value
 whenever it is read, so it takes no record bits, leaves the hash and the
 transfer, and its ID follows every stored custom role's. The box is refused
@@ -81,7 +81,7 @@ HEX_PREFIX = "0x"
 HEXADECIMAL = 16
 ## Width of a new custom role in the form, bits.
 NEW_CUSTOM_WIDTH = 8
-## What the Bits / Bit offset cells of an unstored role say (E13a: no record bits).
+## What the Bits / Bit offset cells of an unstored role say (no record bits).
 UNSTORED_TEXT = "computed on read"
 ## Text colour of an unstored role's row.
 UNSTORED_COLOR = "#5f6fa0"
@@ -488,7 +488,7 @@ class RecordPanel(BattlePanel):
             if not row["stored"]:
                item.setForeground(unstored)
                if key in ("bits", "offset", "name"):
-                  item.setToolTip("Computed on read from its generation entry: no record bits (E13a)")
+                  item.setToolTip("Computed on read from its generation entry: no record bits")
             if engine_row:
                item.setBackground(engine_bg)
                if key in ("id", "name", "kind"):
@@ -607,7 +607,7 @@ class RecordPanel(BattlePanel):
       return self._refused(self.edit(f"Role {key}", lambda: model.set_role(doc, name, key, value)))
 
    def set_stored(self, name: str, stored: bool) -> bool:
-      """!Whether the record holds a custom role (one undo step; E13a: unstored = computed on read). Asks first when
+      """!Whether the record holds a custom role (one undo step; unstored = computed on read). Asks first when
       field scripts use the role (they read an unstored role as 0; the custom IDs after it move).
       @param name    role name
       @param stored  True: stored; False: computed on read
@@ -648,7 +648,7 @@ class RecordPanel(BattlePanel):
       @param name      role name
       @param removing  True for a removal (or a change that moves the custom IDs after it), False for a rename
       @param what      the verb the question uses, or None for Remove / Rename
-      @param storing   the role is stored again (C5: the IDs move from its stored-position ID on)
+      @param storing   the role is stored again (the IDs move from its stored-position ID on)
       @return True to go ahead (nothing uses it, or the user says so; headless No: widgets.ask(), as the CLI
               refuses without --force)
       """

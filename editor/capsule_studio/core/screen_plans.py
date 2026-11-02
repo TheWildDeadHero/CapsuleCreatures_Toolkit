@@ -1,4 +1,4 @@
-"""![S6] Screen plans (engine UC, D-33): a full-screen scene's video plan as data, previewed the way the GBA shows it
+"""!Screen plans: a full-screen scene's video plan as data, previewed the way the GBA shows it
 and exported as the C++ tables capsule/screen/screen.h takes.
 
 A plan is a file NAME.screen.json (schema capsule.screen-plan/1, the studio's: the engine reads the C++ export(),
@@ -22,17 +22,18 @@ not the file) beside the asset manifest it draws from, or in its screens/ folder
 - "transitions": open / in / out (screen::Transition): "none", "to_black", "from_black", "to_white", "from_white"
   or {"mask": "all" | "bg" | "obj" | number, "delay", "from", "to", "color"}; "fade_style" the FadeStyle (default the
   engine's kHandheldFade);
-- S6b (engine C13a) "exit": how the screen leaves, {"call": "close" | "close_now" | "replace" | "replace_now",
+- the text windows and interactions "exit": how the screen leaves, {"call": "close" | "close_now" | "replace" |
+"replace_now",
   "next": the replacing screen's plan name (replace / replace_now)}; left out: close(). close() plays the out fade
   and leaves the frame after its last call; close_now() (the screen faded itself) leaves at the end of the frame it
   is called in; replace() / replace_now() do the same and then start the next screen's setup instead of resuming
   what is below. exit_frames() lists the frames, the export writes a leave() helper that calls it.
 
-S6b (engine C13c): a window holds no pixels of its own; the screen gives each window w x h tiles of its own memory
+A window holds no pixels of its own; the screen gives each window w x h tiles of its own memory
 (a TileBuffer<W, H> member of its screen arena block, window::attach()). window_storage() and windows_storage() say
 how many tiles and bytes each window and the whole plan take (the panel, describe() and the export show them).
 
-check() finds what would go wrong on the GBA: a layer's map written over tiles (the U3 kind of overrun), layers the
+check() finds what would go wrong on the GBA: a layer's map written over tiles (kind of overrun), layers the
 mode has not, sheets or banks that do not fit, assets missing or of the wrong colour mode. render() simulates
 background video memory (64 KB) and sprite memory: tiles, maps and windows are written where the plan puts them, so
 an overlap shows as it would on the hardware, then the layers and sprites are composed in the GBA's priority order,
@@ -117,14 +118,14 @@ MAX_WINDOW_CELLS = 64
 MAX_MAP_OFFSET = SCREEN_BLOCK_BYTES * max(SIZE_BLOCKS) // sg.ENTRY_BYTES
 ## Highest fill index of a window.
 MAX_FILL = sg.NIBBLE_MASK
-## S6b (C13a): the ways a screen leaves (screen.h close(), close_now(), replace(), replace_now()); the first is the
+## The ways a screen leaves (screen.h close(), close_now(), replace(), replace_now()); the first is the
 ## default.
 EXIT_CALLS = ("close", "close_now", "replace", "replace_now")
-## S6b: the exits that start another screen in the closed one's place.
+## The exits that start another screen in the closed one's place.
 REPLACING = ("replace", "replace_now")
-## S6b: the exits without the out fade (the screen faded itself; close_now() cancels any fade still running).
+## The exits without the out fade (the screen faded itself; close_now() cancels any fade still running).
 UNFADED = ("close_now", "replace_now")
-## S6b: the keys of a plan's exit.
+## The keys of a plan's exit.
 EXIT_KEYS = ("call", "next")
 ## Highest sprite size.
 MAX_OBJ_SIZE = 3
@@ -315,7 +316,7 @@ def enumerators(text: str, enum: str) -> list[str]:
    """
    m = re.search(r"enum\s+(?:class\s+)?" + re.escape(enum) + r"\b[^{;]*\{(?P<body>.*?)\};", text, re.DOTALL)
    if m is None:
-      raise PlanError(f"the engine has no enum {enum} (an engine before UC?)")
+      raise PlanError(f"the engine has no enum {enum} (an older engine?)")
    body = re.sub(r"///<[^\n]*|//[^\n]*", "", m.group("body"))
    names = [part.split("=")[0].strip() for part in body.split(",")]
    return [n for n in names if n and not n.startswith(COUNT_PREFIX)]
@@ -767,11 +768,11 @@ def set_fade_style(plan: Document, style: JsonDict | None) -> None:
       del plan.data["fade_style"]
 
 
-# -- S6b: the exit (engine C13a) --------------------------------------------------------------------------------------
+# -- The exit --------------------------------------------------------------------------------------
 
 
 def exit_of(plan: Document | JsonDict) -> JsonDict:
-   """!S6b: how the screen leaves, as stored (close() when the plan says nothing).
+   """!how the screen leaves, as stored (close() when the plan says nothing).
    @param plan  plan Document or data
    @return {"call": one of EXIT_CALLS, "next": a plan name or ""}
    """
@@ -782,7 +783,7 @@ def exit_of(plan: Document | JsonDict) -> JsonDict:
 
 
 def _check_exit(raw: Any) -> None:
-   """!S6b: an exit the plan may keep.
+   """!an exit the plan may keep.
    @param raw  the "exit" value
    @return None
    @throws PlanError when it is malformed, or the engine lacks the call
@@ -793,14 +794,14 @@ def _check_exit(raw: Any) -> None:
    if call not in EXIT_CALLS:
       raise PlanError(f"exit call {call!r}: one of {', '.join(EXIT_CALLS)}")
    if not re.search(r"\bvoid\s+" + call + r"\s*\(", _header(SCREEN_H)):
-      raise PlanError(f"the engine's screen.h has no {call}() (it came with engine C13a)")
+      raise PlanError(f"the engine's screen.h has no {call}() (it came with a newer engine)")
    nxt = raw.get("next", "")
    if nxt and (not isinstance(nxt, str) or not NAME.fullmatch(nxt)):
       raise PlanError(f"exit next {nxt!r}: a plan's snake_case name")
 
 
 def set_exit(plan: Document, call: str, next_screen: str = "") -> None:
-   """!S6b: how the screen leaves (call inside edit()); close() with no next screen leaves the key out.
+   """!how the screen leaves (call inside edit()); close() with no next screen leaves the key out.
    @param plan         plan Document
    @param call         one of EXIT_CALLS
    @param next_screen  replace / replace_now: the next screen's plan name ("" for none yet)
@@ -815,7 +816,7 @@ def set_exit(plan: Document, call: str, next_screen: str = "") -> None:
 
 
 def out_calls(plan: JsonDict) -> int:
-   """!S6b: calls the out fade makes (fade_frames() of the out transition; 0 for none).
+   """!calls the out fade makes (fade_frames() of the out transition; 0 for none).
    @param plan  plan data
    @return calls
    """
@@ -823,7 +824,7 @@ def out_calls(plan: JsonDict) -> int:
 
 
 def exit_frames(plan: JsonDict, below: str = "what is below") -> list[tuple[int, str]]:
-   """!S6b (engine C13a): the frames the plan's exit takes, counted from the frame its call is made in (0; a call
+   """!The frames the plan's exit takes, counted from the frame its call is made in (0; a call
    between frames counts as the frame that just ended): close() / replace() run the out fade (its first call at the
    call, one a frame after), the screen leaves (Screen::leave(false)) the frame after the last call and what comes
    next starts the frame after that; close_now() / replace_now() leave at the end of the frame they are called in
@@ -854,11 +855,11 @@ def exit_frames(plan: JsonDict, below: str = "what is below") -> list[tuple[int,
    return out
 
 
-# -- S6b: window storage (engine C13c) -------------------------------------------------------------------------------
+# -- Window storage -------------------------------------------------------------------------------
 
 
 def window_storage(item: JsonDict) -> text_window.Storage:
-   """!S6b (C13c): the tiles a plan window needs from its screen (window::attach(): its w x h cells).
+   """!The tiles a plan window needs from its screen (window::attach(): its w x h cells).
    @param item  a windows item
    @return text_window.Storage
    """
@@ -866,7 +867,7 @@ def window_storage(item: JsonDict) -> text_window.Storage:
 
 
 def windows_storage(plan: JsonDict) -> tuple[int, int]:
-   """!S6b (C13c): the window buffers of the whole plan (what its arena block holds for them).
+   """!The window buffers of the whole plan (what its arena block holds for them).
    @param plan  plan data
    @return (tiles, bytes)
    """
@@ -1104,7 +1105,7 @@ def check(plan: JsonDict, manifest: Document | None, later: bool = False) -> lis
    out += _exit_problems(plan, manifest)
    for i, w in enumerate(plan.get("windows", [])):
       st = window_storage(w)
-      if not st.fits():   # S6b (C13c): TileBuffer<W, H> and window::open() take 1 to kMaxTiles cells
+      if not st.fits():   # TileBuffer<W, H> and window::open() take 1 to kMaxTiles cells
          out.append(Problem("error", f"windows {i}", f"it covers {st.tiles} cells; a window has at most "
                                                      f"{st.max_tiles} tiles (window::kMaxTiles)"))
    if manifest is not None:
@@ -1114,7 +1115,7 @@ def check(plan: JsonDict, manifest: Document | None, later: bool = False) -> lis
 
 
 def _exit_problems(plan: JsonDict, manifest: Document | None) -> list[Problem]:
-   """!S6b: what is wrong with the plan's exit.
+   """!what is wrong with the plan's exit.
    @param plan      plan data
    @param manifest  its asset manifest Document (the plans beside it), or None
    @return problems
@@ -1912,7 +1913,7 @@ def export_cpp(plan: JsonDict, source: str = "") -> str:
                       f".y = {value(w, 'windows', 'y')}, .w = {value(w, 'windows', 'w')}, "
                       f".h = {value(w, 'windows', 'h')}, .first_tile = {value(w, 'windows', 'first_tile')}, "
                       f".palette = {value(w, 'windows', 'palette')}}};")
-         st = window_storage(w)   # S6b (C13c): the screen gives the window its tiles (window::attach())
+         st = window_storage(w)   # the screen gives the window its tiles (window::attach())
          lines.append(f"/// The {value(w, 'windows', 'name')} window's tiles ({st.tiles} tiles, {st.size_bytes} bytes; "
                       "a member of the screen's arena block).")
          place = f"k{camel(value(w, 'windows', 'name'))}Window"
@@ -1969,7 +1970,7 @@ def export_cpp(plan: JsonDict, source: str = "") -> str:
 
 
 def _cpp_exit(plan: JsonDict) -> list[str]:
-   """!S6b (C13a): the export's leave() helper, the plan's exit as the screen calls it.
+   """!The export's leave() helper, the plan's exit as the screen calls it.
    @param plan  plan data
    @return lines
    """
@@ -2030,7 +2031,7 @@ def describe(plan: JsonDict) -> list[str]:
    for which in TRANSITIONS:
       t = transition(plan, which)
       out.append(f"transition {which}: {t if isinstance(t, str) else json.dumps(t)}")
-   for i, w in enumerate(plan.get("windows", [])):   # S6b (C13c)
+   for i, w in enumerate(plan.get("windows", [])):   # the text windows and interactions
       out.append(f"window {i} {value(w, 'windows', 'name')} storage: {window_storage(w).text()}")
    tiles, size = windows_storage(plan)
    out.append(f"window buffers: {tiles} tiles, {size} bytes")

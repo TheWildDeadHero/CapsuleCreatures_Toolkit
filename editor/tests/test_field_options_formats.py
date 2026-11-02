@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""!S4 (engine C10) without Qt: text table languages in one manifest (core.asset_tables: the build language and its
+"""!field options without Qt: text table languages in one manifest (core.asset_tables: the build language and its
 fallback checked by the engine's select_language(), missing translations, the fallback's share; core.text_tables
 set_language(); the `manifest languages|language|fallback` and `text-table language` commands; the fit report in a
 chosen language), coord triggers that run immediately (core.events: the run field, the refusal of a script that may
-wait, `events set --run`), the script language's C10 words and settings (core.scripts lifetimes() with session, the
-vm switches checked by the engine, var_wraps(), `script settings --vm`, core.script_words face / lifetime words) and
-door sounds checked against the game's sounds (core.doors.sound_problems()).
+wait, `events set --run`), the script language's field options words and settings (core.scripts lifetimes() with
+session, the vm switches checked by the engine, var_wraps(), `script settings --vm`, core.script_words face / lifetime
+words) and door sounds checked against the game's sounds (core.doors.sound_problems()).
 
-Uses copies of the engine's C10 fixture (tests/data/c10: a manifest of en and fr tables, a world with an immediate
-trigger, a scripts manifest with the vm switches and session declarations; its tileset comes from tests/data/d30) and
-of the D-30 fixture's door (sounds sound:DOOR_OPEN / sound:DOOR_SHUT).
+Uses copies of the field options fixture (tests/data/field_options: a manifest of en and fr tables, a world with an
+immediate trigger, a scripts manifest with the vm switches and session declarations; its tileset comes from
+tests/data/doors_overrides) and of the doors and overrides fixture's door (sounds sound:DOOR_OPEN / sound:DOOR_SHUT).
 """
 from __future__ import annotations
 
@@ -34,29 +34,29 @@ PLAIN, IMMEDIATE = "plain", 0
 ## A script of the fixture that waits (`delay 2`).
 WAITING_SCRIPT = "pauses"
 ## The fixture's languages and the key only English has.
-LANGUAGES, ONLY_EN = ["en", "fr"], "text:C10.ONLY_EN"
-## The D-30 fixture's door and its sounds.
+LANGUAGES, ONLY_EN = ["en", "fr"], "text:FIELD_OPTIONS.ONLY_EN"
+## The doors and overrides fixture's door and its sounds.
 GATE, DOOR_SOUNDS = "door:GATE", ("sound:DOOR_OPEN", "sound:DOOR_SHUT")
 
 
 class C10Copy(unittest.TestCase):
-   """!Base: a copy of the engine's C10 and D-30 fixtures per test."""
+   """!Base: a copy of the field options and doors and overrides fixtures per test."""
 
    def setUp(self) -> None:
-      """!Copies tests/data/c10 and tests/data/d30 side by side.
+      """!Copies tests/data/field_options and tests/data/doors_overrides side by side.
       @return None
       """
       ## Temporary root.
       self.root = Path(tempfile.mkdtemp(prefix="capsule_s4_"))
       data = engine.root() / "tests" / "data"
-      for name in ("c10", "d30"):
+      for name in ("field_options", "doors_overrides"):
          shutil.copytree(data / name, self.root / name)
-      ## The C10 fixture's folder.
-      self.c10 = self.root / "c10"
+      ## The field options fixture's folder.
+      self.field_options = self.root / "field_options"
       ## Its asset manifest.
-      self.assets = self.c10 / "assets.json"
+      self.assets = self.field_options / "assets.json"
       ## Its scripts manifest.
-      self.scripts = self.c10 / "scripts" / "scripts.json"
+      self.scripts = self.field_options / "scripts" / "scripts.json"
 
    def tearDown(self) -> None:
       """!Removes the copy.
@@ -109,7 +109,7 @@ class LanguageTests(C10Copy):
       """!A table without a language is in every language: its keys are missing from none.
       @return None
       """
-      fr = text_tables.open_table(self.c10 / "text" / "fr.json")
+      fr = text_tables.open_table(self.field_options / "text" / "fr.json")
       with fr.edit("t"):
          text_tables.set_language(fr, None)
       self.assertNotIn("language", fr.data)
@@ -140,7 +140,7 @@ class LanguageTests(C10Copy):
       self.assertEqual(status, 1, out)
       status, out = self.run_cli("manifest", "check", self.assets, "--language", "en")
       self.assertEqual(status, 0, out)
-      status, out = self.run_cli("text-table", "language", self.c10 / "text" / "fr.json", "-")
+      status, out = self.run_cli("text-table", "language", self.field_options / "text" / "fr.json", "-")
       self.assertIn("language -", out)
 
 
@@ -152,7 +152,7 @@ class TriggerTests(C10Copy):
       not written.
       @return None
       """
-      p = Project.open(self.c10 / "world.json")
+      p = Project.open(self.field_options / "world.json")
       self.assertEqual(events.trigger_runs(), ["step", "immediate"])
       doc = p.map(PLAIN)
       e = events.events(doc, "triggers")[IMMEDIATE]
@@ -179,17 +179,17 @@ class TriggerTests(C10Copy):
       """!`events set MAP trigger N --run immediate|step`.
       @return None
       """
-      world = self.c10 / "world.json"
+      world = self.field_options / "world.json"
       status, out = self.run_cli("events", "set", world, PLAIN, "trigger", "1", "--run", "immediate")
       self.assertEqual(status, 0, out)
-      saved = json.loads((self.c10 / "maps" / "plain.json").read_text(encoding="utf-8"))
+      saved = json.loads((self.field_options / "maps" / "plain.json").read_text(encoding="utf-8"))
       self.assertEqual(saved["events"]["triggers"][1]["run"], "immediate")
       status, out = self.run_cli("events", "show", world, "--map", PLAIN)
       self.assertIn("runs at once", out)
 
 
 class ScriptTests(C10Copy):
-   """!The script language's C10 words and settings."""
+   """!The script language's field options words and settings."""
 
    def test_settings_lifetimes_and_wrap(self) -> None:
       """!session lifetime, the vm switches (checked by the engine), which variables wrap.
@@ -210,7 +210,7 @@ class ScriptTests(C10Copy):
       self.assertFalse(scripts.var_wraps("u8", 0, 9, vm))   # a narrow range saturates
       self.assertFalse(scripts.var_wraps("u16", 0, 0xFFFF, None))
       self.assertFalse(scripts.var_wraps("u32", 0, 0xFFFF, vm))
-      line = scripts.ScriptProject.open(self.scripts).declare("c10.cscript", "flag", "seen_once", "session")
+      line = scripts.ScriptProject.open(self.scripts).declare("field_options.cscript", "flag", "seen_once", "session")
       self.assertEqual(line, "flag seen_once : session;")
 
    def test_words_and_commands(self) -> None:
@@ -238,21 +238,22 @@ class DoorSoundTests(C10Copy):
    """!Door sounds checked against the game's sounds."""
 
    def test_door_sounds(self) -> None:
-      """!The D-30 door's sounds name no sound until the game's scripts declare them; a malformed key is said.
+      """!The doors and overrides door's sounds name no sound until the game's scripts declare them; a malformed key is
+      said.
       @return None
       """
-      doc = Document.open(self.root / "d30" / "assets.json")
+      doc = Document.open(self.root / "doors_overrides" / "assets.json")
       gate = doc.get(GATE)
       found = doors.sound_problems(doc, gate)
       self.assertEqual(len(found), len(DOOR_SOUNDS), found)
       self.assertTrue(all("no such sound" in p for p in found))
-      source = next((self.root / "d30" / "scripts").glob("*.cscript"))
+      source = next((self.root / "doors_overrides" / "scripts").glob("*.cscript"))
       names = [s.split(":")[1] for s in DOOR_SOUNDS]
       source.write_text(source.read_text(encoding="utf-8") + "".join(f"\nconst {n} = {i};" for i, n in
                                                                     enumerate(names, 1)) + "\n", encoding="utf-8")
       self.assertEqual(doors.sound_problems(doc, gate), [])
       self.assertIn("is no sound key", doors.sound_problems(doc, dict(gate, sounds={"open": "DOOR_OPEN"}))[0])
-      again = Document.open(self.root / "d30" / "assets.json")
+      again = Document.open(self.root / "doors_overrides" / "assets.json")
       self.assertFalse(any("no such sound" in line for line in doors.lines(again, GATE)))
 
 

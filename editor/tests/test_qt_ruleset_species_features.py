@@ -1,4 +1,4 @@
-"""!Smoke tests of the S16 pages (the studio side of the engine's E13a):
+"""!Smoke tests of the record fields pages (the studio side of the record fields):
 Structure > Species fields, the Species page's field spins, the Record page's
 Stored box and preview tabs, the Progression page's draw order, species
 preview and coloured derived field, the Formulas page's coloured cells and
@@ -57,7 +57,7 @@ class SpeciesFieldsPageTests(QtBattleTestCase):
       w, panel = self.window("species_fields")
       p = w.project
       self.assertIs(w.document, p.structure)
-      # the Starter's own fields (G3's recruit_rate, G4's training yields): the new one goes after them
+      # the Starter's own fields (recruit_rate, the growth's training yields): the new one goes after them
       given = species_fields.field_names(p.structure)
       self.assertEqual(panel.table.rowCount(), len(given))
       self.assertIn(f"{len(given)}/{species_fields.max_fields()}", panel.count.text())

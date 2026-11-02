@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""!Tests for proportional fonts [S2] (no Qt): core.fonts (capsule.font/2 edits, the engine's compile check),
-core.text_render (text drawn as the engine's text windows draw it, the screens of a text) and the `font` commands.
-Uses the neutral game of text_fixture.py.
+"""!Tests for proportional fonts [the older studio] (no Qt): core.fonts (capsule.font/2 edits, the engine's compile
+check), core.text_render (text drawn as the engine's text windows draw it, the screens of a text) and the `font`
+commands. Uses the neutral game of text_fixture.py.
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ class FontCase(unittest.TestCase):
       @return None
       """
       ## Temporary folder.
-      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_i4_font_"))
+      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_port_font_"))
       ## The game.
       self.game = fx.make_game(self.tmp)
       ## The engine's default code page.

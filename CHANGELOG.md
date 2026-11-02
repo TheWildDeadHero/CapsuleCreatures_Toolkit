@@ -3,6 +3,24 @@
 All notable changes to the CapsuleCreatures Toolkit. Versions are calendar
 versions, `YYYY.MM.DD.MMMM` (the UTC date and the minutes since midnight).
 
+## Unreleased
+
+- **Battle animation tools** (M5 S8) in the scene editor and the Studio's
+  Assets page: **Anim scripts** (an animation bank's scripts stepped
+  frame by frame as the engine's player runs them, with a timeline of
+  sprites, tasks, sound and background), **Affine anims** (an editor for
+  affine sprite animations with an exact preview, saved as
+  `capsule.affine-anims/1` and exported as C++), **Scanline effects** (a
+  preview of per-line tables: the engine's wave, weight ramps, windows)
+  and **Anim scenes** (the engine sandbox's scenes through its
+  `capsule_anim_view`).
+- **VM extensions** (M5 VX, D-39) in the scene editor and the Studio's
+  Assets page: a game's VM extension manifests with the engine's checks,
+  each command table's progress (aliases against natives), the opcodes
+  with their reasons, owners, usage and GBA sizes, and a copyable report.
+- Fixed: limits the studio reads from the engine's headers (screen size, blend levels, sprite and step counts)
+  now read any C++ integer literal; one written in hex (`0x40`) used to read as 0.
+
 ## 2026.10.31.1347: first public release
 
 The first public release of the toolkit, licensed under the Mozilla Public

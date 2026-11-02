@@ -11,11 +11,11 @@ status bar shows the bank's size or the error count. Undo / Redo work on the
 current source, or on the placeholder history while the Placeholders tab is
 in front.
 
-[S2] (engine I4): the outline also groups movements, marts and route steps,
+: the outline also groups movements, marts and route steps,
 and a map's detail shows each trigger entry (on_resume, on_warp_into with
 its condition, ...); the editors complete words (core.script_words: what
 fits at the cursor, the declared names included); Script > Insert statement
-inserts an I4 statement's template; the settings add the object numbering's
+inserts an script port statement's template; the settings add the object numbering's
 start (object_base), unused warnings (warn_unused) and the glitch switches.
 """
 from __future__ import annotations
@@ -65,11 +65,11 @@ PROBLEM_WHERE_WIDTH = 200
 SOURCES_STRETCH = 4
 ## Stretch of the middle (sources and problems) against the outline and the settings (1 each).
 MIDDLE_STRETCH = 4
-## [S2] Rows of the glitch switch list before it scrolls.
+## Rows of the glitch switch list before it scrolls.
 GLITCH_ROWS = 6
 
 
-## [S4] What each "vm" switch's value does (the scripts manifest's vm, engine C10): switch -> (label, tip).
+## What each "vm" switch's value does (the scripts manifest's vm): switch -> (label, tip).
 VM_TIPS = {"resume": ("After a wait", "same_frame: the instruction after a wait runs in the frame the wait ends; "
                       "next_frame: on the next frame (the reference games' script engines)"),
            "random": ("random(n)", "scaled: (r * n) >> 16; modulo: r % n, drawn even for n = 0 (the reference "
@@ -87,10 +87,10 @@ class DeclareDialog(QtWidgets.QDialog):
       @param parent   parent widget
       @param sources  source paths to choose from
       @param kind     'flag' or 'var' preselected
-      @param vm       [S4] the manifest's "vm" setting (whether full-range variables wrap), or None
+      @param vm       [the field options] the manifest's "vm" setting (whether full-range variables wrap), or None
       """
       super().__init__(parent)
-      ## [S4] The manifest's vm switches.
+      ## The manifest's vm switches.
       self.vm = dict(vm or {})
       self.setWindowTitle("Declare a flag or variable")
       form = QtWidgets.QFormLayout(self)
@@ -105,7 +105,7 @@ class DeclareDialog(QtWidgets.QDialog):
       self.source.addItems(sources)
       ## Lifetime bank.
       self.lifetime = QtWidgets.QComboBox()
-      self.lifetime.addItems(scripts.lifetimes())   # [S4] the compiler's (C10: session)
+      self.lifetime.addItems(scripts.lifetimes())   # the compiler's (session)
       ## Variable type.
       self.type = QtWidgets.QComboBox()
       self.type.addItems(scripts.TYPES)
@@ -132,7 +132,7 @@ class DeclareDialog(QtWidgets.QDialog):
                               "in RAM only (never saved, cleared at a new game).")
       hint.setWordWrap(True)
       form.addRow(hint)
-      ## [S4] Whether the variable wraps or saturates (the vm's vars switch, its type and range).
+      ## Whether the variable wraps or saturates (the vm's vars switch, its type and range).
       self.wrap_note = QtWidgets.QLabel()
       self.wrap_note.setWordWrap(True)
       form.addRow(self.wrap_note)
@@ -149,7 +149,7 @@ class DeclareDialog(QtWidgets.QDialog):
       self._kind_changed()
 
    def _wrap_changed(self) -> None:
-      """![S4] Says whether the variable wraps (scripts.var_wraps()).
+      """!Says whether the variable wraps (scripts.var_wraps()).
       @return None
       """
       t = self.type.currentText()
@@ -251,18 +251,18 @@ class ScriptWindow(QtWidgets.QMainWindow):
       self.world = QtWidgets.QLineEdit()
       self.world.setPlaceholderText("not checked")
       self.world.setToolTip("The game's world.json, relative to scripts.json: map_scripts names are checked")
-      ## [S2] I4: the first local ID of the game's object numbering.
+      ## The script ports: the first local ID of the game's object numbering.
       self.object_base = QtWidgets.QSpinBox()
-      self.object_base.setToolTip("Local IDs count from this (an imported game's numbering, I4 object_base)")
-      ## [S2] I4: warnings about unused flags and variables.
+      self.object_base.setToolTip("Local IDs count from this (an imported game's numbering: object_base)")
+      ## The script ports: warnings about unused flags and variables.
       self.warn_unused = QtWidgets.QCheckBox("Warn about unused flags and variables")
-      ## [S2] I4: the glitch variants' switches (checked: the game's glitch is kept).
+      ## The script ports: the glitch variants' switches (checked: the game's glitch is kept).
       self.glitches = QtWidgets.QListWidget()
       self.glitches.setToolTip("when glitch(\"id\") blocks: checked compiles the glitch, unchecked the fix")
       self.glitches.setMaximumHeight(self.glitches.sizeHintForRow(0) * GLITCH_ROWS + self.glitches.frameWidth()
                                      if self.glitches.count() else self.fontMetrics().height() * GLITCH_ROWS)
       self.glitches.itemChanged.connect(lambda _item: self._settings_changed())
-      ## [S4] C10: the vm switches (switch -> its combo; the engine's own behaviour first).
+      ## The field options: the vm switches (switch -> its combo; the engine's own behaviour first).
       self.vm_boxes = {}
       for switch, values in scripts.vm_options().items():
          box = QtWidgets.QComboBox()
@@ -296,7 +296,7 @@ class ScriptWindow(QtWidgets.QMainWindow):
       self.summary = QtWidgets.QLabel()
       self.summary.setWordWrap(True)
       form.addRow(self.summary)
-      ## The manifest's field placeholders and terms (E9).
+      ## The manifest's field placeholders and terms.
       self.placeholders = PlaceholdersPanel(self)
       ## Settings | Placeholders.
       self.side_tabs = QtWidgets.QTabWidget()
@@ -354,7 +354,7 @@ class ScriptWindow(QtWidgets.QMainWindow):
       self.check_action = self._action(m, "&Check", lambda: self.check(), "F7")
       self._action(m, "&Declare flag or variable...", lambda: self.declare())
       self._action(m, "&Rename...", lambda: self.rename(), "F2")
-      ## [S2] Script > Insert statement: the I4 statements' templates.
+      ## Script > Insert statement: the script port statements' templates.
       self.insert_menu = m.addMenu("&Insert statement")
       for word in script_words.STATEMENT_TEMPLATES:
          self._action(self.insert_menu, word, lambda w=word: self.insert_statement(w))
@@ -484,8 +484,8 @@ class ScriptWindow(QtWidgets.QMainWindow):
       if rel in self.project.unreadable:
          ed.setReadOnly(True)
          ed.setPlaceholderText(f"{rel} is not UTF-8 text: convert it to UTF-8 to edit it here")
-      ed.set_completion_source(lambda text: self.completions(text))   # [S2]
-      ed.word_help = script_words.word_help   # [S5] route steps' help under the mouse
+      ed.set_completion_source(lambda text: self.completions(text))   # [the older studio]
+      ed.word_help = script_words.word_help   # route steps' help under the mouse
       ed.textChanged.connect(lambda r=rel, e=ed: self._text_changed(r, e))
       ed.document().undoAvailable.connect(lambda _a: self._update_title())
       ed.document().redoAvailable.connect(lambda _a: self._update_title())
@@ -529,7 +529,7 @@ class ScriptWindow(QtWidgets.QMainWindow):
          item.setCheckState(QtCore.Qt.CheckState.Checked if on else QtCore.Qt.CheckState.Unchecked)
          self.glitches.addItem(item)
       vm = p.setting("vm") or {}
-      for switch, box in self.vm_boxes.items():   # [S4] a switch left out is the engine's own (the first value)
+      for switch, box in self.vm_boxes.items():   # a switch left out is the engine's own (the first value)
          box.setCurrentText(str(vm.get(switch, box.itemText(0))))
       self._settings_loading = False
 
@@ -549,10 +549,10 @@ class ScriptWindow(QtWidgets.QMainWindow):
          return
       wanted = {"game": self.game.text().strip() or None, "games": games or None,
                 "stack_depth": self.depth.value(), "assets": assets, "world": world,
-                # [S2] I4: written only when they differ from the compiler's defaults
+                # The script ports: written only when they differ from the compiler's defaults
                 "object_base": self.object_base.value() or None,
                 "warn_unused": None if self.warn_unused.isChecked() else False}
-      # [S4] the vm switches that differ from the engine's own behaviour (none: the key is left out)
+      # The vm switches that differ from the engine's own behaviour (none: the key is left out)
       vm = {k: b.currentText() for k, b in self.vm_boxes.items() if b.currentIndex() > 0}
       wanted["vm"] = vm or None
       if p.setting("glitches") is not None:
@@ -563,7 +563,7 @@ class ScriptWindow(QtWidgets.QMainWindow):
          for key, value in wanted.items():
             # The default depth is not written into a manifest that leaves it unset.
             default_depth = key == "stack_depth" and value == DEFAULT_STACK_DEPTH and p.setting(key) is None
-            # [S2] a written default (object_base 0, warn_unused true) stays as written
+            # A written default (object_base 0, warn_unused true) stays as written
             same = (key == "object_base" and (p.setting(key) or 0) == (value or 0)) or \
                (key == "warn_unused" and (p.setting(key) is not False) == (value is None)) or \
                (key == "vm" and _vm_same(p.setting(key), value, self.vm_boxes))
@@ -685,7 +685,7 @@ class ScriptWindow(QtWidgets.QMainWindow):
       if f:
          self.go_to(f, line or 1, col or 1)
 
-   # -- completion and templates [S2] ----------------------------------------------------
+   # -- completion and templates [the older studio] ----------------------------------------------------
 
    def completions(self, text: str) -> list[str]:
       """!The words that fit at the end of a text (the source before the cursor): core.script_words.completions()
@@ -694,7 +694,7 @@ class ScriptWindow(QtWidgets.QMainWindow):
       @return words
       """
       try:
-         return script_words.completions(text, script_words.check_names(self.result))   # S3: + override sets
+         return script_words.completions(text, script_words.check_names(self.result))   # + override sets
       except engine.EngineNotFound:
          return []
 
@@ -707,7 +707,7 @@ class ScriptWindow(QtWidgets.QMainWindow):
          w.show_completions(forced=True)
 
    def insert_statement(self, word: str) -> None:
-      """!Inserts an I4 statement's template at the front editor's cursor (its names are examples to change).
+      """!Inserts an script port statement's template at the front editor's cursor (its names are examples to change).
       @param word  a key of core.script_words.STATEMENT_TEMPLATES
       @return None
       """
@@ -922,7 +922,7 @@ class ScriptWindow(QtWidgets.QMainWindow):
 
 
 def _vm_same(written: dict | None, wanted: dict | None, boxes: dict[str, QtWidgets.QComboBox]) -> bool:
-   """![S4] Whether two vm settings mean the same (a switch written with the engine's own value is left out).
+   """!Whether two vm settings mean the same (a switch written with the engine's own value is left out).
    @param written  the manifest's vm
    @param wanted   the form's
    @param boxes    the switches' combos (their first value is the engine's own)

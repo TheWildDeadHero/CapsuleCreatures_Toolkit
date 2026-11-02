@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!Qt tests of the studio pages for the engine's G1 (D-26 section 1): the Logic > AI page (profiles, rules, numbers),
+"""!Qt tests of the studio pages for the AI profiles: the Logic > AI page (profiles, rules, numbers),
 the Structure > Delayed hits page, the Parties page's AI profile combo and the Conditions page's bound_to combo.
 Skipped when PySide6 is missing; uses Qt's offscreen platform.
 """
@@ -14,7 +14,7 @@ from capsule_studio.core import ai  # noqa: E402
 from capsule_studio.core.structure import conditions, delayed_hits  # noqa: E402
 from test_qt_battle import QtBattleTestCase  # noqa: E402
 
-## The Starter's profiles and a party naming one (samples/starter/battle.json, G1).
+## The Starter's profiles and a party naming one (samples/starter/battle.json).
 STARTER_DEFAULT, STARTER_BATTLER, PARTY = "Basic", "Battler", "Novice Kit"
 
 

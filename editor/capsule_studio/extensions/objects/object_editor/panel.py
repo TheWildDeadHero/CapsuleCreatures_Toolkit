@@ -1,4 +1,4 @@
-"""!The Objects panel: a map's people, spotters and pickups (B-21, D-17).
+"""!The Objects panel: a map's people, spotters and pickups (B-21).
 
 Shown on its own as the object editor app, and as a tab of the Studio's
 World page after Events and Locations, where it follows the map chosen in
@@ -48,7 +48,7 @@ WhenValue = int | str | bool | list[str] | None
 
 ## Errors meaning the engine (its compilers) is missing or too old.
 ENGINE_ERRORS = (engine.EngineNotFound, ImportError, AttributeError)
-## [S5] The route box's tip without the engine's route compiler.
+## The route box's tip without the engine's route compiler.
 ROUTE_TIP_FALLBACK = "Steps: up / down / left / right [n], wait n, face X, ... (one per line)"
 ## Page choosers' first entry: the object's own value.
 KEEP = "(the object's)"
@@ -86,7 +86,7 @@ MIN_VALUE = -2**31
 MAX_VALUE = 2**31 - 1
 ## Numbers in a range [x, y].
 RANGE_LENGTH = 2
-## The object view a map gets when its box is ticked (I3: the reference games' view, cells left, right, up, down).
+## The object view a map gets when its box is ticked (the reference games' view, cells left, right, up, down).
 DEFAULT_VIEW = (9, 10, 7, 9)
 ## Movement option check boxes per row.
 OPTION_COLUMNS = 3
@@ -233,7 +233,7 @@ class ObjectsPanel(EditorPanel):
       top.addWidget(QtWidgets.QLabel("Map"))
       top.addWidget(self.map_box, 1)
       top.addWidget(self.follow)
-      # I3: the map's object view (objects spawn near the player, up to 64) and stacked objects
+      # The map's object view (objects spawn near the player, up to 64) and stacked objects
       ## The object view is on.
       self.view_on = QtWidgets.QCheckBox("Object view")
       self.view_on.setToolTip("Objects spawn when the player comes this close (cells left, right, up, down) and go "
@@ -313,10 +313,10 @@ class ObjectsPanel(EditorPanel):
       self.movement.addItems(objects.movements())
       self.movement.setToolTip("static: stands; look_around: turns now and then; wander: random steps in its "
                                "range box; pace_*: walks to and fro within its range; approach: steps towards "
-                               "the player; custom: follows its move route. I3 (the reference games' types): turn, "
+                               "the player; custom: follows its move route. The reference games' types: turn, "
                                "roam, rotate, patrol, circuit, mirror (copies the player), in_place, invisible")
       self.movement.activated.connect(lambda _i: self._set(movement=self.movement.currentText()))
-      ## I3: the movement's settings.
+      ## The movement's settings.
       self.movement_args = MovementArgsBox(lambda args: self._set(movement_args=args))
       ## Range box, cells each way.
       self.range_x = QtWidgets.QSpinBox()
@@ -379,7 +379,7 @@ class ObjectsPanel(EditorPanel):
                               "it; event_touch: it walks into the player (or the player into it); autorun: runs "
                               "again and again, the player waits; parallel: runs alongside play")
       self.trigger.activated.connect(lambda _i: self._set(trigger=self.trigger.currentText()))
-      ## F2: its kind (one of the world's object kinds; field actions target it), "" = none.
+      ## Its kind (one of the world's object kinds; field actions target it), "" = none.
       self.kind = QtWidgets.QComboBox()
       self.kind.setToolTip("A kind of the world's object kinds (a bush, a boulder): the battle structure's field "
                            "actions on that kind are offered when the player faces it and it has no script")
@@ -656,7 +656,7 @@ class ObjectsPanel(EditorPanel):
          self._filling = False
 
    def _fill_view(self) -> None:
-      """!The map's object view and stacked objects (I3).
+      """!The map's object view and stacked objects.
       @return None
       """
       doc = self.map_doc()
@@ -682,7 +682,7 @@ class ObjectsPanel(EditorPanel):
       self._run("Object view", lambda: objects.set_object_view(doc, view))
 
    def _stacked_changed(self, on: bool) -> None:
-      """!Whether the map's objects may share a cell (I3).
+      """!Whether the map's objects may share a cell.
       @param on  checked
       @return None
       """
@@ -1266,8 +1266,8 @@ class ObjectsPanel(EditorPanel):
 
 
 def route_tip() -> str:
-   """![S5] The route box's tip: the engine's route steps with what they do (core.script_words.route_step_help(): the
-   route compiler's table and route.h's; engine N2: in_place walks in place, speed applies to the walker too).
+   """!The route box's tip: the engine's route steps with what they do (core.script_words.route_step_help(): the
+   route compiler's table and route.h's; in_place walks in place, speed applies to the walker too).
    @return text
    """
    try:

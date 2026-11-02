@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""!Tests for text box styles [S2, S4] (no Qt): core.text_boxes (S4: asset kind text_box of engine C10, its
-settings from the engine's asset compiler joined with window.h, the engine's limits, the frame's cells as
-draw_frame() writes them, the checks, the Font control's fonts, S2's editor-data styles migrated into assets, the
-preview typed frame by frame, the box a table fits in), core.text_window (window.cpp's interval and counter typing,
-the engine's own counter_typing() expectations) and the `text-box` commands. Uses the neutral game of
+"""!Tests for text box styles [the older studio, the field options] (no Qt): core.text_boxes (asset kind text_box of the
+field options, its settings from the engine's asset compiler joined with window.h, the engine's limits, the frame's
+cells as draw_frame() writes them, the checks, the Font control's fonts, the older studio's editor-data styles migrated
+into assets, the preview typed frame by frame, the box a table fits in), core.text_window (window.cpp's interval and
+counter typing, the engine's own counter_typing() expectations) and the `text-box` commands. Uses the neutral game of
 text_fixture.py; the message box geometry of the tests is a two-line box over the screen's bottom rows with one cell
 of padding at the left (the shape of a handheld game's message box).
 """
@@ -36,7 +36,8 @@ KEY = "text_box:MESSAGE"
 DELAY, LEAD, PAUSE, FRAMES = 3, 2, 5, 40
 ## The glyph the counter tests type ('A').
 GLYPH_A = 0x41
-## S2's legacy style of the migration test: its name, and a value no setting of the engine takes (font_count).
+## The older studio's legacy style of the migration test: its name, and a value no setting of the engine takes
+## (font_count).
 LEGACY_NAME = "old message"
 
 
@@ -48,7 +49,7 @@ class BoxCase(unittest.TestCase):
       @return None
       """
       ## Temporary folder.
-      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_s4_box_"))
+      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_field_options_box_"))
       ## The game.
       self.game = fx.make_game(self.tmp)
       ## The manifest.
@@ -149,17 +150,17 @@ class StyleTests(BoxCase):
       self.assertEqual(len(text_boxes.styles(self.doc)), 2)
 
    def test_engine_fixture_and_checks(self) -> None:
-      """!The engine's C10 fixture style reads back with its settings; a font that is no font asset is refused.
+      """!The field options fixture style reads back with its settings; a font that is no font asset is refused.
       @return None
       """
-      fixture = engine.root() / "tests" / "data" / "c10" / "assets.json"
+      fixture = engine.root() / "tests" / "data" / "field_options" / "assets.json"
       doc = Document.open(fixture)
-      style = text_boxes.find(doc, "text_box:C10_MESSAGE")
+      style = text_boxes.find(doc, "text_box:FIELD_OPTIONS_MESSAGE")
       self.assertEqual(text_boxes.value(style, "window", "typing"), "counter")
       self.assertEqual(text_boxes.value(style, "window", "speedup"), "per_frame")
       self.assertIsNone(text_boxes.value(style, "window", "char_block"))   # the layer's
       self.assertEqual(text_boxes.number(style, "window", "char_block"), engine.asset_compiler().LAYER_CHAR_BLOCK)
-      self.assertEqual(text_boxes.control_fonts(style), {3: "font:C10_BOX"})
+      self.assertEqual(text_boxes.control_fonts(style), {3: "font:FIELD_OPTIONS_BOX"})
       self.assertEqual(text_boxes.check(style, None, text_boxes.font_keys(doc)), [])
       bad = dict(style, font="font:NOPE")
       self.assertIn("no font asset", "\n".join(text_boxes.check(bad, None, text_boxes.font_keys(doc))))
@@ -188,7 +189,7 @@ class StyleTests(BoxCase):
       font = self.font()
       self.assertEqual(text_boxes.check(style, font, text_boxes.font_keys(self.doc)), [])
       lim = text_boxes.limits()
-      # S5: one row more than window::kMaxTiles holds at this width (the engine's limit, 256 since N3), and more
+      # One row more than window::kMaxTiles holds at this width (the engine's limit, 256 since the menus), and more
       # lines than that height takes
       height = lim.max_tiles // BOX[2] + 1
       lines = height * lim.tile // font["line_height"] + 2   # the last line starts below the window
@@ -206,7 +207,8 @@ class StyleTests(BoxCase):
                                                            "lines": lines})
 
    def test_migrate_editor_data_styles(self) -> None:
-      """!S2's editor-data styles become text_box assets the engine compiles; kNoArrow and font_count are left out.
+      """!The older studio's editor-data styles become text_box assets the engine compiles; kNoArrow and font_count are
+      left out.
       @return None
       """
       no_arrow = engine.tool("text_encoder").CODE_END

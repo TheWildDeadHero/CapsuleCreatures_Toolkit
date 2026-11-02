@@ -1,16 +1,16 @@
-"""!The Passives / Items panel (D-23 §3.1 Content): the battle manifest's
+"""!The Passives / Items panel (§3.1 Content): the battle manifest's
 passives and items, one tab each (titled in the game's words), and the shop
-lists (G2: a Shops tab).
+lists (a Shops tab).
 
 Each tab lists its entries (new / copy / rename / delete / up / down: the
 shared EntryPanel; a rename follows species, party members and the effect
 logic) next to a form: whether the battle shows the entry when its logic
 announces it, its manifest point handlers (core.holders: the ruleset points
 its kind may handle) and what names it. "Logic..." shows its `.ceffect`
-owner on Logic > Effects. An item also has its bag and use fields (G2,
+owner on Logic > Effects. An item also has its bag and use fields (
 core.inventory: pocket, price, use, target, key / consumed / holdable) and
 its use logic (the use_field / use_battle handlers as text; Add writes a
-stub handler). G3: Recruit makes the item recruit the battler it is used on
+stub handler). Recruit makes the item recruit the battler it is used on
 (`recruit holder BONUS;` in its use_battle handler, battle use, a battler
 target; the rules are Structure > Recruit). F1: Start makes its use_field
 handler start a timed field effect (`field_effect start NAME N;`, the effects
@@ -41,7 +41,7 @@ NO_POCKET = "(none)"
 FLAG_BOXES = [(inventory.KEY_KEY, "Key item", "Never consumed or sold"),
               (inventory.CONSUMED_KEY, "Consumed", "A use with an effect takes one from the bag"),
               (inventory.HOLDABLE_KEY, "Holdable", "A party member may hold it"),
-              (inventory.EGGS_KEY, "Usable on eggs", "B2: it may be used on an egg (refused by default)")]
+              (inventory.EGGS_KEY, "Usable on eggs", "it may be used on an egg (refused by default)")]
 ## Lowest height of the use logic text, pixels.
 USE_TEXT_HEIGHT = 140
 ## Bonus the Recruit row starts at for an item that does not recruit yet (the neutral pipeline's percent: x1).
@@ -124,13 +124,13 @@ class PassivesTab(HolderTab):
 
 
 class ItemsTab(HolderTab):
-   """!The items: the holder form, then the bag box (G2: pocket, price, use, target, key / consumed / holdable;
+   """!The items: the holder form, then the bag box (pocket, price, use, target, key / consumed / holdable;
    choices from the engine's lists and the structure's pockets) and the use logic box (the item's use_field /
    use_battle handlers as text, Add buttons writing a stub handler)."""
 
    ## See EntryPanel.kind.
    kind = "items"
-   ## See EntryPanel.scroll_form: the bag and use logic boxes make the form taller than a small window (F2, an F1
+   ## See EntryPanel.scroll_form: the bag and use logic boxes make the form taller than a small window (an F1
    ## leftover: the use logic's Add buttons were drawn over its text).
    scroll_form = True
 
@@ -183,7 +183,7 @@ class ItemsTab(HolderTab):
          row.addWidget(b)
       row.addStretch(1)
       lay.addLayout(row)
-      # G3: the recruit row (core.structure.recruit)
+      # The recruit row (core.structure.recruit)
       recruit_row = QtWidgets.QHBoxLayout()
       ## The bonus Recruit passes recruit_odds.
       self.recruit_bonus = QtWidgets.QSpinBox()
@@ -329,7 +329,7 @@ class ItemsTab(HolderTab):
 
 
 class ShopsTab(BattlePanel):
-   """!The shop lists (G2): the shops and the items each sells (an item needs a price and a pocket).
+   """!The shop lists: the shops and the items each sells (an item needs a price and a pocket).
 
    @var errors
    Compile result line.
@@ -534,7 +534,7 @@ class PassivesItemsPanel(BattlePanel):
       self.passives = PassivesTab(host)
       ## The items.
       self.items = ItemsTab(host)
-      ## The shop lists (G2).
+      ## The shop lists.
       self.shops = ShopsTab(host)
       ## The tabs.
       self.tabs = QtWidgets.QTabWidget()

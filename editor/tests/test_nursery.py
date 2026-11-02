@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!Tests for eggs and the nursery in the studio (D-28 sections 2 and 3, engine B2): core.structure.nursery (the
+"""!Tests for eggs and the nursery in the studio (combination sections 2 and 3): core.structure.nursery (the
 structure's eggs and nursery, the choices, the editing calls, the refusal flags of the systems that use records,
 the renames that follow into the sections and the removals refused while they name something), the test saves'
 nursery slots, waiting result and boxed eggs (checked and exported into the Nursery section) and the
@@ -179,8 +179,8 @@ class NurseryEditTests(NurseryCase):
       with self.assertRaises(DocumentError):
          nursery.set_refusal(doc, "items", "No Such Item", True)
 
-   def test_c9_flags_and_transfer(self) -> None:
-      """!C9: the lead rules', transformations' and step effects' egg flags (rows, edits, the compiled bits) and the
+   def test_egg_flags_and_transfer(self) -> None:
+      """!The lead rules', transformations' and step effects' egg flags (rows, edits, the compiled bits) and the
       transfer rule for eggs.
       @return None
       """

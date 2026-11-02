@@ -10,12 +10,12 @@ declarations, and renames that follow every use.
 Qt-free; the script editor panel and the `capsule-studio script` commands use
 it.
 
-[S2] (engine I4): the outline also lists the named move routes (movement),
+: the outline also lists the named move routes (movement),
 mart lists (mart) and game route steps (step); a map's detail names each
 trigger entry with its condition (on_frame, on_warp_into) and script; the
 settings include object_base, warn_unused and glitches.
 
-[S4] (engine C10): the lifetimes come from the compiler (lifetimes(): "session" keeps a flag or variable in RAM
+: the lifetimes come from the compiler (lifetimes(): "session" keeps a flag or variable in RAM
 only); the manifest's "vm" switches (vm_options(): resume the instruction after a wait on the next frame, random()
 modulo n, full-range u8 / u16 variables wrap) are a setting checked by the compiler's vm_flags(); var_wraps() says
 which variables wrap under them.
@@ -31,10 +31,10 @@ from . import engine
 
 ## Lifetime names (B-2), as the language spells them, when the engine's compiler does not list them (lifetimes()).
 LIFETIMES = ["permanent", "daily", "area", "map"]
-## [S4] The variable types whose whole range wraps under the "vars": "wrap" switch, with their highest value (the
+## The variable types whose whole range wraps under the "vars": "wrap" switch, with their highest value (the
 ## engine's script.cpp wraps(): u8 0-255, u16 0-65535).
 WRAPPING_TYPES = {"u8": 0xFF, "u16": 0xFFFF}
-## [S4] The "vm" switch and value that make full-range variables wrap.
+## The "vm" switch and value that make full-range variables wrap.
 VARS_WRAP = ("vars", "wrap")
 ## Variable types.
 TYPES = ["u8", "u16", "u32"]
@@ -64,9 +64,10 @@ JSON_INDENT = 2
 KEYWORD_OFFSET = 2
 ## Tokens from a statement's first word to the battle manifest name it takes ("field_action available NAME").
 STATEMENT_NAME_AHEAD = 2
-## Declaration kinds of the outline, in its order ([S2]: I4's movement, mart and step after the B-4 ones).
+## Declaration kinds of the outline, in its order ([the older studio]: the script ports' movement, mart and step after
+## the B-4 ones).
 OUTLINE_KINDS = ("script", "flag", "var", "const", "native", "map", "movement", "mart", "step")
-## Manifest settings set_setting() changes ([S2]: I4's object_base, warn_unused, glitches).
+## Manifest settings set_setting() changes ([the older studio]: the script ports' object_base, warn_unused, glitches).
 SETTING_KEYS = ("game", "games", "stack_depth", "assets", "world", "object_base", "warn_unused", "glitches", "vm")
 ## The arrow between a map trigger's kind (and condition) and its script.
 TRIGGER_ARROW = "->"
@@ -85,7 +86,8 @@ class ScriptsError(Exception):
 
 
 def lifetimes() -> list[str]:
-   """![S4] The lifetimes a flag or variable may have (the engine's script_compiler.LIFETIMES: C10 adds "session").
+   """!The lifetimes a flag or variable may have (the engine's script_compiler.LIFETIMES: the field options adds
+   "session").
    @return names, the default first
    """
    try:
@@ -95,9 +97,9 @@ def lifetimes() -> list[str]:
 
 
 def vm_options() -> dict[str, list[str]]:
-   """![S4] The scripts manifest's "vm" switches (the engine's script_compiler.VM_OPTIONS): switch -> its values, the
+   """!The scripts manifest's "vm" switches (the engine's script_compiler.VM_OPTIONS): switch -> its values, the
    engine's own behaviour first.
-   @return {} for an engine before C10
+   @return {} for an older engine
    """
    try:
       options = getattr(compiler(), "VM_OPTIONS", {})
@@ -107,7 +109,7 @@ def vm_options() -> dict[str, list[str]]:
 
 
 def var_wraps(type_: str, lo: int, hi: int, vm: dict[str, Any] | None) -> bool:
-   """![S4] Whether a variable wraps (the engine's script.cpp wraps()): the "vars": "wrap" switch on, a u8 or u16 of
+   """!Whether a variable wraps (the engine's script.cpp wraps()): the "vars": "wrap" switch on, a u8 or u16 of
    its type's whole range; any other saturates.
    @param type_  u8, u16 or u32
    @param lo     its lowest value
@@ -173,10 +175,10 @@ class CheckResult:
       self.save_bytes = comp.save_bytes() if self.result else 0
       ## Declarations (also on errors: whatever parsed).
       self.outline = Outline()
-      ## S3 (engine DS1): the override sets of the manifest's world, in its order (`override apply|clear NAME`).
+      ## The override sets of the manifest's world, in its order (`override apply|clear NAME`).
       self.override_sets = [str(n) for n in (getattr(comp, "world_field", None) or {}).get("override_sets", [])]
       where = getattr(comp, "where", {})
-      # [S2] I4: movements, marts and game route steps (an engine before I4 has none)
+      # The script ports: movements, marts and game route steps (an older engine has none)
       steps = {n: where.get(n, {}) for n in getattr(comp, "route_steps", [])}
       for kind, table in (("script", comp.scripts), ("flag", comp.flags), ("var", comp.vars),
                           ("const", comp.consts), ("native", comp.natives), ("map", comp.maps),
@@ -212,8 +214,8 @@ class CheckResult:
 
 
 def _load_world_data(sc: types.ModuleType, comp: Any, world: Path) -> None:
-   """!S3: what the engine's compile_file() gives the compiler from the manifest's world besides its map names: the
-   maps' script uses, the movement modes and the field data (F2 darkness / flight points / escape, DS1 override
+   """!what the engine's compile_file() gives the compiler from the manifest's world besides its map names: the
+   maps' script uses, the movement modes and the field data (darkness / flight points / escape, doors override
    sets: `override apply NAME` names a set of the world). Each part only when the engine has it.
    @param sc     the engine's script_compiler module
    @param comp   its Compiler, not run yet
@@ -267,8 +269,8 @@ def _detail(kind: str, node: JsonDict) -> str:
 
 
 def _map_detail(node: JsonDict, texts: dict[str, str]) -> str:
-   """![S2] A map_scripts table for the outline: each trigger entry as kind [condition] -> script, the condition
-   read from its source line (engine I4: on_frame and on_warp_into entries have one).
+   """!A map_scripts table for the outline: each trigger entry as kind [condition] -> script, the condition
+   read from its source line (on_frame and on_warp_into entries have one).
    @param node   the map_scripts node
    @param texts  sources by path
    @return text
@@ -311,7 +313,7 @@ class ScriptProject:
       self.missing = [s for s in manifest.get("sources", []) if s not in texts]
       ## Sources on disk that are not UTF-8 text: shown read-only, never saved.
       self.unreadable = []
-      ## The battle data's places the last rename() rewrote (C8; "where" strings, already saved).
+      ## The battle data's places the last rename() rewrote ("where" strings, already saved).
       self.followed: list[str] = []
 
    # Opening and saving.
@@ -437,7 +439,7 @@ class ScriptProject:
       """
       if key not in SETTING_KEYS:
          raise ScriptsError(f"unknown setting {key!r}")
-      # [S2] I4: the local ID numbering's start, the unused warnings, the glitch switches (the engine's limits)
+      # The script ports: the local ID numbering's start, the unused warnings, the glitch switches (the engine's limits)
       top = getattr(compiler(), "MAX_OBJECT_BASE", 0)
       if key == "object_base" and value is not None and (isinstance(value, bool) or not isinstance(value, int)
                                                          or not 0 <= value <= top):
@@ -447,10 +449,10 @@ class ScriptProject:
       if key == "glitches" and value is not None and not (isinstance(value, dict) and all(
             isinstance(k, str) and isinstance(v, bool) for k, v in value.items())):
          raise ScriptsError("glitches map each glitch id to true (on) or false (off)")
-      if key == "vm" and value is not None:   # [S4] C10: the compiler's own check of the switches
+      if key == "vm" and value is not None:   # the field options: the compiler's own check of the switches
          sc = compiler()
          if not hasattr(sc, "vm_flags"):
-            raise ScriptsError("this engine's scripts have no vm switches (engine C10)")
+            raise ScriptsError("this engine's scripts have no vm switches")
          try:
             sc.vm_flags(value)
          except sc.ScriptError as e:
@@ -574,7 +576,7 @@ class ScriptProject:
 
    def rename(self, old: str, new: str) -> int:
       """!Renames a script, flag, variable, constant or native everywhere it
-      is declared or used (labels and texts are left alone). C8: the battle
+      is declared or used (labels and texts are left alone). The battle
       data the manifest names ("battle") follows a script, flag or variable
       rename at once (core.structure.field_expressions.follow_game_rename():
       saved; the sources are saved with save(); the places are in followed).
@@ -622,7 +624,7 @@ class ScriptProject:
             changed[rel] = "".join(out)
             count += len(spans)
       self.texts.update(changed)
-      # C8: the battle data the manifest names follows a script, flag or variable rename (the field actions' and
+      # The battle data the manifest names follows a script, flag or variable rename (the field actions' and
       # step effects' scripts, flag.NAME / var.NAME in the field actions' requirements), saved at once
       from .structure import field_expressions   # local: core.structure imports this module
       battle_json = field_expressions.battle_file(self.path, self.manifest)
@@ -633,10 +635,10 @@ class ScriptProject:
 
    def rename_statement_name(self, word: str, kinds: list[str], old: str, new: str,
                              implicit: list[tuple[str, str]] | None = None) -> int:
-      """!Renames a name of the battle manifest a statement names (engine F1 / F2: `field_effect start|active|remaining
-      NAME`, `field_action available NAME`), and the implicit names the script compiler makes from it (a field
-      effect's variable and expiry script) where the sources use them. Strings and comments are left alone (the
-      engine's tokenizer finds the names).
+      """!Renames a name of the battle manifest a statement names (engine F1 / the field actions: `field_effect
+      start|active|remaining NAME`, `field_action available NAME`), and the implicit names the script compiler makes
+      from it (a field effect's variable and expiry script) where the sources use them. Strings and comments are left
+      alone (the engine's tokenizer finds the names).
       @param word      the statement's first word
       @param kinds     the words after it that take the name
       @param old       the current name

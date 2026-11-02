@@ -1,6 +1,6 @@
-"""!`capsule-studio tileset WORLD TILESET ...` for the I2 / I3 tileset format (registered by world_cmds): a fixed
-tileset's placement, palette banks, raw metatile entries and indexed sheets, and the tile animations of any tileset
-(phase, from_sheet, on_shift; S3: targets at frame offsets). Every change runs through
+"""!`capsule-studio tileset WORLD TILESET ...` for the imported maps / imported sprite tileset format (registered by
+world_cmds): a fixed tileset's placement, palette banks, raw metatile entries and indexed sheets, and the tile
+animations of any tileset (phase, from_sheet, on_shift; targets at frame offsets). Every change runs through
 core.world.Project.edit_tileset(), so maps with an "all" dictionary follow a change of the metatile order, and is
 compiled with the engine before anything is saved."""
 from __future__ import annotations
@@ -28,11 +28,11 @@ def register_actions(s: argparse._SubParsersAction) -> None:
    @param s  the tileset group's subparsers
    @return None
    """
-   q = s.add_parser("place", help="show or set a fixed tileset's placement (I2; a tileset without one becomes fixed)")
+   q = s.add_parser("place", help="show or set a fixed tileset's placement (a tileset without one becomes fixed)")
    for opt in tilesets.PLACE_KEYS:
       q.add_argument(f"--{opt}", type=str if opt == "sheet" else int)
    q.set_defaults(run=cmd_place)
-   q = s.add_parser("indexed-sheet", help="add an indexed sheet: a palette PNG used as its indices (I2)")
+   q = s.add_parser("indexed-sheet", help="add an indexed sheet: a palette PNG used as its indices")
    q.add_argument("image")
    q.add_argument("--name", help="sheet name (default: the file name)")
    q.set_defaults(run=cmd_indexed_sheet)
@@ -75,33 +75,33 @@ def register_actions(s: argparse._SubParsersAction) -> None:
       q.add_argument("--at", help="first tile counted from the placement's (a fixed tileset)")
       q.add_argument("--count", help="tiles replaced")
       q.add_argument("--period", help="display frames per frame")
-      q.add_argument("--phase", help="frames into the period at map entry (I2; - lets the compiler spread it)")
-      q.add_argument("--from-sheet", dest="from_sheet", help="on: no frame at entry (I3)")
-      q.add_argument("--on-shift", dest="on_shift", help="keep, reload or restart (I3)")
+      q.add_argument("--phase", help="frames into the period at map entry (- lets the compiler spread it)")
+      q.add_argument("--from-sheet", dest="from_sheet", help="on: no frame at entry")
+      q.add_argument("--on-shift", dest="on_shift", help="keep, reload or restart")
       q.set_defaults(run=cmd_animation_add if name == "animation-add" else cmd_animation_set)
    q = s.add_parser("animation-remove", help="remove a tile animation")
    q.add_argument("index", type=int)
    q.set_defaults(run=cmd_animation_remove)
-   # S3 (D-30 section 5): one animation's frames on several targets at frame offsets
-   q = s.add_parser("targets", help="list an animation's targets (tile, offset, phase) and the ROM they save (S3)")
+   # One animation's frames on several targets at frame offsets
+   q = s.add_parser("targets", help="list an animation's targets (tile, offset, phase) and the ROM they save")
    q.add_argument("index", type=int)
    q.add_argument("--at-frame", dest="at_frame", type=int, help="also say which frame each target shows on this "
                                                                  "display frame")
    q.set_defaults(run=cmd_targets)
-   q = s.add_parser("target-add", help="add a target: the same frames on other tiles, from a frame offset (S3)")
+   q = s.add_parser("target-add", help="add a target: the same frames on other tiles, from a frame offset")
    q.add_argument("index", type=int)
    q.add_argument("first", help='its first tile: "sheet:index", or a fixed tileset\'s tile of the placement')
    q.add_argument("--offset", type=int, default=0, help="the frame it shows while target 0 shows frame 0")
    q.add_argument("--phase", type=int, help="frames into the period at map entry (default: the animation's)")
    q.set_defaults(run=cmd_target_add)
-   q = s.add_parser("target-set", help="change a target's tile, offset or phase (- removes the phase) (S3)")
+   q = s.add_parser("target-set", help="change a target's tile, offset or phase (- removes the phase)")
    q.add_argument("index", type=int)
    q.add_argument("target", type=int)
    q.add_argument("--first", help="its first tile")
    q.add_argument("--offset", type=int)
    q.add_argument("--phase")
    q.set_defaults(run=cmd_target_set)
-   q = s.add_parser("target-remove", help="remove a target (the last one at offset 0: the one-target form) (S3)")
+   q = s.add_parser("target-remove", help="remove a target (the last one at offset 0: the one-target form)")
    q.add_argument("index", type=int)
    q.add_argument("target", type=int)
    q.set_defaults(run=cmd_target_remove)
@@ -218,7 +218,7 @@ def _describe(doc: Document, i: int, an: dict[str, Any]) -> str:
    phase = an.get("phase", "auto")
    extra = (", from sheet" if an.get("from_sheet") else "") + \
       (f", on shift {an['on_shift']}" if an.get("on_shift") else "")
-   if tilesets.targets(an):   # S3: the tiles are its targets
+   if tilesets.targets(an):   # the tiles are its targets
       first = f"{len(tilesets.targets(an))} targets"
    return (f"{i} {an.get('name', '?')}: {first}, {an.get('count', 1)} tile(s), frames {an.get('frames')}, "
            f"period {an.get('period', tilesets._mc().DEFAULT_ANIMATION_PERIOD)}, phase {phase}{extra}")
@@ -301,7 +301,7 @@ def _first(doc: Document, raw: str) -> Any:
 
 
 def cmd_targets(args: argparse.Namespace) -> None:
-   """!tileset targets (S3). @param args  parsed arguments
+   """!tileset targets. @param args  parsed arguments
    @return None
    """
    p = Project.open(args.world)
@@ -328,7 +328,7 @@ def cmd_targets(args: argparse.Namespace) -> None:
 
 
 def cmd_target_add(args: argparse.Namespace) -> None:
-   """!tileset target-add (S3). @param args  parsed arguments
+   """!tileset target-add. @param args  parsed arguments
    @return None
    """
    def run(doc: Document) -> None:
@@ -338,7 +338,7 @@ def cmd_target_add(args: argparse.Namespace) -> None:
 
 
 def cmd_target_set(args: argparse.Namespace) -> None:
-   """!tileset target-set (S3). @param args  parsed arguments
+   """!tileset target-set. @param args  parsed arguments
    @return None
    """
    def run(doc: Document) -> None:
@@ -357,7 +357,7 @@ def cmd_target_set(args: argparse.Namespace) -> None:
 
 
 def cmd_target_remove(args: argparse.Namespace) -> None:
-   """!tileset target-remove (S3). @param args  parsed arguments
+   """!tileset target-remove. @param args  parsed arguments
    @return None
    """
    _change(args, "Remove target", lambda doc: tilesets.remove_target(doc, args.index, args.target))

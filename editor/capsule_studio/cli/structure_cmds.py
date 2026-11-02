@@ -1,4 +1,4 @@
-"""!`capsule-studio battle FILE ...` Structure actions (D-23 §3.4): checking
+"""!`capsule-studio battle FILE ...` Structure actions: checking
 the data against the game's target platforms, editing its stats and its
 creature record (roles, party size, move slots).
 
@@ -23,7 +23,7 @@ creature record (roles, party size, move slots).
                                              custom roles only; --force as for remove
     battle FILE role set NAME KEY VALUE      KEY: width count default (null puts the default back)
     battle FILE role stored NAME on|off [--force]
-                                             E13a: off = computed on read from its one derived or constant
+                                             Off = computed on read from its one derived or constant
                                              generation entry (no record bits, not hashed or transferred);
                                              --force as for remove (field scripts read an unstored role as 0)
     battle FILE role preview [--species S] [ROLE=V ...]
@@ -146,7 +146,7 @@ def _register_record(s: argparse._SubParsersAction) -> None:
    r.add_argument("key", choices=record.ROLE_PROPERTIES)
    r.add_argument("value")
    r.set_defaults(run=cmd_role_set)
-   r = a.add_parser("stored", help="whether the record holds a custom role (off: computed on read, E13a)")
+   r = a.add_parser("stored", help="whether the record holds a custom role (off: computed on read)")
    r.add_argument("name")
    r.add_argument("value", choices=list(SWITCH))
    r.add_argument("--force", action="store_true", help="even though field scripts use it (they read it as 0)")

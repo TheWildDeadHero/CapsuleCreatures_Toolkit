@@ -1,4 +1,4 @@
-"""![S6b] The World page's "Interactions" panel (engine C13b): the world's cell interaction rules, what pressing
+"""!The World page's "Interactions" panel: the world's cell interaction rules, what pressing
 Accept while facing a cell does when no object and no sign answers. The rules are tried in the order listed (the
 first that holds starts its script), so Up / Down move a rule earlier or later. A rule picks the faced cell's
 behavior from the world's behaviors and its script from the world's scripts manifest, and may ask for a facing
@@ -167,7 +167,7 @@ class InteractionsPanel(EditorPanel):
          self._fill_choices()
          self._fill_table()
       except ENGINE_ERRORS as e:
-         self.problems.setText(f"No engine with cell interaction rules (C13b): {e}")
+         self.problems.setText(f"No engine with cell interaction rules: {e}")
          return
       finally:
          self._filling = False

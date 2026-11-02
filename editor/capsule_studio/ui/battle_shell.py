@@ -2,7 +2,7 @@
 
 The window owns the BattleProject (battle manifest, its ruleset, and the
 structure and effect sources it names), the File and Edit menus and the
-status bar. A navigator on the left groups the pages (D-23 §3.1):
+status bar. A navigator on the left groups the pages:
 
   - Content: Species, Moves, Types, Parties, Presenters, Passives / Items,
     Data;
@@ -19,7 +19,7 @@ their group in front; the Studio's Battle page is this window too.
 Each document keeps its own undo history; Undo / Redo act on the active
 page's current document (the content pages edit the battle manifest,
 battle.json; the structure pages the structure manifest it names,
-structure.json (E5s); the Formulas and Pipelines & Points pages the ruleset,
+structure.json; the Formulas and Pipelines & Points pages the ruleset,
 the Effects page an effect source; planned pages none; no page is planned
 now). The navigator's second column names the file each group edits (a
 page whose file is another one names its own), with " *" while it has unsaved
@@ -30,7 +30,7 @@ Save writes the active page's file and every unsaved file of its grouped
 edits (a rename that rewrote structure.json, sources and bench scenarios is
 never saved in part); Save all, the window title's " *" and the prompt
 before closing or opening other data count the Bench page's scenarios too.
-Opening single-file battle data (the form before E5s) offers to split it into
+Opening single-file battle data (the form from an older version) offers to split it into
 battle.json + structure.json (core.battle.split(); never asked headless: the
 failure is reported); opening pre-E6a stage or chart data offers to migrate
 it (File > Migrate stages and chart does it any time; the CLI's `battle FILE
@@ -102,7 +102,7 @@ if TYPE_CHECKING:
 ## A navigator group: (id, title, its panel classes in page order).
 NavGroup = tuple[str, str, list[type[EditorPanel]]]
 
-## The navigator's groups, in order (D-23 §3.1).
+## The navigator's groups, in order.
 NAV_GROUPS: list[NavGroup] = [
    ("content", "Content", [SpeciesPanel, MovesPanel, TypesPanel, PartiesPanel, PresentersPanel, PassivesItemsPanel,
                            TestSavePanel, MessagesPanel, DataPanel]),
@@ -116,7 +116,7 @@ NAV_GROUPS: list[NavGroup] = [
 ]
 ## Group ids (battle_app --group, BattleWindow's group).
 GROUP_IDS = [g[0] for g in NAV_GROUPS]
-## The file each navigator group edits: the BattleProject attribute holding its Document (E5s).
+## The file each navigator group edits: the BattleProject attribute holding its Document.
 GROUP_FILES = {"content": "battle", "structure": "structure", "logic": "ruleset"}
 ## Navigator column of the group and page titles.
 TITLE_COLUMN = 0
@@ -706,7 +706,7 @@ class BattleWindow(QtWidgets.QMainWindow):
       if self.project is None or not stage_model.needs_any_migration(self.project.battle):
          return False
       title = "Migrate stages and chart"
-      text = ("This battle data has stage or type chart data from before E6a (rules tables, stage_names, a stat's "
+      text = ("This battle data has stage or type chart data of an older version (rules tables, stage_names, a stat's "
               "stage flag, a multiplier chart), which the engine no longer reads. Migrate it now? The values move "
               "into the stages list and the chart's tiers (one undo step).")
       b = QtWidgets.QMessageBox.StandardButton
@@ -728,7 +728,7 @@ class BattleWindow(QtWidgets.QMainWindow):
       return ok and bool(done)
 
    def _offer_split(self, refused: NeedsSplit) -> bool:
-      """!Asks to split single-file battle data (the form before E5s) into its battle and structure manifests
+      """!Asks to split single-file battle data (the form from an older version) into its battle and structure manifests
       (core.battle.split(), the engine's battle_split tool) and splits it on yes. Headless nothing is asked: the
       refusal is reported (open_error, the status bar; `capsule-studio battle FILE split` does it there).
       @param refused  the open() refusal

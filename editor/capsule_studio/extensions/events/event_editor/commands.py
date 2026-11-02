@@ -1,12 +1,12 @@
 """!`capsule-studio events ...`: everything the Events panel and the Events
-map tool do, from the command line (D-10 parity).
+map tool do, from the command line (parity).
 
 Events are addressed as MAP KIND INDEX (KIND: warp, trigger or sign; INDEX
 as `show` lists them). Changes are compiled with the engine before anything
-is saved. I3: `--trigger` takes step, press, arrow, door or none, `--to
+is saved. `--trigger` takes step, press, arrow, door or none, `--to
 dynamic` leaves the destination to the game, and `unpainted MAP on|off`
-lets a map's events stand on unpainted cells. S3: `--door door:KEY` binds a
-door animation to a warp's cell (D-30). S4 (engine C10): `--run step|immediate`
+lets a map's events stand on unpainted cells. `--door door:KEY` binds a
+door animation to a warp's cell. `--run step|immediate`
 sets how a trigger runs (immediate: to its end at once; its script may not wait).
 """
 from __future__ import annotations
@@ -36,9 +36,9 @@ OPTIONS = [("--elevation", "elevation", int), ("--to", "to", str), ("--warp", "w
            ("--trigger", "trigger", str), ("--direction", "direction", str), ("--transition", "transition", str),
            ("--script", "script", str),
            ("--var", "var", str), ("--value", "value", int), ("--facing", "facing", str), ("--flag", "flag", str),
-           ("--door", "door", str),   # S3 (D-30): a warp's door animation, door:KEY
-           ("--run", "run", str)]     # S4 (C10): a trigger's run, step or immediate
-## S4: option destinations that differ from their field (argparse's "run" is the command's callback).
+           ("--door", "door", str),   # a warp's door animation, door:KEY
+           ("--run", "run", str)]     # a trigger's run, step or immediate
+## Option destinations that differ from their field (argparse's "run" is the command's callback).
 DESTS = {"run": "run_mode"}
 
 
@@ -228,7 +228,7 @@ def cmd_scripts(args: argparse.Namespace) -> None:
 
 
 def cmd_unpainted(args: argparse.Namespace) -> None:
-   """!events unpainted (I3). @param args  parsed arguments
+   """!events unpainted. @param args  parsed arguments
    @return None
    """
    p = _open(args)
@@ -305,5 +305,5 @@ def register(ctx: ExtensionContext) -> None:
        lambda q: (q.add_argument("name"), q.add_argument("period", type=int),
                   q.add_argument("--phase", type=int)), cmd_hook_add)
    add("hook-remove", "remove a step hook", lambda q: q.add_argument("name"), cmd_hook_remove)
-   add("unpainted", "show or set whether a map's events and objects may stand on unpainted cells (I3)",
+   add("unpainted", "show or set whether a map's events and objects may stand on unpainted cells",
        lambda q: (q.add_argument("map"), q.add_argument("value", nargs="?", help="on or off")), cmd_unpainted)

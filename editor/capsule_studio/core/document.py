@@ -98,6 +98,9 @@ EMPTY = {
    # [S7] The audio manifest of a game (engine M4, D-34: tools/audio/format.py; core.audio.empty() writes the
    # default mixer and players into a new one; no apostrophes here: Doxygen reads them as quotes).
    "capsule.audio/1": {"schema": "capsule.audio/1", "players": [], "song_table": []},
+   # [S8] An affine sprite animation file (engine BF, D-38: capsule/screen/affine.h; a file of the studio,
+   # core.anim_affine, exported as C++).
+   "capsule.affine-anims/1": {"schema": "capsule.affine-anims/1", "anims": []},
 }
 ## Undo steps kept.
 HISTORY_LIMIT = 200

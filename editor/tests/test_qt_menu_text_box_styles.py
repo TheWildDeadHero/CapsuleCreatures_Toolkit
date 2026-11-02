@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""!S5 (engine N1 / N2 / N3) Qt: the Menu styles panel on a copy of the engine's N3 fixture (tests/data/ui: a style's
+"""!The menu and text box styles Qt: the Menu styles panel on a copy of the menus fixture (tests/data/ui: a style's
 menu given, edited through its widgets, the preview run over keys with the repeat, a list with its arrows), the
 Text boxes panel's art (the stored palette, the frame's own colours, the arrow image's strip and settings), the
-scene editor with a single panel (a tab change no longer reaches the actions before they exist: S4's save_action
-AttributeError), a JSON file of another schema opened read-only in the data view, the script editor's route step
-help under the mouse, and the Test save page's Game box on a copy of the Starter sample. Skipped when PySide6 is
+scene editor with a single panel (a tab change no longer reaches the actions before they exist: the field options'
+save_action AttributeError), a JSON file of another schema opened read-only in the data view, the script editor's route
+step help under the mouse, and the Test save page's Game box on a copy of the Starter sample. Skipped when PySide6 is
 missing; uses Qt's offscreen platform. With CAPSULE_SHOTS=FOLDER it saves pictures of the panels.
 """
 from __future__ import annotations
@@ -68,8 +68,8 @@ def shot(app: QtWidgets.QApplication, w: QtWidgets.QWidget, name: str) -> None:
 
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
-class QtS5Tests(unittest.TestCase):
-   """!Drives the S5 scene editor panels, the shell and the data view."""
+class QtMenuTextBoxStylesTests(unittest.TestCase):
+   """!Drives the menu and text box styles scene editor panels, the shell and the data view."""
 
    @classmethod
    def setUpClass(cls) -> None:
@@ -177,7 +177,7 @@ class QtS5Tests(unittest.TestCase):
       from capsule_studio.ui import json_view
       from capsule_studio.ui.editors.menu_styles import MenuStylePanel
       w = self.window(MenuStylePanel)
-      w.tabs.currentChanged.emit(0)   # S4's report: save_action was not there yet
+      w.tabs.currentChanged.emit(0)   # the field options' report: save_action was not there yet
       w._tab_changed(-1)
       self.assertTrue(w.save_action is not None)
       other = self.root / "menus.json"

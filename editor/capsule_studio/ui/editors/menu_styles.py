@@ -1,6 +1,6 @@
-"""!Menu styles panel [S5] (engine N3: a text box style's "menu", ui::MenuStyle in capsule/ui/menu.h): how a menu
-drawn in a style's window looks and behaves, with a live preview that runs the menu frame by frame as the engine's
-ui module does (core.menu_styles: keys.cpp's repeat counter, menu.cpp's moves, wrap, delay, sounds and order,
+"""!Menu styles panel [the menu and text box styles] (a text box style's "menu", ui::MenuStyle in capsule/ui/menu.h):
+how a menu drawn in a style's window looks and behaves, with a live preview that runs the menu frame by frame as the
+engine's ui module does (core.menu_styles: keys.cpp's repeat counter, menu.cpp's moves, wrap, delay, sounds and order,
 arrows.cpp's bounce).
 
 Left: the manifest's text box styles (those with a menu marked), Give menu / Remove menu. Middle: one editor per
@@ -99,7 +99,7 @@ class MenuStylePanel(EditorPanel):
       form = QtWidgets.QVBoxLayout()
       fields = menu_styles.menu_fields()
       if not fields:
-         form.addWidget(QtWidgets.QLabel("The engine has no menu styles (they came with engine N3)."))
+         form.addWidget(QtWidgets.QLabel("The engine has no menu styles (they came with a newer engine)."))
       box = QtWidgets.QGroupBox("Menu (ui::MenuStyle)")
       grid = QtWidgets.QGridLayout(box)
       row = 0

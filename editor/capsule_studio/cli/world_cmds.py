@@ -1,4 +1,4 @@
-"""!`capsule-studio world|map|tileset ...`: worlds, maps and tilesets. I2 / I3: `map dictionary all|list` (a map's
+"""!`capsule-studio world|map|tileset ...`: worlds, maps and tilesets. `map dictionary all|list` (a map's
 dictionary as every metatile of its tilesets, or the ones painted) and the fixed-placement and animation actions of
 `tileset` (cli/tileset_cmds.py)."""
 from __future__ import annotations
@@ -114,7 +114,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    q.add_argument("tilesets", nargs="*", metavar="TILESET")
    q.set_defaults(run=cmd_map_tilesets)
    q = s.add_parser("dictionary", help="show the metatile dictionary, or make it every metatile of the map's "
-                                       "tilesets (all, I2) or the metatiles painted (list); the cells are renumbered")
+                                       "tilesets (all) or the metatiles painted (list); the cells are renumbered")
    q.add_argument("form", nargs="?", choices=("all", "list"))
    q.set_defaults(run=cmd_map_dictionary)
    q = s.add_parser("layers", help="list the tile layers, back to front")
@@ -195,7 +195,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    q.add_argument("output")
    q.add_argument("--columns", type=int, default=DEFAULT_TILESET_COLUMNS)
    q.set_defaults(run=cmd_tileset_render)
-   tileset_cmds.register_actions(s)   # I2 / I3: placement, banks, raw entries, indexed sheets, animations
+   tileset_cmds.register_actions(s)   # placement, banks, raw entries, indexed sheets, animations
 
 
 def _project(path: str | Path) -> Project:
@@ -247,7 +247,7 @@ def cmd_validate(args: argparse.Namespace) -> int:
    for mp in result["maps"]:
       print(f"ok: map {mp['name']}: {len(mp['chunks'])} chunks, {len(mp['metatiles'])} metatiles, "
             f"{len(mp['tiles'])}/{engine.tool('map_compiler').MAX_TILES} tiles, {len(mp['palettes'])} palettes")
-   reg = getattr(args, "registry", None)   # extensions' validators (D-10)
+   reg = getattr(args, "registry", None)   # extensions' validators
    found = reg.validate(p) if reg is not None else []
    for d in found:
       print(f"{d.level}: {d.message}" + (f" at {d.at[0]},{d.at[1]}" if d.at else "") + f" [{d.plugin}]")
@@ -306,7 +306,7 @@ def cmd_import(args: argparse.Namespace) -> None:
             print(f"behavior {b}: added")
          for c in plan["classes"]:
             print(f"vehicle class {c}: added")
-         for key, names in plan["names"].items():   # F2: map tags, object kinds
+         for key, names in plan["names"].items():   # map tags, object kinds
             for n in names:
                print(f"{key.replace('_', ' ')} {n}: added")
          for line in plan["notes"]:
@@ -402,7 +402,7 @@ def cmd_render(args: argparse.Namespace) -> None:
    @return None
    """
    p = _project(args.world)
-   # I2: the map alone against its tilesets; the collision view needs the world's behaviors (a whole compile)
+   # The map alone against its tilesets; the collision view needs the world's behaviors (a whole compile)
    world, error = p.compile([args.map]) if args.collision else (None, None)
    if error:
       raise CommandError(error)
@@ -490,7 +490,7 @@ def cmd_map_tilesets(args: argparse.Namespace) -> None:
 
 
 def cmd_map_dictionary(args: argparse.Namespace) -> None:
-   """!map dictionary (I2). @param args  parsed arguments
+   """!map dictionary. @param args  parsed arguments
    @return None
    """
    def show(p: Project, doc: Document) -> None:
@@ -701,7 +701,7 @@ def cmd_tileset_render(args: argparse.Namespace) -> None:
    img = mapview.blank(cols * step + METATILE_GAP, rows * step + METATILE_GAP, TILESET_BACKGROUND)
    for i in range(n):
       mapview.draw_metatile(img, METATILE_GAP + (i % cols) * step, METATILE_GAP + (i // cols) * step, preview, i)
-   if tilesets.is_fixed(p.tileset(args.tileset)):   # I2: its entries are drawn with the tilesets maps load with it
+   if tilesets.is_fixed(p.tileset(args.tileset)):   # its entries are drawn with the tilesets maps load with it
       print("drawn with " + ", ".join(p.companions(args.tileset)))
    _png(args.output, img, TILESET_RENDER_SCALE)
    print(f"wrote {args.output} ({n} metatiles)")

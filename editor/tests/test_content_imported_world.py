@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""!The studio core on a large imported world (I2: hundreds of maps, dozens of fixed tilesets, "all" dictionaries; I3
-content sets add warps, objects and sprites). Private content, never part of this repository: the tests run when
-CAPSULE_IMPORTED_CONTENT names an imported content folder (assets-imported/<game>, holding world/world.json) and are
-skipped otherwise. The round trip works on a temporary copy, removed afterwards.
+"""!The studio core on a large imported world (hundreds of maps, dozens of fixed tilesets, "all" dictionaries; the
+imported events and sprites content sets add warps, objects and sprites). Private content, never part of this
+repository: the tests run when CAPSULE_IMPORTED_CONTENT names an imported content folder (assets-imported/<game>,
+holding world/world.json) and are skipped otherwise. The round trip works on a temporary copy, removed afterwards.
 
 Checks: every map compiles one by one against its tilesets (what the map editor shows) without errors, every
 tileset's preview draws, the events check passes, and opening every document and saving without edits writes
@@ -72,13 +72,13 @@ class ImportedWorldTests(unittest.TestCase):
       self.assertLess(maps_time, MAPS_SECONDS)
 
    def test_sprites(self) -> None:
-      """!An I3 content set's overworld sprites (streamed, mirrored steps, indexed sheet frames) compile in the scene
-      editor's core (skipped for a content set without them).
+      """!An imported sprite content set's overworld sprites (streamed, mirrored steps, indexed sheet frames) compile in
+      the scene editor's core (skipped for a content set without them).
       @return None
       """
       assets = content_world().parent.parent / "overworld" / "assets.json"
       if not assets.is_file():
-         self.skipTest("this content set has no overworld sprites (an I2 one)")
+         self.skipTest("this content set has no overworld sprites (an older one)")
       doc = Document.open(assets)
       problems, reports = doc.validate()
       self.assertEqual(problems, [])

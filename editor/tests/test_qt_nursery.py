@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!Smoke tests of the B2 pages: Structure > Nursery (the Starter's eggs and Grove in the boxes, edits through the
+"""!Smoke tests of the nursery pages: Structure > Nursery (the Starter's eggs and Grove in the boxes, edits through the
 widgets, the refusal table), the egg flags on the Turn, Recruit, Field actions and Items pages, the Species page's
 Eggs row and the Test save page's boxed eggs and Nursery box. Each opens a copy of the map sandbox laid out as one
 game (sample_data.make_field_game) and edits through the widgets. Skipped when PySide6 is missing; uses Qt's
@@ -40,7 +40,7 @@ NEW_CYCLES = 6
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
 class NurseryPageTests(unittest.TestCase):
-   """!The Nursery page and the B2 parts of the other pages."""
+   """!The Nursery page and the nursery parts of the other pages."""
 
    @classmethod
    def setUpClass(cls) -> None:
@@ -130,7 +130,7 @@ class NurseryPageTests(unittest.TestCase):
       panel.refusals.item(row, CHECK_COLUMN).setCheckState(QtCore.Qt.CheckState.Checked)
       self.settle()
       self.assertTrue(battle.entry(p.battle, "items", "Orb").get("allow_eggs"))
-      self.shot(w, "b2_studio_nursery")
+      self.shot(w, "studio_nursery")
       self.assertFalse(panel.set_eggs_on(False))   # the Grove delivers eggs
       self.settle()
       self.assertTrue(panel.has_eggs.isChecked())
@@ -163,7 +163,7 @@ class NurseryPageTests(unittest.TestCase):
       actions.allow_eggs.click()
       self.settle()
       self.assertTrue(nursery.allowed(p.structure, "field_actions", actions.selected))
-      self.shot(w, "b2_studio_field_action_eggs")
+      self.shot(w, "studio_field_action_eggs")
       w.close()
 
    def test_species_and_test_save(self) -> None:
@@ -184,7 +184,7 @@ class NurseryPageTests(unittest.TestCase):
       self.settle()
       own = next(v for v in species_fields.values_of(p.battle, SPROUTLE) if v["name"] == "hatch_cycles")
       self.assertEqual(own["value"], NEW_CYCLES)
-      self.shot(w, "b2_studio_species_eggs")
+      self.shot(w, "studio_species_eggs")
       panel = w.show_panel("test_save")
       self.settle()
       self.assertTrue(panel.new_save(SAVE))
@@ -207,7 +207,7 @@ class NurseryPageTests(unittest.TestCase):
       save = inventory.open_testsave(p, SAVE)
       self.assertEqual(nursery.result_of(save), {"species": SPROUTLE, "level": 1, "hatch": STEPS})
       self.assertEqual(inventory.check(save, p.battle), [])
-      self.shot(w, "b2_studio_test_save_nursery")
+      self.shot(w, "studio_test_save_nursery")
       out = self.root / "grove.sav"
       self.assertTrue(panel.export_save(out))
       self.assertTrue(out.is_file())

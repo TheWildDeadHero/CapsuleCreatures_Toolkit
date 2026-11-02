@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""![C14b] Qt smoke (offscreen; skipped without PySide6): the WAV player's fallback when Qt Multimedia fails while
+"""!Qt smoke (offscreen; skipped without PySide6): the WAV player's fallback when Qt Multimedia fails while
 playing (the player goes silent, its clock runs on, the render bar hands the WAV to the system's player and says
 why), and Play on a machine without Qt Multimedia or an audio output (the offscreen platform) staying silent."""
 from __future__ import annotations
@@ -27,7 +27,7 @@ LENGTH = 2.0
 
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
-class QtC14bTests(unittest.TestCase):
+class QtWavPlayerFallbackTests(unittest.TestCase):
    """!The audio editor's playing fallbacks."""
 
    @classmethod

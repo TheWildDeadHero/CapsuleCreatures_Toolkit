@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""![C14b] Without Qt: the studio's cover of engine E1's text and script changes and of the M4 fixes. The text window
-port (core.text_window) waits in PAUSE_SOUND on WAIT_SE as window.cpp's Pause::Sound does (the control ends the
-typed frame, the frame that sees the sound ended still waits: interval and counter typing), hands PLAY_SE / PLAY_BGM
+"""!Without Qt: the studio's cover of the text and sound changes' text and script changes and of the audio fixes. The
+text window port (core.text_window) waits in PAUSE_SOUND on WAIT_SE as window.cpp's Pause::Sound does (the control ends
+the typed frame, the frame that sees the sound ended still waits: interval and counter typing), hands PLAY_SE / PLAY_BGM
 and the music controls to its PreviewSound, and a preview's PLAY_SE can play for chosen frames; the script editor
 offers `wait_sound bgm` (the compiler's SOUND_WAITS) and the engine's compiler takes it.
 """
@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from capsule_studio.core import script_words, text_window  # noqa: E402
-from test_s6b_formats import A, B, WINDOW, ctl, end, font  # noqa: E402
+from test_text_window_interactions import A, B, WINDOW, ctl, end, font  # noqa: E402
 
 ## A sound number split into its control bytes (low first).
 SOUND_LO, SOUND_HI = 0x15, 0x01
@@ -94,7 +94,7 @@ class SoundPauseTests(unittest.TestCase):
 
 
 class ScriptWordTests(unittest.TestCase):
-   """!E1's `wait_sound bgm;` in the script editor."""
+   """!The text and sound changes' `wait_sound bgm;` in the script editor."""
 
    def test_wait_sound_bgm_is_offered(self) -> None:
       """!The kinds after wait_sound include bgm, and the engine's compiler takes the statement.

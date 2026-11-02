@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!S6 (engine UC / UM, D-33) without Qt: the screen graphics kinds (core.screen_graphics: tiles, tilemaps,
+"""!screen graphics and plans without Qt: the screen graphics kinds (core.screen_graphics: tiles, tilemaps,
 palettes; compiled with the engine, previewed, painted, imported from and exported to indexed PNGs), screen plans
 (core.screen_plans: layers, palettes, windows, sheets, sprites, steps and transitions; check() finds video memory
 clashes, mode and colour-mode mistakes and sprite limits; render() simulates video memory; fade_frames() steps the
@@ -32,7 +32,7 @@ from sample_data import copy_engine_apps  # noqa: E402
 PATTERN_TILES, PATTERN_MAP = "tiles:SANDBOX_SCREEN_PATTERN", "tilemap:SANDBOX_SCREEN_PATTERN"
 BG_PALETTE, OBJ_PALETTE = "palette:SANDBOX_SCREEN_BG", "palette:SANDBOX_SCREEN_OBJ"
 ICONS, CURSOR = "tiles:SANDBOX_SCREEN_ICONS", "tiles:SANDBOX_SCREEN_CURSOR"
-## A real report line (UM's full ROM, 2026-10-25) and the link's EWRAM failure.
+## A real report line (full ROM, 2026-10-25) and the link's EWRAM failure.
 REPORT = ("GBA memory (capsule_game): EWRAM 201300 of 262144 B (60844 B free); IWRAM code + data 19236 of 32768 B, "
           "stack 13276 B (reserve 2048 B)")
 OVER = ("GBA memory (capsule_game): EWRAM 365248 of 262144 B (-103104 B free); IWRAM code + data 22200 of 32768 B, "
@@ -353,7 +353,7 @@ class MemoryTests(unittest.TestCase):
       @return None
       """
       ## Temporary build folder.
-      self.build = Path(tempfile.mkdtemp(prefix="capsule_s6_build_"))
+      self.build = Path(tempfile.mkdtemp(prefix="capsule_screens_build_"))
       (self.build / gba_memory.CACHE_FILE).write_text(
          "# This is the CMakeCache file.\n"
          "CMAKE_TOOLCHAIN_FILE:FILEPATH=/engine/cmake/toolchains/gba-devkitarm.cmake\n"

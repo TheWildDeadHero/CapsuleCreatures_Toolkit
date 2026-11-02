@@ -5,7 +5,7 @@ Editing commands change the files, compile the result with the engine's
 battle compiler and save only when it compiles; otherwise they print the
 compiler's message and leave the files as they were. A change saves the
 files it changed (battle.json, structure.json or both). `split` migrates
-single-file battle data (the form before E5s), which no other action opens.
+single-file battle data (the form from an older version), which no other action opens.
 
 The Structure and Logic commands (validate, stat, pipeline, point, damage,
 formula) are actions of this group too; their modules are listed in
@@ -45,7 +45,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    q.add_argument("--template", metavar="NAME", help="a battle data template (capsule-studio template list), e.g. "
                                                      "blank or starter; FILE must be its battle manifest's name")
    q.set_defaults(run=cmd_new)
-   q = s.add_parser("split", help="split single-file battle data (the form before E5s) into FILE + its structure "
+   q = s.add_parser("split", help="split older single-file battle data into FILE + its structure "
                                   "manifest (the engine's battle_split tool; values unchanged)")
    q.add_argument("--check", action="store_true", help="only report what would move")
    q.set_defaults(run=cmd_split)
@@ -91,7 +91,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    q.add_argument("level", type=int)
    q.add_argument("move")
    q.set_defaults(run=cmd_learn)
-   q = s.add_parser("teachable", help="the moves `teach` may give a species: SPECIES [add|remove MOVE] (C6)")
+   q = s.add_parser("teachable", help="the moves `teach` may give a species: SPECIES [add|remove MOVE]")
    q.add_argument("species")
    q.add_argument("action", nargs="?", choices=("add", "remove"))
    q.add_argument("move", nargs="?")
@@ -338,7 +338,7 @@ def cmd_learn(args: argparse.Namespace) -> int:
 
 
 def cmd_teachable(args: argparse.Namespace) -> int:
-   """!Shows or changes a species' teachable moves (C6).
+   """!Shows or changes a species' teachable moves.
    @param args  parsed arguments
    @return 0 or 1
    """
@@ -442,7 +442,7 @@ def cmd_intro(args: argparse.Namespace) -> int:
    @param args  parsed arguments
    @return 0
    """
-   p = open_project(args)   # kept alive (a weak reference from the Document, S17)
+   p = open_project(args)   # kept alive (a weak reference from the Document)
    for line in battle.intro(p.battle, args.party, args.format):
       print(line)
    return 0

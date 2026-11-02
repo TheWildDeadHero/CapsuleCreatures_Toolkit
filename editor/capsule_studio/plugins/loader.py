@@ -1,4 +1,4 @@
-"""!Loading plugins into a Registry (D-10 §2-§3).
+"""!Loading plugins into a Registry (§2-§3).
 
 Loading a plugin checks, in order: its manifest, the plugin API number
 (registry.MIN_API to registry.API),
@@ -11,7 +11,7 @@ Plugin packages are imported under a private name per plugin, so two
 plugins may use the same package name; a plugin's modules import each
 other relatively (from . import x).
 
-Connector plugins (manifest and compiler data, D-10 §4) need the
+Connector plugins (manifest and compiler data) need the
 compiler-side host, which is not built yet: such plugins are refused with a
 message saying so.
 
@@ -110,7 +110,7 @@ def load_plugin(reg: registry.Registry, info: manifest.PluginInfo, studio_versio
    if missing:
       raise PluginError(f"plugin {info.id}: needs plugin(s) {', '.join(missing)} (list them first)")
    if info.connector is not None:
-      raise PluginError(f"plugin {info.id}: has a connector; connectors (compiler-side data, D-10 §4) are not "
+      raise PluginError(f"plugin {info.id}: has a connector; connectors (compiler-side data) are not "
                         "supported by this studio yet")
    try:
       purity.check_folder(info.id, info.folder)

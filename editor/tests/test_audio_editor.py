@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!S7 (engine M4, D-34) without Qt: the audio manifest model (core.audio: checked edits that format.py refuses,
+"""!audio editor without Qt: the audio manifest model (core.audio: checked edits that format.py refuses,
 voices, windows and their overlaps, keymaps, drum sets, waves, samples from WAV files with pending data files,
 MIDI import in both forms with the end-tick report, the song table and players, envelope curves), songs
 (core.audio_song: notes, tempo map, ends and loops, the mute variant), playback (core.audio_render: the preview
@@ -56,7 +56,7 @@ class AudioTestCase(unittest.TestCase):
       """!The shared cache folder.
       @return None
       """
-      cls.cache = Path(tempfile.mkdtemp(prefix="capsule_s7_cache_"))
+      cls.cache = Path(tempfile.mkdtemp(prefix="capsule_audio_cache_"))
       cls._old_cache = os.environ.get(ar.CACHE_ENV)
       os.environ[ar.CACHE_ENV] = str(cls.cache)
 
@@ -279,7 +279,7 @@ class SampleTests(AudioTestCase):
       self.assertEqual(audio.sample_levels(self.doc, "sample:hiss"), audio.dpcm().decode(data, 700))
 
    def test_pitch_of_is_wav_samples(self) -> None:
-      """!C14b (R10 L7): pitch_of() is wav_sample.convert()'s value: rate x 1024 at key 60, an octave up halves it,
+      """!A review L7: pitch_of() is wav_sample.convert()'s value: rate x 1024 at key 60, an octave up halves it,
       100 cents raise it a semitone, the key is clamped to 0-127.
       @return None
       """
@@ -466,7 +466,7 @@ class RenderTests(AudioTestCase):
          self.assertEqual(a.summary[level], b.summary[level], level)
       self.assertEqual(a.end_frame, b.end_frame)
       # The song's END runs on song frame 151 = render frame 152 (audio_render's first blank comes before the
-      # call); C14b (engine C14a): end_frame is that frame exactly, status_end_frame the later one the player's
+      # call); end_frame is that frame exactly, status_end_frame the later one the player's
       # status shows it ended (the tick after the END)
       song_end = audio_song.song_view(self.doc, "song:tune").end_frame + audio_song.FIRST_RENDER_FRAME - 1
       self.assertEqual(a.end_frame, song_end)
@@ -481,14 +481,14 @@ class RenderTests(AudioTestCase):
       self.assertEqual(tl.owners[1], (0, 0))
       busy = [f for f in range(len(tl.frames)) if tl.sounding(f, 0)]
       self.assertTrue(busy)
-      # C15b (engine kTrackExists): the song's tracks run until the frame whose ticks ran the last END
+      # Engine kTrackExists: the song's tracks run until the frame whose ticks ran the last END
       self.assertGreater(tl.tracks_running(a.end_frame - 2), 0)
       self.assertEqual(tl.tracks_running(a.end_frame - 1), 0)
       self.assertTrue(a.tones())
       self.assertEqual(r.list_table()["players"], 3)
 
    def test_priority_in_the_core(self) -> None:
-      """!C14b: two sounds at once in the C++ core (audio_render --then) give the reference model's outcome: the
+      """!two sounds at once in the C++ core (audio_render --then) give the reference model's outcome: the
       same owners frame by frame, the same steals and refusals; the mix is the render's output from the first
       sound's frame.
       @return None
@@ -505,7 +505,7 @@ class RenderTests(AudioTestCase):
          self.assertEqual((core.refused, core.same_player), (model.refused, model.same_player), where)
          self.assertEqual(len(core.samples), len(model.samples), where)
          self.assertIs(core.render.priority, core)
-         # C15b: the --then sound's end frames are in the summary and its text
+         # The --then sound's end frames are in the summary and its text
          self.assertIn("then_end_frame", core.render.summary, where)
          self.assertTrue([line for line in core.render.lines() if line.startswith("second sound")], where)
 
@@ -647,7 +647,7 @@ class ProjectTests(unittest.TestCase):
       """!project.json's "audio" is a game file, as capsule_audio_game() reads it.
       @return None
       """
-      root = Path(tempfile.mkdtemp(prefix="capsule_s7_project_"))
+      root = Path(tempfile.mkdtemp(prefix="capsule_audio_project_"))
       try:
          manifest = af.make_game(root)
          doc = project.open_project(root / "tiny" / "reference" / "project.json")

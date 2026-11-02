@@ -1,4 +1,4 @@
-"""!`capsule-studio battle FILE bench ...`: the battle test bench (D-23 §3.3,
+"""!`capsule-studio battle FILE bench ...`: the battle test bench (
 core.bench): scenarios in the game's bench/ folder, run through the
 engine's compiled bench.
 
@@ -13,7 +13,7 @@ engine's compiled bench.
     battle FILE bench build [--rng R]             configure (once) and build the bench; prints its path
     battle FILE bench generators                  the generators a bench can link (default, the reference
                                                   repo's compat/generators.json) and their source files
-    battle FILE bench owner-texts SCENARIO [on|off]   the transcript's owner texts (E13b "owner_texts")
+    battle FILE bench owner-texts SCENARIO [on|off]   the transcript's owner texts (the effect handlers "owner_texts")
     battle FILE bench migrate                     rename the retired poke keys (status_turns -> status_counter,
                                                   escalation -> status_aux) in every scenario and save them
 
@@ -85,7 +85,7 @@ def register_actions(s: argparse._SubParsersAction) -> None:
    r = a.add_parser("migrate", help="rename the retired poke keys in every scenario and save them")
    r.set_defaults(run=cmd_migrate)
    r = a.add_parser("owner-texts", help="whether a scenario's transcript prints the effect logic's texts "
-                                        "(scenario \"owner_texts\", E13b); with on / off: set it and save")
+                                        "(scenario \"owner_texts\"); with on / off: set it and save")
    r.add_argument("scenario")
    r.add_argument("value", nargs="?", choices=list(SWITCH))
    r.set_defaults(run=cmd_owner_texts)
@@ -215,7 +215,7 @@ def cmd_generators(args: argparse.Namespace) -> int:
    found, problem = bench.generators_or_default(p)
    for name, source in found.items():
       print(f"{name}  {source if source is not None else ENGINE_GENERATOR}")
-   if problem is not None:   # a malformed reference manifest: the engine's generator still works (C4)
+   if problem is not None:   # a malformed reference manifest: the engine's generator still works
       print(f"capsule-studio: error: {problem}", file=sys.stderr)
       return 1
    return 0

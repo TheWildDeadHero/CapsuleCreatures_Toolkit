@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!S3 (D-30, engine DS1) without Qt: door assets and bindings (core.doors), cell override sets (core.override_sets,
+"""!doors and overrides without Qt: door assets and bindings (core.doors), cell override sets (core.override_sets,
 the overrides extension), direction-grid sprites (core.sprite_grid, core.indexed_png), the draw order rule
 (core.draw_order), tile animation targets (core.tilesets), the override statement's words (core.script_words), the
 importer's handling of persisted sets, and their commands.
@@ -47,7 +47,7 @@ class D30World(unittest.TestCase):
       @return None
       """
       ## Temporary root.
-      self.root = copy_engine_apps(Path(tempfile.mkdtemp(prefix="capsule_d30_")), ["sandbox_map"])
+      self.root = copy_engine_apps(Path(tempfile.mkdtemp(prefix="capsule_doors_overrides_")), ["sandbox_map"])
       ## The copy's data folder.
       self.data = self.root / "sandbox_map" / "data"
       ## The opened world.
@@ -151,7 +151,7 @@ class DoorTests(D30World):
       self.assertEqual(len(a["frames"]), doors.NEW_FRAMES)
       self.assertTrue(doors.compiled(doc, "door:TEST").ok)
       shown = doors.lines(doc, "door:TEST")
-      warned = [line for line in shown if "warning:" in line]   # S4: sound:DOOR is no sound of the sandbox
+      warned = [line for line in shown if "warning:" in line]   # sound:DOOR is no sound of the sandbox
       self.assertEqual(len(warned), 1, warned)
       self.assertEqual(len(shown) - len(warned), 4 + doors.NEW_FRAMES * 4 * 2)
 
@@ -528,7 +528,7 @@ class ScriptWordTests(D30World):
                                                                       GARDEN)
       m = json.loads(manifest.read_text(encoding="utf-8"))
       src = manifest.parent / m["sources"][0]
-      text = src.read_text(encoding="utf-8") + f"\nscript s3_template {{\n    {template}\n}}\n"
+      text = src.read_text(encoding="utf-8") + f"\nscript doors_template {{\n    {template}\n}}\n"
       src.write_text(text, encoding="utf-8")
       comp = sc.compile_file(manifest)
       self.assertEqual([d.message for d in comp.diags if d.severity == "error"], [])

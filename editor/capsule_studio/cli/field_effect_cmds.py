@@ -1,5 +1,5 @@
-"""!`capsule-studio battle FILE field-effect ...` and `battle FILE encounter ...` (engine F1, D-27 sections 1 and 2):
-the structure manifest's timed field effects (core.structure.field_effects) and encounter rules (the lead rule,
+"""!`capsule-studio battle FILE field-effect ...` and `battle FILE encounter ...` (engine F1, field effect sections 1
+and 2): the structure manifest's timed field effects (core.structure.field_effects) and encounter rules (the lead rule,
 core.structure.encounter_rules).
 
     battle FILE field-effect list                     every effect (unit, stack rule, persists, expiry, users)
@@ -13,9 +13,10 @@ core.structure.encounter_rules).
     battle FILE encounter show                        who leads, the encounter pipelines, the logic running the hooks
     battle FILE encounter lead EXPR                   the first member for which EXPR holds leads
     battle FILE encounter lead-clear                  the first member that can battle leads
-    battle FILE encounter hook-lead EXPR              C8: the first member for which EXPR holds runs the hooks of its
+    battle FILE encounter hook-lead EXPR              the field effects: the first member for which EXPR holds runs the
+    hooks of its
                                                       passive and held item (the lead stays the global rules' holder)
-    battle FILE encounter hook-lead-clear             C8: the lead runs them
+    battle FILE encounter hook-lead-clear             the field effects: the lead runs them
     battle FILE encounter add-global NAME             a global rule with an empty `on encounter` handler
 
 Editing actions save only when the result compiles (battle_cmds.save_if_valid).
@@ -80,11 +81,11 @@ def register_actions(s: argparse._SubParsersAction) -> None:
    r.add_argument("when", metavar="EXPR")
    r.set_defaults(run=cmd_lead)
    a.add_parser("lead-clear", help="the first member that can battle leads").set_defaults(run=cmd_lead_clear)
-   r = a.add_parser("hook-lead", help="C8: the first member for which EXPR holds runs the hooks of its passive and "
+   r = a.add_parser("hook-lead", help="the first member for which EXPR holds runs the hooks of its passive and "
                                       "held item")
    r.add_argument("when", metavar="EXPR")
    r.set_defaults(run=cmd_hook_lead)
-   a.add_parser("hook-lead-clear", help="C8: the lead runs the hooks of its passive and held item").set_defaults(
+   a.add_parser("hook-lead-clear", help="the lead runs the hooks of its passive and held item").set_defaults(
       run=cmd_hook_lead_clear)
    r = a.add_parser("add-global", help="a global rule with an empty `on encounter` handler")
    r.add_argument("name")
@@ -134,7 +135,7 @@ def cmd_rename(args: argparse.Namespace) -> int:
       places = field_effects.rename_effect(p.structure, args.old, args.new, follow=False)
    for place in places:
       print(place if place.startswith("scripts: ") else f"logic: {place}")
-   # C8: the game's scripts (saved at once) follow only once the renamed battle data compiled and was saved
+   # The game's scripts (saved at once) follow only once the renamed battle data compiled and was saved
    status = save_if_valid(p)
    if status == 0:
       for place in field_effects.follow_scripts(p.structure, args.old, args.new):
@@ -219,7 +220,7 @@ def cmd_lead_clear(args: argparse.Namespace) -> int:
 
 
 def cmd_hook_lead(args: argparse.Namespace) -> int:
-   """!States the hooks' member's rule (C8).
+   """!States the hooks' member's rule.
    @param args  parsed arguments
    @return 0 or 1
    """
@@ -230,7 +231,7 @@ def cmd_hook_lead(args: argparse.Namespace) -> int:
 
 
 def cmd_hook_lead_clear(args: argparse.Namespace) -> int:
-   """!Drops the hooks' member's rule (C8).
+   """!Drops the hooks' member's rule.
    @param args  parsed arguments
    @return 0 or 1
    """

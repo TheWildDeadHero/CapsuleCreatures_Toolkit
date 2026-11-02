@@ -1,4 +1,4 @@
-"""!`capsule-studio battle FILE combine ...` (engine B1, D-28 section 1): the structure manifest's combination methods
+"""!`capsule-studio battle FILE combine ...`: the structure manifest's combination methods
 (core.structure.combination).
 
     battle FILE combine list                          every method (kind, inputs, rules, tables, users)
@@ -19,9 +19,9 @@
                                   [--when E] [--where E] [--order F] [--choose C] [--else E]
     battle FILE combine rule NAME remove K | move K up|down | when K EXPR | pick K [--where ...]
     battle FILE combine moves NAME [--limit N] [--chooser C] [--fill on|off] [--push on|off]
-                                                      C9: --push: the chosen moves after the result's own ones
+                                                      --push: the chosen moves after the result's own ones
     battle FILE combine source NAME KIND on|off|remove [--limit N] [--all] [--from ROLE]
-                                                      C9: --from: the one slot role it reads (its moves in slot
+                                                      --from: the one slot role it reads (its moves in slot
                                                       order); without it every input
     battle FILE combine message NAME MOMENT [KEY]     the battle message at a moment (no KEY: none)
     battle FILE combine preview NAME SPECIES[:LEVEL] ... [--context N=V] [--save SAVE --slots S,S]
@@ -136,7 +136,7 @@ def register_actions(s: argparse._SubParsersAction) -> None:
    r.add_argument("state", choices=[*ON_OFF, "remove"])
    r.add_argument("--limit", type=int, default=0)
    r.add_argument("--all", action="store_true")
-   r.add_argument("--from", dest="role", help="the one slot role the source reads (C9)")
+   r.add_argument("--from", dest="role", help="the one slot role the source reads")
    r.set_defaults(run=cmd_source)
    r = a.add_parser("message", help="the battle message at a moment")
    r.add_argument("name")
@@ -205,7 +205,7 @@ def cmd_rename(args: argparse.Namespace) -> int:
    with p.structure.edit("Rename combination method"):
       places = combination.rename_method(p.structure, args.old, args.new, follow=False)
    for place in places:
-      print(place if place.startswith("structure: ") else f"logic: {place}")   # B2: the nursery's method
+      print(place if place.startswith("structure: ") else f"logic: {place}")   # the nursery's method
    status = save_if_valid(p)
    if status == 0:
       for place in combination.follow_scripts(p.structure, args.old, args.new):

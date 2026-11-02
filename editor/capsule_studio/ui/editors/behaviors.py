@@ -1,6 +1,6 @@
 """!The World page's Behaviors panel (core.behaviors): the world's terrain classes, each solid or not, entered by
-every movement mode or by some, doing nothing or sliding / jumping (ledge) / pushing the walker or (I3) being a
-counter that A talks across, and (I2) with walls on some sides (one-way fences). The kinds, directions and limits are
+every movement mode or by some, doing nothing or sliding / jumping (ledge) / pushing the walker or being a
+counter that A talks across, and with walls on some sides (one-way fences). The kinds, directions and limits are
 the engine's map compiler's; every change is one undo step on the world Document (the host's run_edit())."""
 from __future__ import annotations
 
@@ -55,14 +55,14 @@ class BehaviorsPanel(EditorPanel):
       self.kind = QtWidgets.QComboBox()
       self.kind.addItems(model.kinds())
       self.kind.setToolTip("slide: keeps the walker going until blocked; ledge: jumped over moving its direction "
-                           "(engine N2: whatever the cell's own collision), a wall otherwise; push: a forced step; "
-                           "counter (I3): A facing it talks to the object beyond")
+                           "(whatever the cell's own collision), a wall otherwise; push: a forced step; "
+                           "counter: A facing it talks to the object beyond")
       self.kind.activated.connect(lambda *a: self._kind_chosen())
       ## A ledge's or push's direction.
       self.direction = QtWidgets.QComboBox()
       self.direction.addItems(model.directions())
       self.direction.activated.connect(lambda *a: self._kind_chosen())
-      ## I2: wall sides.
+      ## Wall sides.
       self.walls = {d: QtWidgets.QCheckBox(d) for d in model.directions()}
       walls_row = QtWidgets.QHBoxLayout()
       for d, box in self.walls.items():
@@ -84,7 +84,7 @@ class BehaviorsPanel(EditorPanel):
       form.addRow("", self.solid)
       form.addRow("Does", self.kind)
       form.addRow("Direction", self.direction)
-      form.addRow("Walls (I2)", walls_row)
+      form.addRow("Walls", walls_row)
       form.addRow("Entered by", self.every)
       form.addRow("", self.passable)
       right = QtWidgets.QVBoxLayout()

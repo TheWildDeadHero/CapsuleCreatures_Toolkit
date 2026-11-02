@@ -1,10 +1,10 @@
-"""!Text box styles panel [S2, S4] (engine C10: asset kind "text_box", capsule/text/window.h): a game's message box
-styles, the window and the frame the engine draws, with a preview that types as the engine types.
+"""!Text box styles panel [the older studio, the field options] (asset kind "text_box", capsule/text/window.h): a game's
+message box styles, the window and the frame the engine draws, with a preview that types as the engine types.
 
 Left: the manifest's text_box assets (core.text_boxes) with Add / Copy / Rename / Remove, and, while the manifest
-still holds S2's editor-data styles, a button that turns them into assets (core.text_boxes.migrate()). Middle: the
-style's font (a font asset of the manifest) and the fonts its Font control n selects; one field per setting the
-engine's text_box takes, in window.h's order with its comments as tips (a number in the compiler's range; typing and
+still holds the older studio's editor-data styles, a button that turns them into assets (core.text_boxes.migrate()).
+Middle: the style's font (a font asset of the manifest) and the fonts its Font control n selects; one field per setting
+the engine's text_box takes, in window.h's order with its comments as tips (a number in the compiler's range; typing and
 speed-up as their words; char_block and arrow may be left out: the layer's block, no arrow); the frame's first tile,
 palette bank and padding per side; the preview's colours (the bank's 16 entries), the frame art's two entries or a
 24x24 frame picture. Below, what the engine refuses or draws wrongly (core.text_boxes.check()), and "Apply to table"
@@ -13,7 +13,7 @@ with a text of the manifest's tables, typed frame by frame as window.cpp types i
 counter typing, the lead frames, pauses, scrolls, the speed-up): the keys pressed (none, a press at each wait,
 Accept held), the wait shown, a frame slider and Play.
 
-S5 (engine N3): the bank's colours are stored in the style ("palette": the engine loads them) once "Stored in the
+The bank's colours are stored in the style ("palette": the engine loads them) once "Stored in the
 style" is on (else they are the preview's); the frame's image (a 24x24 palette PNG of the nine parts) and its own
 bank's colours (frame "palette"); the window's arrow image (an 8-pixel-wide palette PNG, the rows shown at once, the
 steps' first rows, the frames between steps) with a strip of its steps, typed in the preview as window.cpp steps it.
@@ -69,9 +69,9 @@ FONT_COLUMNS = ["Control", "Font"]
 FONT_ROWS = 4
 ## Colour of the engine's refusals.
 ERROR_COLOR = "#c03030"
-## S5: screen pixels per arrow image pixel in its strip.
+## Screen pixels per arrow image pixel in its strip.
 STRIP_ZOOM = 4
-## S5: highest arrow image height / delay the spins offer (the compiler's MAX_ARROW_ROWS when it has one).
+## Highest arrow image height / delay the spins offer (the compiler's MAX_ARROW_ROWS when it has one).
 DEFAULT_ARROW_MAX = 255
 
 
@@ -111,9 +111,10 @@ class TextBoxPanel(EditorPanel):
       left.addWidget(button("Copy...", lambda: self.copy_style()))
       left.addWidget(button("Rename...", lambda: self.rename_style()))
       left.addWidget(button("Remove", lambda: self.remove_style()))
-      ## S4: turns S2's editor-data styles into assets (shown while the manifest has some).
+      ## Turns the older studio's editor-data styles into assets (shown while the manifest has some).
       self.migrate_button = button("Make editor-data styles assets", lambda: self.migrate(),
-                                   "S2 kept styles as the manifest's editor data; the engine now reads text_box assets")
+                                   "Older studios kept styles as the manifest's editor data; the engine now reads "
+                                   "text_box assets")
       left.addWidget(self.migrate_button)
       ## The style's font (a font asset's key).
       self.font_box = QtWidgets.QComboBox()
@@ -177,11 +178,11 @@ class TextBoxPanel(EditorPanel):
          b.clicked.connect(lambda _c=False, n=i: self._pick_color(n))
          self.swatches.append(b)
          cgrid.addWidget(b, i // SWATCHES_PER_ROW, i % SWATCHES_PER_ROW)
-      ## S5: the colours are the style's own palette (entries 1-15; the engine loads them into the bank).
+      ## The colours are the style's own palette (entries 1-15; the engine loads them into the bank).
       self.stored = QtWidgets.QCheckBox("Stored in the style (palette: the game loads these colours)")
       self.stored.clicked.connect(lambda on: self.set_stored_palette(on))
       cgrid.addWidget(self.stored, text_render.bank_colors() // SWATCHES_PER_ROW, 0, 1, SWATCHES_PER_ROW)
-      ## S5: the frame bank's own colours.
+      ## The frame bank's own colours.
       self.frame_swatches = []
       fcolors = QtWidgets.QGroupBox("Frame bank colours (frame palette; off: the window's)")
       fgrid = QtWidgets.QGridLayout(fcolors)
@@ -191,7 +192,7 @@ class TextBoxPanel(EditorPanel):
          b.clicked.connect(lambda _c=False, n=i: self._pick_frame_color(n))
          self.frame_swatches.append(b)
          fgrid.addWidget(b, i // SWATCHES_PER_ROW, i % SWATCHES_PER_ROW)
-      ## S5: the frame has a palette of its own.
+      ## The frame has a palette of its own.
       self.frame_own = QtWidgets.QCheckBox("Own colours (frame palette)")
       self.frame_own.clicked.connect(lambda on: self.set_frame_palette(on))
       fgrid.addWidget(self.frame_own, text_render.bank_colors() // SWATCHES_PER_ROW, 0, 1, SWATCHES_PER_ROW)
@@ -203,7 +204,7 @@ class TextBoxPanel(EditorPanel):
          s.setRange(0, text_render.bank_colors() - 1)
          s.editingFinished.connect(lambda: self._frame_entries_changed())
          erow.addWidget(s)
-      ## S5: the frame's image (frame "image": a 24x24 palette PNG of the nine parts; engine N3 data).
+      ## The frame's image (frame "image": a 24x24 palette PNG of the nine parts; menus data).
       self.frame_image = QtWidgets.QLineEdit()
       self.frame_image.setPlaceholderText("generated from the two entries")
       self.frame_image.setToolTip("frame.image: a 24x24 palette PNG of the nine frame parts in reading order, relative "
@@ -290,7 +291,7 @@ class TextBoxPanel(EditorPanel):
       split_box(layout)   # [RZ] list | form | preview: the user drags the boundaries
 
    def _build_arrow(self) -> QtWidgets.QGroupBox:
-      """!S5: the arrow image box (window "arrow_image", engine N3): the image, its height, steps and delay, and a
+      """!The arrow image box (window "arrow_image"): the image, its height, steps and delay, and a
       strip of the steps.
       @return the box
       """
@@ -503,7 +504,7 @@ class TextBoxPanel(EditorPanel):
       self._update_preview(True)
 
    def _fill_arrow(self, style: dict[str, Any] | None) -> None:
-      """!S5: the arrow image box.
+      """!The arrow image box.
       @param style  the style, or None
       @return None
       """
@@ -605,7 +606,7 @@ class TextBoxPanel(EditorPanel):
          return
       font = self._compiled_font(style.get("font"))
       problems = text_boxes.check(style, font, self._font_keys, self.doc.base_dir)
-      # S6b (C13c): the tiles the game gives the window (window::attach()), with what the engine says
+      # The tiles the game gives the window (window::attach()), with what the engine says
       self.checks.setText("\n".join(problems or ["The engine draws this box as shown."]) +
                           f"\nWindow storage: {text_boxes.storage(style).text()}")
       self.checks.setStyleSheet(f"color: {ERROR_COLOR};" if any(p.startswith("error") for p in problems) else "")
@@ -782,7 +783,7 @@ class TextBoxPanel(EditorPanel):
       return self._set("preview", "colors", colors, "Preview colour")
 
    def set_stored_palette(self, on: bool) -> bool:
-      """!S5: stores the bank's colours in the style (its palette: entries 1-15 as shown) or leaves them out.
+      """!stores the bank's colours in the style (its palette: entries 1-15 as shown) or leaves them out.
       @param on  store them
       @return True when it went through
       """
@@ -793,7 +794,7 @@ class TextBoxPanel(EditorPanel):
       return self._set("", text_boxes.PALETTE_KEY, colors[1:] if on else None, "Palette")
 
    def set_frame_palette(self, on: bool) -> bool:
-      """!S5: gives the frame its own bank colours (a copy of the window's) or takes them away.
+      """!gives the frame its own bank colours (a copy of the window's) or takes them away.
       @param on  own colours
       @return True when it went through
       """
@@ -804,7 +805,7 @@ class TextBoxPanel(EditorPanel):
       return self._set("frame", text_boxes.FRAME_PALETTE_KEY, colors[1:] if on else None, "Frame palette")
 
    def _pick_frame_color(self, entry: int) -> None:
-      """!S5: asks for a frame bank colour.
+      """!asks for a frame bank colour.
       @param entry  the palette entry (1-15)
       @return None
       """
@@ -817,7 +818,7 @@ class TextBoxPanel(EditorPanel):
          self.set_frame_color(entry, (c.red(), c.green(), c.blue()))
 
    def set_frame_color(self, entry: int, color: tuple[int, int, int]) -> bool:
-      """!S5: changes one frame bank colour (the frame gets its own palette).
+      """!changes one frame bank colour (the frame gets its own palette).
       @param entry  the palette entry (1-15)
       @param color  8-bit RGB
       @return True when it went through
@@ -830,7 +831,7 @@ class TextBoxPanel(EditorPanel):
       return self._set("frame", text_boxes.FRAME_PALETTE_KEY, colors[1:], "Frame colour")
 
    def _arrow_changed(self) -> None:
-      """!S5: an arrow image setting's editor changed.
+      """!an arrow image setting's editor changed.
       @return None
       """
       style = self.style()
@@ -855,7 +856,7 @@ class TextBoxPanel(EditorPanel):
          self.set_arrow_image(arrow)
 
    def set_arrow_image(self, arrow: dict[str, Any] | None) -> bool:
-      """!S5: gives the window an arrow image ({image, height, steps, delay}) or takes it away.
+      """!gives the window an arrow image ({image, height, steps, delay}) or takes it away.
       @param arrow  the settings, or None
       @return True when it went through
       """
@@ -873,7 +874,7 @@ class TextBoxPanel(EditorPanel):
          self._set("preview", "frame_entries", values, "Frame art")
 
    def _frame_image_changed(self) -> None:
-      """!The frame image changed (S5: the frame's own "image", engine N3 data).
+      """!The frame image changed (the frame's own "image", menus data).
       @return None
       """
       style = self.style()
@@ -945,7 +946,7 @@ class TextBoxPanel(EditorPanel):
          self.refresh()
 
    def migrate(self) -> bool:
-      """!S4: turns S2's editor-data styles into text_box assets (one undo step).
+      """!turns the older studio's editor-data styles into text_box assets (one undo step).
       @return True when it went through
       """
       doc = self.doc

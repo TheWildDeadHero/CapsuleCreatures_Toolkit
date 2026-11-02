@@ -1,6 +1,6 @@
-"""![S6] `capsule-studio screen-gfx MANIFEST ...` (the tiles / tilemap / palette asset kinds, engine UC), `screen-plan
+"""!`capsule-studio screen-gfx MANIFEST ...` (the tiles / tilemap / palette asset kinds), `screen-plan
 ...` (screen plans: layers, windows, sprites and transitions as data, previewed and exported as C++) and
-`gba-memory BUILD ...` (a build folder's GBA memory settings and its programs' memory report, engine UM). Changes are
+`gba-memory BUILD ...` (a build folder's GBA memory settings and its programs' memory report). Changes are
 compiled or checked before anything is saved."""
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ def _register_graphics(sub: argparse._SubParsersAction) -> None:
    @param sub  argparse subparsers
    @return None
    """
-   p = sub.add_parser("screen-gfx", help="screen graphics assets: tiles, tilemaps, palettes (UC) (S6)")
+   p = sub.add_parser("screen-gfx", help="screen graphics assets: tiles, tilemaps, palettes")
    p.add_argument("manifest", help="asset manifest (capsule.assets/1)")
    s = p.add_subparsers(dest="gfx_command", metavar="ACTION")
    s.required = True
@@ -116,7 +116,7 @@ def _register_plans(sub: argparse._SubParsersAction) -> None:
    @param sub  argparse subparsers
    @return None
    """
-   p = sub.add_parser("screen-plan", help="screen plans: layers, windows, sprites, transitions (UC) (S6)")
+   p = sub.add_parser("screen-plan", help="screen plans: layers, windows, sprites, transitions")
    s = p.add_subparsers(dest="plan_command", metavar="ACTION")
    s.required = True
    q = s.add_parser("list", help="the plans of an asset manifest")
@@ -177,8 +177,8 @@ def _register_plans(sub: argparse._SubParsersAction) -> None:
    q.add_argument("plan")
    q.add_argument("value")
    q.set_defaults(run=cmd_plan_fade_style)
-   q = s.add_parser("exit", help="how the screen leaves: close, close_now, replace NEXT or replace_now NEXT (engine "
-                                 "C13a), and its frames; no CALL: show them")
+   q = s.add_parser("exit", help="how the screen leaves: close, close_now, replace NEXT or replace_now NEXT, "
+                                 "and its frames; no CALL: show them")
    q.add_argument("plan")
    q.add_argument("call", nargs="?", choices=sp.EXIT_CALLS)
    q.add_argument("next", nargs="?", default="", help="replace / replace_now: the next screen's plan name")
@@ -206,8 +206,7 @@ def _register_memory(sub: argparse._SubParsersAction) -> None:
    @param sub  argparse subparsers
    @return None
    """
-   p = sub.add_parser("gba-memory", help="a build folder's GBA memory checks, stack reserve and memory report (UM) "
-                                         "(S6)")
+   p = sub.add_parser("gba-memory", help="a build folder's GBA memory checks, stack reserve and memory report")
    p.add_argument("build", help="a configured build folder (its CMakeCache.txt)")
    s = p.add_subparsers(dest="memory_command", metavar="ACTION")
    s.required = True
@@ -577,7 +576,7 @@ def cmd_plan_fade_style(args: argparse.Namespace) -> None:
 
 
 def cmd_plan_exit(args: argparse.Namespace) -> None:
-   """!screen-plan exit (S6b, engine C13a). @param args  parsed arguments
+   """!screen-plan exit. @param args  parsed arguments
    @return None
    """
    plan, manifest = _plan(args.plan)

@@ -24,7 +24,7 @@ CHECKER_LIGHT = 160
 CHECKER_DARK = 110
 
 
-## I3 step mirroring words and their flips values (asset::kFlipH 1, kFlipV 2).
+## Imported sprite step mirroring words and their flips values (asset::kFlipH 1, kFlipV 2).
 FLIP_WORDS = {"none": 0, "h": 1, "v": 2, "hv": 3}
 ## How `show` names a flips value.
 FLIP_NAMES = ("none", "horizontally", "vertically", "both ways")
@@ -91,33 +91,33 @@ def register(sub: argparse._SubParsersAction) -> None:
    q.add_argument("output")
    q.add_argument("--scale", type=int, default=1)
    q.set_defaults(run=cmd_sheet)
-   # I3: mirrored steps, streamed sprites, step tables, indexed sheet frames
-   q = s.add_parser("flips", help="mirror steps (I3): none, h, v or hv")
+   # Mirrored steps, streamed sprites, step tables, indexed sheet frames
+   q = s.add_parser("flips", help="mirror steps: none, h, v or hv")
    q.add_argument("manifest")
    q.add_argument("key")
    q.add_argument("value", choices=list(FLIP_WORDS))
    q.add_argument("--steps", default="all", help='steps like "0,2-4" (default: all)')
    q.add_argument("--anim", type=int, default=0)
    q.set_defaults(run=cmd_flips)
-   q = s.add_parser("stream", help="keep only the shown frame in VRAM (I3), on or off")
+   q = s.add_parser("stream", help="keep only the shown frame in VRAM, on or off")
    q.add_argument("manifest")
    q.add_argument("key")
    q.add_argument("mode", choices=["on", "off"])
    q.set_defaults(run=cmd_stream)
-   q = s.add_parser("step-table", help="the walk animations' step table (I3): FIRST_STAND SECOND_STAND "
+   q = s.add_parser("step-table", help="the walk animations' step table: FIRST_STAND SECOND_STAND "
                                        "AFTER_SECOND AFTER_FIRST, or - to remove it")
    q.add_argument("manifest")
    q.add_argument("key")
    q.add_argument("entries", nargs="+")
    q.set_defaults(run=cmd_step_table)
-   q = s.add_parser("sheet-frames", help="add every frame of an indexed sheet, its palette indices as they are (I3)")
+   q = s.add_parser("sheet-frames", help="add every frame of an indexed sheet, its palette indices as they are")
    q.add_argument("manifest")
    q.add_argument("key")
    q.add_argument("image", help="a palette PNG of frames of the sprite's size (copied next to the manifest)")
    q.add_argument("--anim", type=int, default=0)
    q.add_argument("--duration", type=int, default=sprites.DEFAULT_DURATION)
    q.set_defaults(run=cmd_sheet_frames)
-   from . import grid_cmds   # [S3] D-30 direction grids: `sprite grid MANIFEST KEY ...`
+   from . import grid_cmds   # doors and overrides direction grids: `sprite grid MANIFEST KEY ...`
    grid_cmds.register(s)
 
 
@@ -257,7 +257,7 @@ def _saved(doc: Document, key: str) -> int | None:
 
 
 def cmd_flips(args: argparse.Namespace) -> int | None:
-   """!sprite flips (I3). @param args  parsed arguments
+   """!sprite flips. @param args  parsed arguments
    @return 1 when the sprite no longer compiles, otherwise None
    """
    doc = open_doc(args.manifest)
@@ -270,7 +270,7 @@ def cmd_flips(args: argparse.Namespace) -> int | None:
 
 
 def cmd_stream(args: argparse.Namespace) -> int | None:
-   """!sprite stream (I3). @param args  parsed arguments
+   """!sprite stream. @param args  parsed arguments
    @return 1 when the sprite no longer compiles, otherwise None
    """
    doc = open_doc(args.manifest)
@@ -283,7 +283,7 @@ def cmd_stream(args: argparse.Namespace) -> int | None:
 
 
 def cmd_step_table(args: argparse.Namespace) -> int | None:
-   """!sprite step-table (I3). @param args  parsed arguments
+   """!sprite step-table. @param args  parsed arguments
    @return 1 when the sprite no longer compiles, otherwise None
    """
    doc = open_doc(args.manifest)
@@ -305,7 +305,7 @@ def cmd_step_table(args: argparse.Namespace) -> int | None:
 
 
 def cmd_sheet_frames(args: argparse.Namespace) -> int | None:
-   """!sprite sheet-frames (I3). @param args  parsed arguments
+   """!sprite sheet-frames. @param args  parsed arguments
    @return 1 when the sprite no longer compiles, otherwise None
    """
    doc = open_doc(args.manifest)

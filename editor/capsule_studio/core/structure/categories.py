@@ -1,4 +1,4 @@
-"""!The move categories of battle data (D-23 §3.2 "Categories"): the battle
+"""!The move categories of battle data (§3.2 "Categories"): the battle
 manifest's "categories" list.
 
     "categories": [{"name": "physical", "offense": "attack", "defense": "defence"},
@@ -12,7 +12,7 @@ rules.self_hit names one. At most the engine's MAX_CATEGORIES
 
 Where a damaging move's category comes from (modes()):
   - BY_MOVE: each move names its category (default: the first);
-  - BY_TYPE: the structure's `category_by_type` (E11) names a damaging
+  - BY_TYPE: the structure's `category_by_type` names a damaging
     category for every type, and a damaging move takes its type's (it states
     none; a status move still names its non-damaging category):
 
@@ -25,7 +25,7 @@ a damaging move of another one then takes its type's, and is counted; back
 to BY_MOVE every move keeps its category), set_type_category() sets one
 type's.
 
-The hit types' categories (engine C5, structure `hit_category_by_type`,
+The hit types' categories (structure `hit_category_by_type`,
 hit_key()): in BY_MOVE mode a structure may name a damaging category for
 every type that a damaging move hits with when the ruleset's move_type point
 changed its type (e.g. a move whose type is chosen when it is used: the category follows the hit
@@ -57,7 +57,7 @@ CATEGORIES_KEY = "categories"
 BY_MOVE = "move"
 ## Where a damaging move's category comes from: its type (the structure's category_by_type).
 BY_TYPE = "type"
-## The structure key of the by-type rule: {type name: damaging category name} (E11).
+## The structure key of the by-type rule: {type name: damaging category name}.
 BY_TYPE_KEY = battle.BY_TYPE_KEY
 ## The content list naming the types.
 TYPES_KEY = "types"
@@ -300,7 +300,7 @@ def set_mode(doc: Document, wanted: str, default: str | None = None) -> int:
       raise DocumentError(f"{default!r} is not a damaging category ({', '.join(damaging)})")
    # the most common damaging category of the type's moves; ties and types without moves take the default
    rule = _type_majority(doc, damaging, default)
-   # C5: category_by_type gives the hit types' categories too (the engine refuses both tables)
+   # category_by_type gives the hit types' categories too (the engine refuses both tables)
    if hit_available():
       battle.data_of(doc, hit_key()).pop(hit_key(), None)
    changed = 0
@@ -342,7 +342,7 @@ def set_type_category(doc: Document, type_name: str, category: str) -> int:
 
 
 def type_added(doc: Document, type_name: str) -> None:
-   """!Gives a new type the first damaging category in BY_TYPE mode, and in the hit types' table (C5; core.battle
+   """!Gives a new type the first damaging category in BY_TYPE mode, and in the hit types' table (core.battle
    add_entry(): both name every type).
    @param doc        battle Document
    @param type_name  the new type
@@ -355,7 +355,7 @@ def type_added(doc: Document, type_name: str) -> None:
             rule[type_name] = damaging[0]
 
 
-# -- the hit types' categories (engine C5) --------------------------------------------------------------------------
+# -- the hit types' categories --------------------------------------------------------------------------
 
 def hit_key() -> str:
    """!The structure key of the hit types' categories (the engine's HIT_CATEGORY_KEY, "hit_category_by_type").
@@ -366,7 +366,7 @@ def hit_key() -> str:
 
 def hit_available() -> bool:
    """!Whether this engine has the hit types' categories (its structure keys name the key).
-   @return True from engine C5 on
+   @return True from the hit categories on
    """
    return hasattr(_bc(), "HIT_CATEGORY_KEY") and hit_key() in _bc().STRUCTURE_KEYS
 
@@ -401,7 +401,7 @@ def set_hit(doc: Document, on: bool, default: str | None = None) -> bool:
    @throws DocumentError when the engine has no such table, in BY_TYPE mode, or for a default that is not damaging
    """
    if not hit_available():
-      raise DocumentError("this engine has no hit types' categories (engine C5)")
+      raise DocumentError("this engine has no hit types' categories")
    if not on:
       return battle.data_of(doc, hit_key()).pop(hit_key(), None) is not None
    if hit_table(doc) is not None:
@@ -554,7 +554,7 @@ def remove_category(doc: Document, name: str) -> None:
 def move_category(doc: Document, name: str, delta: int) -> bool:
    """!Moves a category up or down (its engine index). No move's category changes: in BY_MOVE mode a move that
    names none takes the first, so when the first changes those moves get the old first's name written in the
-   same step (F5 [S14]: they keep their category; the alternative, refusing, would block reordering).
+   same step (they keep their category; the alternative, refusing, would block reordering).
    @param doc    battle Document
    @param name   category name
    @param delta  -1 up, +1 down

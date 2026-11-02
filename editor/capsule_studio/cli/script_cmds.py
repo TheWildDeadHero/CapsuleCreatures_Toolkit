@@ -1,24 +1,24 @@
 """!`capsule-studio script ...`: scripts, flags and variables (B-1, B-2, B-4),
 the same operations as the script editor, and the manifest's field
-placeholders and terms (E9, core.placeholders):
+placeholders and terms (core.placeholders):
 
     script placeholders MANIFEST                       list them, the terms and the markup state
     script placeholder MANIFEST add NAME KIND VALUE [--form F] [--slot N]   KIND name | var | term | record
     script placeholder MANIFEST set NAME KIND VALUE [--form F] [--slot N]
     script placeholder MANIFEST remove NAME | rename OLD NEW | move NAME up|down | markup on|off
     script term MANIFEST set CONCEPT WORD [--plural WORDS] | remove CONCEPT
-    script save-shapes MANIFEST [--record]            the save sub-banks' shapes and the save history (C6)
+    script save-shapes MANIFEST [--record]            the save sub-banks' shapes and the save history
     script save-shapes MANIFEST --check               exit 1 when the history lacks one of the build's shapes (F1)
 
 Placeholder changes are checked with the engine's script compiler and saved
 only when the scripts still compile.
 
-[S2] (engine I4): `script list` also lists movements, marts and route steps;
+: `script list` also lists movements, marts and route steps;
 `script settings` sets object_base, warn_unused and glitch switches;
 `script words [--at TEXT]` lists the language's words (core.script_words)
 or the completions at the end of a text.
 
-[S4] (engine C10): `script settings --vm SWITCH VALUE` sets a script VM switch
+: `script settings --vm SWITCH VALUE` sets a script VM switch
 (resume same_frame|next_frame, random scaled|modulo, vars saturate|wrap; the
 engine's own value removes it); `script declare --lifetime session`."""
 from __future__ import annotations
@@ -38,7 +38,7 @@ MOVES = {"up": -1, "down": 1}
 SWITCH = {"on": True, "off": False}
 ## Values of a --glitch option (the id, on or off).
 GLITCH_ARGS = 2
-## [S4] Values of a --vm option (the switch, its value).
+## Values of a --vm option (the switch, its value).
 VM_ARGS = 2
 
 
@@ -91,12 +91,12 @@ def register(sub: argparse._SubParsersAction) -> None:
    q.add_argument("--stack-depth", type=int, help="VM call depth, 1-32")
    q.add_argument("--assets", help="asset manifest checked for text: references ('' removes)")
    q.add_argument("--world", help="world manifest checked for map names ('' removes)")
-   q.add_argument("--object-base", type=int, help="the first local ID of the game's object numbering (I4)")
-   q.add_argument("--warn-unused", choices=list(SWITCH), help="warn about unused flags and variables (I4)")
+   q.add_argument("--object-base", type=int, help="the first local ID of the game's object numbering")
+   q.add_argument("--warn-unused", choices=list(SWITCH), help="warn about unused flags and variables")
    q.add_argument("--glitch", nargs=GLITCH_ARGS, action="append", metavar=("ID", "on|off"),
-                  help="a glitch variant's switch (I4; repeat for several)")
+                  help="a glitch variant's switch (repeat for several)")
    q.add_argument("--vm", nargs=VM_ARGS, action="append", metavar=("SWITCH", "VALUE"),
-                  help="a script VM switch (C10: resume, random, vars; repeat for several)")
+                  help="a script VM switch (resume, random, vars; repeat for several)")
    q.set_defaults(run=cmd_settings)
    q = s.add_parser("words", help="the language's words (from the engine's compilers), or the completions at the "
                                   "end of --at TEXT")
@@ -315,7 +315,7 @@ def cmd_settings(args: argparse.Namespace) -> None:
             raise CommandError(f"--glitch {gid}: on or off, not {state!r}")
          p.set_setting("glitches", {**(p.setting("glitches") or {}), gid: SWITCH[state]})
       options = scripts.vm_options()
-      for switch, value in args.vm or []:   # [S4] the engine's own value (the first) leaves the switch out
+      for switch, value in args.vm or []:   # the engine's own value (the first) leaves the switch out
          vm = dict(p.setting("vm") or {})
          if switch in options and options[switch] and value == options[switch][0]:
             vm.pop(switch, None)
@@ -343,7 +343,7 @@ def cmd_words(args: argparse.Namespace) -> None:
    if args.at is not None:
       names = {}
       if args.manifest:
-         names = script_words.check_names(_open(args.manifest).check())   # S3: + the world's override sets
+         names = script_words.check_names(_open(args.manifest).check())   # + the world's override sets
       print(" ".join(script_words.completions(args.at.replace("\\n", "\n"), names)))
       return
    print("declarations: " + " ".join(script_words.declaration_words()))
@@ -469,7 +469,7 @@ def cmd_term_remove(args: argparse.Namespace) -> int:
 
 
 def cmd_save_shapes(args: argparse.Namespace) -> int:
-   """!Prints the save shapes, records them (C6) or checks that the history holds them (F1).
+   """!Prints the save shapes, records them or checks that the history holds them (F1).
    @param args  parsed arguments
    @return 0, or 1 when --check finds a shape the history lacks
    @throws CommandError when the scripts or the history cannot be read

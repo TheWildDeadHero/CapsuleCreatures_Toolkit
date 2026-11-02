@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!S7 (engine M4, D-34) Qt panels: the audio editor's window (ui/audio_shell.py) on a generated tiny game: Songs
+"""!The audio editor Qt panels: the audio editor's window (ui/audio_shell.py) on a generated tiny game: Songs
 (header edits with undo, mute and solo, the commands and tempo views, a render through the engine with the player
 state, the output waveform and the playhead, Play without an audio device), Instruments (a voice field, a kind
 change, a refused edit, key splits, a drum key opened, the bank view, the envelope), Samples (a WAV converted,
@@ -38,7 +38,7 @@ RENDER_WAIT = 300
 
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
-class QtS7Tests(unittest.TestCase):
+class QtAudioEditorTests(unittest.TestCase):
    """!Drives the audio editor."""
 
    @classmethod
@@ -47,7 +47,7 @@ class QtS7Tests(unittest.TestCase):
       @return None
       """
       cls.app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
-      cls.cache = Path(tempfile.mkdtemp(prefix="capsule_qt_s7_cache_"))
+      cls.cache = Path(tempfile.mkdtemp(prefix="capsule_qt_audio_cache_"))
       cls._old_cache = os.environ.get(ar.CACHE_ENV)
       os.environ[ar.CACHE_ENV] = str(cls.cache)
 
@@ -146,7 +146,7 @@ class QtS7Tests(unittest.TestCase):
       p._show_commands()
       self.assertIn("PROGRAM 1", p.commands.toPlainText())
       self.assertEqual(p.tempo.rowCount(), 1)
-      self.shot("s7_songs.png")
+      self.shot("audio_songs.png")
       if not CAN_BUILD:
          return
       p.render()
@@ -166,7 +166,7 @@ class QtS7Tests(unittest.TestCase):
       saved = p.bar.save_wav(str(self.root / "copy.wav"))
       self.assertEqual(ar.read_wav(saved).rate, 13379)
       p.views.setCurrentIndex(3)
-      self.shot("s7_songs_state.png")
+      self.shot("audio_songs_state.png")
 
    def test_instruments_panel(self) -> None:
       """!A voice field (undo), a kind change, a refused edit, a key split, a drum key, the banks, the envelope.
@@ -189,14 +189,14 @@ class QtS7Tests(unittest.TestCase):
       self.assertEqual(audio.window_voice(self.w.document, "instruments:main", 1)["kind"], "noise")
       self.w._undo_redo(True)
       self.assertEqual(audio.window_voice(self.w.document, "instruments:main", 1)["kind"], "square")
-      self.shot("s7_instruments.png")
+      self.shot("audio_instruments.png")
       p.select("instruments:main", 5)
       p.side.setCurrentIndex(1)
       self.assertEqual(p.split.rowCount(), 2)
       p.set_keys(60, 71, 1)
       self.assertEqual(audio.entry(self.w.document, "keymap:halves")["entries"][65], 1)
       self.assertEqual(p.split.rowCount(), 3)
-      self.shot("s7_instruments_split.png")
+      self.shot("audio_instruments_split.png")
       p.select("instruments:main", 6)
       self.assertGreater(p.drums.rowCount(), 0)
       row = next(r for r in range(p.drums.rowCount()) if p.drums.item(r, 0).text() == "36")
@@ -230,7 +230,7 @@ class QtS7Tests(unittest.TestCase):
       self.assertTrue(p.import_wav())
       self.assertEqual(p.current_key(), "sample:saw")
       self.assertIn("imported", p.info.text())
-      self.shot("s7_samples.png")
+      self.shot("audio_samples.png")
       self.assertTrue(self.w.save())
       self.assertTrue((self.manifest.parent / "samples" / "saw.bin").is_file())
       p.loop_start.setValue(300)
@@ -260,7 +260,7 @@ class QtS7Tests(unittest.TestCase):
       self.assertTrue(p.import_song())
       rows = audio.sounds(self.w.document)
       self.assertEqual((rows[-1].song, rows[-1].player), ("song:tune_midi", "sfx"))
-      self.shot("s7_midi.png")
+      self.shot("audio_midi.png")
 
    def test_sounds_panel(self) -> None:
       """!An entry edited, a sound and a player added, the mixer, two sounds at once.
@@ -290,7 +290,7 @@ class QtS7Tests(unittest.TestCase):
       p.delay.setValue(10)
       p.frames.setValue(60)
       result = p.preview_priority()
-      if CAN_BUILD:   # C14b: the C++ core renders it on the bar's worker
+      if CAN_BUILD:   # the C++ core renders it on the bar's worker
          self.assertIsNone(result)
          self.assertTrue(p.mix_bar.wait(RENDER_WAIT), p.mix_bar.status.text())
          result = p.priority_result
@@ -300,7 +300,7 @@ class QtS7Tests(unittest.TestCase):
       self.assertEqual(len(result.steals), 1)
       self.assertIn("taken from sound 2", p.outcome.toPlainText())
       self.assertTrue(p.mix_bar.result.wav_path.is_file())
-      self.shot("s7_sounds.png")
+      self.shot("audio_sounds.png")
       if CAN_BUILD:
          p.pages.setCurrentIndex(0)
          p.select_sound(3)

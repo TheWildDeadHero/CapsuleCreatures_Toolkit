@@ -1,6 +1,6 @@
-"""![S3] `capsule-studio door MANIFEST ...` (door animation assets, D-30 section 1), `door-binding WORLD ...` (the
+"""!`capsule-studio door MANIFEST ...` (door animation assets), `door-binding WORLD ...` (the
 world's door bindings by metatile; a warp's own binding is `events set MAP warp N --door door:KEY`) and
-`draw-order WORLD ...` (the world's object draw order rule, D-30 section 4). Changes are compiled with the engine
+`draw-order WORLD ...` (the world's object draw order rule). Changes are compiled with the engine
 before anything is saved."""
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    @param sub  argparse subparsers
    @return None
    """
-   p = sub.add_parser("door", help="door animation assets (D-30): frames, cells, timing, sounds, exit (S3)")
+   p = sub.add_parser("door", help="door animation assets: frames, cells, timing, sounds, exit")
    p.add_argument("manifest", help="asset manifest (capsule.assets/1)")
    s = p.add_subparsers(dest="door_command", metavar="ACTION")
    s.required = True
@@ -89,7 +89,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    q.add_argument("--at", help="X,Y anchor cell (default: the map's first cell bound to the door)")
    q.set_defaults(run=cmd_render)
 
-   p = sub.add_parser("door-binding", help="the world's door bindings by metatile (D-30) (S3)")
+   p = sub.add_parser("door-binding", help="the world's door bindings by metatile")
    p.add_argument("world")
    s = p.add_subparsers(dest="binding_command", metavar="ACTION")
    s.required = True
@@ -114,7 +114,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    q.add_argument("--door", help="only this door")
    q.set_defaults(run=cmd_binding_cells)
 
-   p = sub.add_parser("draw-order", help="the world's object draw order rule (D-30) (S3)")
+   p = sub.add_parser("draw-order", help="the world's object draw order rule")
    p.add_argument("world")
    s = p.add_subparsers(dest="draw_command", metavar="ACTION")
    s.required = True
