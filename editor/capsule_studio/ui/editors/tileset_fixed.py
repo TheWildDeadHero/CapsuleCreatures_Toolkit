@@ -1,7 +1,7 @@
-"""!Tileset panel parts for the I2 / I3 tileset format: a fixed tileset's placement, palette banks and raw metatile
-entries, and the tile animations of any tileset (phase, from_sheet, on_shift; S3: targets at frame offsets). The
-TilesetPanel hosts them in tabs under its sheet; every change goes through the panel's edit (one undo step;
-renumbered "all" maps join it)."""
+"""!Tileset panel parts for the imported maps / imported sprite tileset format: a fixed tileset's placement, palette
+banks and raw metatile entries, and the tile animations of any tileset (phase, from_sheet, on_shift; targets at frame
+offsets). The TilesetPanel hosts them in tabs under its sheet; every change goes through the panel's edit (one undo
+step; renumbered "all" maps join it)."""
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -267,7 +267,7 @@ class FixedBox(QtWidgets.QWidget):
 
 class AnimationBox(QtWidgets.QWidget):
    """!A tileset's tile animations: the list, and the chosen one's name, first tile ("tiles" or, fixed, "at"),
-   count, frame sheet, period, phase (I2; "auto": spread by the compiler), from_sheet and on_shift (I3)."""
+   count, frame sheet, period, phase ("auto": spread by the compiler), from_sheet and on_shift."""
 
    def __init__(self, panel: TilesetPanel) -> None:
       """!Builds the box.
@@ -293,16 +293,16 @@ class AnimationBox(QtWidgets.QWidget):
       self.frames = QtWidgets.QComboBox()
       ## Display frames per animation frame.
       self.period = QtWidgets.QSpinBox()
-      ## Frames into the period at map entry (I2), or NO_PHASE.
+      ## Frames into the period at map entry, or NO_PHASE.
       self.phase = QtWidgets.QSpinBox()
       self.phase.setSpecialValueText("auto")
       self.phase.setToolTip("Frames into the period when a map is entered (auto: the compiler spreads the map's "
                             "animations over their periods)")
-      ## I3: no frame uploaded at entry.
+      ## No frame uploaded at entry.
       self.from_sheet = QtWidgets.QCheckBox("Start from the sheet's own tiles")
       self.from_sheet.setToolTip("No frame is uploaded when a map is entered: the tileset's own tiles show until the "
-                                 "first frame change (I3 from_sheet)")
-      ## I3: what a seamless map shift does.
+                                 "first frame change")
+      ## What a seamless map shift does.
       self.on_shift = QtWidgets.QComboBox()
       self.on_shift.setToolTip("When the walker steps onto a connected map that runs it too: keep (runs on), reload "
                                "(its tiles are reloaded) or restart (reloaded and started over)")
@@ -333,7 +333,7 @@ class AnimationBox(QtWidgets.QWidget):
       row.addWidget(button("Add", lambda: self._add()))
       row.addWidget(button("Remove", lambda: self._remove()))
       left.addLayout(row)
-      ## [S3] the chosen animation's targets (D-30 section 5).
+      ## The chosen animation's targets.
       self.targets = TargetsBox(self)
       right = QtWidgets.QVBoxLayout()
       right.addLayout(form)
@@ -384,7 +384,7 @@ class AnimationBox(QtWidgets.QWidget):
       self.targets.fill()
       if an is None:
          return
-      # S3: with targets, the first tile and the phase are each target's
+      # With targets, the first tile and the phase are each target's
       for w in (self.first, self.phase):
          w.setEnabled(not tilesets.targets(an))
       mc = tilesets._mc()
@@ -425,7 +425,7 @@ class AnimationBox(QtWidgets.QWidget):
                                 min(self.phase.value(), self.period.value() - 1),
                                 "from_sheet": self.from_sheet.isChecked(), "on_shift": self.on_shift.currentText()}
       text = self.first.text().strip()
-      if tilesets.targets(an):   # S3: the targets name the tiles and phases
+      if tilesets.targets(an):   # the targets name the tiles and phases
          fields.pop("phase")
       elif fixed:
          fields["at"] = int(text) if text.isdigit() else an.get("at", 0)

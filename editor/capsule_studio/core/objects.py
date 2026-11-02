@@ -1,4 +1,4 @@
-"""!Map objects (B-21, D-17): editing a map's characters, spotters and pickups,
+"""!Map objects (B-21): editing a map's characters, spotters and pickups,
 their event pages, triggers, movement options and move routes.
 
 The engine's tools/object_compiler.py (through map_compiler.py) is the one
@@ -19,14 +19,14 @@ key. Scripts address objects by local ID (world_ids.h OBJ_<MAP>_<NAME>), so
 removing an object shifts the local IDs of the ones after it; remove_object()
 says which.
 
-Pages (RPG Maker XP's event pages, D-17) are {"when": {flag, var, value,
+Pages (RPG Maker XP's event pages) are {"when": {flag, var, value,
 equal, self}, ...fields it replaces} or {"when": ..., "hidden": true}; the
 last page whose conditions all hold is the active one, and with none the
-object's own fields are. Worlds written before D-17 had "overrides" (the
+object's own fields are. Worlds written from an older version had "overrides" (the
 first whose flag was set applied); pages_from_overrides() turns them into
 pages (the importer does so).
 
-I3: the reference games' movement types (turn, roam, rotate, patrol, circuit,
+The reference games' movement types (turn, roam, rotate, patrol, circuit,
 mirror, in_place, invisible) and their settings ("movement_args": the
 engine's object_compiler.MOVEMENT_ARGS, DELAYS, PACES), ranges up to the
 engine's MAX_RANGE, and a map's "object_view" (up to MAX_VIEW_OBJECTS
@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 
 ## The movement the compiler refuses until the world clock exists (C-05).
 SCHEDULE = "schedule"
-## Movement types that use a range box (I3: roam, patrol, circuit and mirror stay inside theirs; 0 on an axis
+## Movement types that use a range box (roam, patrol, circuit and mirror stay inside theirs; 0 on an axis
 ## leaves it unbounded).
 RANGED = {"wander", "pace_vertical", "pace_horizontal", "roam", "patrol", "circuit", "mirror"}
 ## Triggers (capsule::map::Trigger order): what starts an object's script.
@@ -113,14 +113,15 @@ def _obc() -> Any:
 
 def movements() -> list[str]:
    """!The movement types (the engine's object_compiler.MOVEMENTS, capsule::map::Movement order, without schedule,
-   which the compiler refuses until the world clock exists; I3 adds the reference games' types).
+   which the compiler refuses until the world clock exists; the imported events and sprites adds the reference games'
+   types).
    @return movement names
    """
    return [m for m in _obc().MOVEMENTS if m != SCHEDULE]
 
 
 def movement_args_of(movement: str) -> list[str]:
-   """!The settings a movement takes in "movement_args" (the engine's object_compiler.MOVEMENT_ARGS; I3).
+   """!The settings a movement takes in "movement_args" (the engine's object_compiler.MOVEMENT_ARGS).
    @param movement  movement name
    @return setting names ([] for a movement without settings)
    """
@@ -142,7 +143,7 @@ def pace_words() -> list[str]:
 
 
 def max_range() -> int:
-   """!The largest range each way (the engine's object_compiler.MAX_RANGE; I3: 15).
+   """!The largest range each way (the engine's object_compiler.MAX_RANGE; 15).
    @return cells
    """
    return int(_obc().MAX_RANGE)
@@ -150,7 +151,7 @@ def max_range() -> int:
 
 def max_objects(doc: Document) -> int:
    """!Objects a map may list: the engine's object_compiler.MAX_OBJECTS (sprite slots 1-15), or with an object
-   view MAX_VIEW_OBJECTS (I3: they spawn near the player).
+   view MAX_VIEW_OBJECTS (they spawn near the player).
    @param doc  map Document
    @return the count
    """
@@ -158,7 +159,7 @@ def max_objects(doc: Document) -> int:
 
 
 def object_view(doc: Document) -> list[int] | None:
-   """!A map's object view (I3): [left, right, up, down] cells around the player its objects spawn in.
+   """!A map's object view: [left, right, up, down] cells around the player its objects spawn in.
    @param doc  map Document
    @return the four counts, or None (every object spawns at entry)
    """
@@ -187,7 +188,8 @@ def set_object_view(doc: Document, view: list[int] | None) -> None:
 
 
 def set_stacked(doc: Document, on: bool) -> None:
-   """!Whether a map's objects may share a cell (I3 "stacked_objects": data whose flags keep one there at a time).
+   """!Whether a map's objects may share a cell (the imported events and sprites "stacked_objects": data whose flags
+   keep one there at a time).
    @param doc  map Document
    @param on   True or False
    @return None
@@ -287,7 +289,7 @@ def _motion_text(src: JsonDict, defaults: bool) -> list[str]:
 
 
 def describe_args(args: JsonValue) -> str:
-   """!A movement's settings as text (I3).
+   """!A movement's settings as text.
    @param args  the "movement_args" object
    @return e.g. "choices down, up; delays short", or "" for none
    """
@@ -541,14 +543,14 @@ def _check(field: str, value: JsonValue) -> JsonValue:
       if not isinstance(value, str) or not value:
          raise DocumentError(f"{field} is a name from the scripts manifest")
    elif field == "kind":
-      # F2: one of the world's object_kinds (the map compiler checks the name)
+      # One of the world's object_kinds (the map compiler checks the name)
       if not isinstance(value, str) or not value:
          raise DocumentError("kind is one of the world's object kinds (core.map_field)")
    return value
 
 
 def _check_args(value: JsonValue) -> JsonDict:
-   """!Checks a movement's settings ("movement_args", I3) with the engine's values (the movement itself decides
+   """!Checks a movement's settings ("movement_args") with the engine's values (the movement itself decides
    which settings it takes: _tidy_args()); keep_to's vehicle class is checked by the world's compile.
    @param value  {setting: value}
    @return a copy
@@ -577,7 +579,7 @@ def _check_args(value: JsonValue) -> JsonDict:
 
 
 def _tidy_args(o: JsonDict, movement: str | None) -> None:
-   """!Keeps only the settings a movement takes (I3; settings of another movement go when it changes), and drops
+   """!Keeps only the settings a movement takes (settings of another movement go when it changes), and drops
    an empty "movement_args".
    @param o         object or page (changed in place)
    @param movement  its movement (None: a page that keeps its object's)
@@ -636,7 +638,7 @@ def add_object(doc: Document, x: int, y: int, name: str | None = None, **fields:
    if items is not None and not isinstance(items, list):
       raise DocumentError('"objects" must be a list; fix the map file by hand')
    if len(objects(doc)) >= max_objects(doc):
-      view = "" if doc.data.get("object_view") is not None else "; an object view allows more (I3)"
+      view = "" if doc.data.get("object_view") is not None else "; an object view allows more"
       raise DocumentError(f"this map has at most {max_objects(doc)} objects (sprite slots 1-15; the walker has slot "
                           f"0){view}")
    name = free_name(doc) if name is None else name
@@ -1081,7 +1083,7 @@ def diagnostics(project: Project, name: str | None = None) -> list[Diagnostic]:
          if not (isinstance(at, list) and len(at) == XY_ENTRIES):
             continue
          label = f"map {n}: object {i} ({o.get('name')})"
-         if tuple(at) in seen and doc.data.get("stacked_objects") is True:   # I3: allowed, worth knowing
+         if tuple(at) in seen and doc.data.get("stacked_objects") is True:   # allowed, worth knowing
             out.append(Diagnostic("info", f"{label} shares its cell with {seen[tuple(at)]} (stacked objects: the "
                                           "game's flags keep one there at a time)", n, tuple(at)))
          seen.setdefault(tuple(at), str(o.get("name")))

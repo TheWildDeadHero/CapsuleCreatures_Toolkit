@@ -1,6 +1,6 @@
-"""!Smoke tests of the S17 pages (the studio side of the engine's E13b): the
+"""!Smoke tests of the effect handlers pages (the studio side of the effect handlers): the
 Moves page's point handlers (a move's .ceffect point members), the Conditions
-page's side condition handlers, the Effects page's palette with E13b's
+page's side condition handlers, the Effects page's palette with the effect handlers'
 statements, the Turn page's delayed phase, the Bench page's owner texts
 switch and data level, the damage calculator's conditions and hidden stat
 inputs, and the classic cost cell. Each opens a copy of a sample laid out as a
@@ -48,7 +48,7 @@ class StarterPagesTests(QtBattleTestCase):
    """!The Starter: palette, Turn, Bench, calculator."""
 
    def test_palette(self) -> None:
-      """!The block palette lists E13b's statements (from the engine's primitives) and inserts one.
+      """!The block palette lists the effect handlers' statements (from the engine's primitives) and inserts one.
       @return None
       """
       w, panel = self.window("effects")
@@ -64,7 +64,7 @@ class StarterPagesTests(QtBattleTestCase):
          self.assertIn(label, items)
       panel.blocks.palette.scrollToItem(items["end battle"])
       panel.blocks.palette.setCurrentItem(items["reset stages"])
-      save_shot(w, "palette_e13b.png")
+      save_shot(w, "effects_palette.png")
       self.close(w)
 
    def test_turn_delayed_phase(self) -> None:
@@ -139,7 +139,7 @@ class StarterPagesTests(QtBattleTestCase):
 
 @needs_classic
 class ClassicPagesTests(QtBattleTestCase):
-   """!E13b's owners on the reference repo's classic template."""
+   """!The effect handlers' owners on the reference repo's classic template."""
 
    def setUp(self) -> None:
       """!The classic template as a game.

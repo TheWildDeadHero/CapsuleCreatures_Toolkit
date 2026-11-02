@@ -1,4 +1,4 @@
-"""!Battle formats and the turn structure of battle data (D-22 A11, D-23 §3.2
+"""!Battle formats and the turn structure of battle data (A11, §3.2
 "Formats & Turn"): the battle manifest's "formats" list and its "turn"
 object.
 
@@ -65,12 +65,12 @@ EACH_KEY = "each"
 ## The end-of-turn phase that lists dispatch sources.
 BATTLERS_PHASE = "battlers"
 ## What each end-of-turn phase of the engine runs (the Turn page and `turn show`; a phase the engine adds later and
-## this list lacks shows PHASE_NOTE_UNKNOWN). E13b: delayed lands the pending effects of `delay`.
+## this list lacks shows PHASE_NOTE_UNKNOWN). Delayed lands the pending effects of `delay`.
 PHASE_NOTES = {"weather": "the weather's residual and countdown",
                "battlers": "each active battler's residual hooks, by source (its statuses, volatiles, ...)",
                "sides": "each side condition's residual and countdown",
                "field": "each field condition's residual and countdown",
-               "regen": "the resources' end-of-turn amounts (D-25 regen)",
+               "regen": "the resources' end-of-turn amounts",
                "delayed": "the pending effects of `delay` count down; one that is due lands (its move's land phase "
                           "runs); needed when the logic uses delay"}
 ## Note of a phase PHASE_NOTES does not describe.

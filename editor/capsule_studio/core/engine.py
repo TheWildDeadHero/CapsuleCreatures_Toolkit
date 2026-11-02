@@ -124,6 +124,33 @@ def font_glyphs(codepage: Any = None, fonts: Sequence[Path] | None = None) -> di
    return {code: fc.render(chars[ch]) for code, ch in page.chars.items() if ch in chars}
 
 
+_INT_LITERAL = r"(0[xX][0-9a-fA-F']+|0[bB][01']+|\d[\d']*)[uUlL]*\b"
+"""!A C++ integer literal after "=" (group 1: its digits with the prefix, without the suffix)."""
+
+_HEX_BASE = 16
+_BINARY_BASE = 2
+_OCTAL_BASE = 8
+_DECIMAL_BASE = 10
+_RADIX_PREFIX = len("0x")   # "0x" / "0b" before the digits
+
+
+def cpp_int(literal: str) -> int:
+   """!The value of a C++ integer literal without its suffix ("0x40", "0b101", "010", "1'000", "64").
+   @param literal  the literal's prefix and digits
+   @return its value
+   """
+   digits = literal.replace("'", "")
+   lower = digits.lower()
+   if lower.startswith("0x"):
+      return int(digits[_RADIX_PREFIX:], _HEX_BASE)
+   if lower.startswith("0b"):
+      return int(digits[_RADIX_PREFIX:], _BINARY_BASE)
+   if len(digits) > 1 and digits.startswith("0"):
+      # a leading 0 makes the literal octal in C++
+      return int(digits[1:], _OCTAL_BASE)
+   return int(digits, _DECIMAL_BASE)
+
+
 def header_constant(header: str, name: str, default: int) -> int:
    """!Reads an integer constant from an engine header, so editor limits
    follow the engine's VRAM plan.
@@ -136,9 +163,16 @@ def header_constant(header: str, name: str, default: int) -> int:
       text = (root() / "include" / header).read_text(encoding="utf-8")
    except (OSError, EngineNotFound):
       return default
-   # The first "name = digits" in the header, e.g. "inline constexpr int kTilesPerSlot = 64;".
-   m = re.search(r"\b" + re.escape(name) + r"\s*=\s*(\d+)", text)
-   return int(m.group(1)) if m else default
+   # The first "name = literal" in the header, e.g. "inline constexpr int kTilesPerSlot = 64;" or
+   # "... kBlendMax = 0x10u;": a C++ integer literal (hex, binary, octal or decimal, digit separators, suffixes).
+   m = re.search(r"\b" + re.escape(name) + r"\s*=\s*" + _INT_LITERAL, text)
+   if m is None:
+      return default
+   try:
+      return cpp_int(m.group(1))
+   except ValueError:
+      # not a literal this reader knows (e.g. "09", a bad octal one): the default, as for a missing constant
+      return default
 
 
 def sprite_tiles_per_slot() -> int:

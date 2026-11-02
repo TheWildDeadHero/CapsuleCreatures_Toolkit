@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!Tests for the studio side of the engine's E13a (package S16), no Qt:
+"""!Tests for the studio side of the record fields, no Qt:
 
 - core.expressions: the ruleset language's operator levels (bit operators
   above the comparisons), spans, the engine's parse, input names;
@@ -101,7 +101,7 @@ class ExpressionLanguageTests(unittest.TestCase):
 
 
 class SpeciesFieldLogicTests(unittest.TestCase):
-   """!C5: species fields effect logic reads (the classic sample's Trip Kick: `target.species_field(weight)`)."""
+   """!species fields effect logic reads (the classic sample's Trip Kick: `target.species_field(weight)`)."""
 
    @needs_classic
    def test_rename_and_remove_follow_logic(self) -> None:
@@ -115,7 +115,7 @@ class SpeciesFieldLogicTests(unittest.TestCase):
          p = BattleProject.open(folder / "battle.json")
          doc = p.structure
          self.assertIsNone(p.error_now())
-         names = species_fields.field_names(doc)   # weight, then the sample's other fields (G3 / G4)
+         names = species_fields.field_names(doc)   # weight, then the sample's other fields
          row = next(r for r in species_fields.field_rows(doc) if r["name"] == "weight")
          self.assertIn("effects/moves.ceffect: move Trip Kick", row["readers"])
          with self.assertRaises(DocumentError) as refused:
@@ -134,8 +134,8 @@ class SpeciesFieldLogicTests(unittest.TestCase):
 
 
 class SpeciesFieldStarterTests(BattleTestCase):
-   """!Species fields on the neutral Starter (its own: G3's recruit_rate, G4's training yields; a new one goes after
-   them)."""
+   """!Species fields on the neutral Starter (its own: the recruitment's recruit_rate, the growth's training yields; a
+   new one goes after them)."""
 
    def test_add_value_rename_remove(self) -> None:
       """!Add a field, give a species a value (the default is not written), rename (species follow, one undo step of
@@ -210,7 +210,7 @@ class SpeciesFieldStarterTests(BattleTestCase):
 
 
 class FormulaArgumentTests(BattleTestCase):
-   """!A named formula's argument names are identifiers (E13a INPUT_NAME)."""
+   """!A named formula's argument names are identifiers (the record fields INPUT_NAME)."""
 
    def test_dotted_argument_refused(self) -> None:
       """!A dotted argument is refused with the engine's reason; a plain one is fine.
@@ -228,7 +228,7 @@ class FormulaArgumentTests(BattleTestCase):
 
 @needs_classic_record
 class ClassicRecordTests(BattleTestCase):
-   """!The reference repo's compat/classic/record data set: everything E13a added."""
+   """!The reference repo's compat/classic/record data set: everything record fields added."""
 
    def sample(self) -> Path:
       """!The reference repo's record data set.

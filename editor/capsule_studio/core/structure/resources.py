@@ -1,4 +1,4 @@
-"""!The resources of battle data (D-25, engine E8): the structure manifest's
+"""!The resources of battle data: the structure manifest's
 "resources" list, every pool a battler spends or loses, in the order costs
 are paid.
 
@@ -35,7 +35,7 @@ max_battler_resources / max_move_resources: hit points included) for every
 target of the game. What follows a change: renaming a resource renames the
 moves' cost keys, the move field it reads when that field is named after it,
 and the effect logic naming it (`holder.resource(NAME)`, restore, raise);
-the bench scenarios naming it follow too (core.bench.follow_rename() [S14];
+the bench scenarios naming it follow too (core.bench.follow_rename() [the studio review];
 bench_users() lists them).
 Removing one is refused while a move's cost or effect logic names it (the
 moves' base field of a move resource goes with it). Changing a move
@@ -98,7 +98,7 @@ WHERE = "structure"
 BENCH_KEYS = ("members", "pokes")
 ## The platform limit of each scope (build_settings.PLATFORM_LIMITS).
 LIMIT_KEYS = {BATTLER: "max_battler_resources", MOVE: "max_move_resources"}
-## The structure's transformation section (G4) and its record role holding the form (no resource's to take).
+## The structure's transformation section and its record role holding the form (no resource's to take).
 FORM_SECTION = "transformation"
 ## See FORM_SECTION.
 FORM_ROLE = "form_role"
@@ -370,7 +370,7 @@ def compile_check(doc: Document, targets: list[str] | None = None) -> tuple[list
 
 def _guarded(doc: Document, change: Callable[[], Any]) -> Any:
    """!Runs a change; when the resources (or the whole battle data: the persist roles' widths, the costs, the
-   number of resource formulas are checked there, C1) compiled before and do not after, refuses it with the
+   number of resource formulas are checked there) compiled before and do not after, refuses it with the
    compiler's message (raised inside battle.edit(), which puts the manifests back).
    @param doc     any manifest Document of the battle
    @param change  the change
@@ -402,7 +402,7 @@ def pool_caps(doc: Document) -> dict[str, int]:
    from . import progression, record   # local: they import this module (see compile_check())
    project = logic.project_of(doc)
    whole = project.compile()[0] if project is not None else None
-   if whole is not None:   # the stats' analysed bounds (C1: a battler pool reaches its stat's highest value)
+   if whole is not None:   # the stats' analysed bounds (a battler pool reaches its stat's highest value)
       return {r["name"]: int(_bc().pool_cap(r, whole["layout"], whole["rules"]["stat_cap"], whole["stats"]))
               for r in whole["resources"]}
    compiled, _error = compile_check(doc)
@@ -460,7 +460,7 @@ def role_choices(doc: Document, scope: str, current: str | None = None) -> list[
    want = record.move_slots(doc) if scope == MOVE else 1
    bits = _res().STORAGE_ROLE_BITS[scope]
    taken = {role for r in _listed(doc) if r.get("name") != current for role in (r.get("persist"), r.get("raises"))}
-   # G4: the role holding the form is the transformation's (Structure > Growth & training)
+   # The role holding the form is the transformation's (Structure > Growth & training)
    growth = battle.data_of(doc, FORM_SECTION).get(FORM_SECTION)
    if isinstance(growth, dict):
       taken.add(growth.get(FORM_ROLE))
@@ -938,7 +938,7 @@ def cost_of(doc: Document, move: Any) -> JsonDict:
 
 
 def fallback_move(doc: Document) -> str | None:
-   """!The move that runs when no move can be paid (rules.fallback_move: it pays nothing, D-25 decision 4).
+   """!The move that runs when no move can be paid (rules.fallback_move: it pays nothing).
    @param doc  any manifest Document of the battle
    @return its name, or None
    """
@@ -976,7 +976,7 @@ def set_cost(doc: Document, move: str, resource: str, amount: Any) -> None:
    m = battle.entry(doc, "moves", move)
    r = resource_entry(doc, resource)
    if move == fallback_move(doc):
-      raise DocumentError(f"{move} is rules.fallback_move: it pays nothing (D-25), so it states no cost")
+      raise DocumentError(f"{move} is rules.fallback_move: it pays nothing, so it states no cost")
    if amount is None:
       amount = default_cost() if r.get("scope") == MOVE else 0
    else:

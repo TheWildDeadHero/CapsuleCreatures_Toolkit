@@ -1,4 +1,4 @@
-"""!The pure-Python rule for plugins (D-10 §2).
+"""!The pure-Python rule for plugins.
 
 A plugin may use only pure-Python code: the standard library, the studio's
 API, other plugins and pure-Python packages (py3-none-any wheels). Three
@@ -34,7 +34,7 @@ NATIVE_SUFFIXES = tuple(sorted(set(importlib.machinery.EXTENSION_SUFFIXES) |
 NATIVE_LOADERS = ("ctypes", "_ctypes", "cffi", "_cffi_backend")
 ## Modules connector code must not import (headless builds have no Qt).
 UI_MODULES = ("PySide6", "shiboken6", "PyQt5", "PyQt6")
-## Compiled packages the studio itself provides; extensions draw their UI with them (D-10).
+## Compiled packages the studio itself provides; extensions draw their UI with them.
 HOST_PACKAGES = ("PySide6", "shiboken6")
 ## Folders of the standard library (its own compiled modules are allowed).
 STDLIB_DIRS = tuple(Path(p).resolve() for p in {sysconfig.get_paths().get("stdlib"),
@@ -71,10 +71,10 @@ def check_folder(plugin_id: str, folder: str | Path) -> None:
          continue
       rel = f.relative_to(folder).as_posix()   # messages read the same on every system
       if _is_native(f):
-         raise PurityError(f"plugin {plugin_id}: {rel} is a native binary; plugins are pure Python only (D-10)")
+         raise PurityError(f"plugin {plugin_id}: {rel} is a native binary; plugins are pure Python only")
       if f.suffix == ".whl" and not f.name.endswith("-py3-none-any.whl"):
          raise PurityError(f"plugin {plugin_id}: {rel} is not a py3-none-any wheel; plugins take pure-Python "
-                           "packages only (D-10)")
+                           "packages only")
 
 
 def _imports(tree: ast.Module) -> list[tuple[str, int]]:
@@ -116,10 +116,10 @@ def check_sources(plugin_id: str, folder: str | Path, connector_files: Iterable[
       for name, line in _imports(tree):
          if name in NATIVE_LOADERS:
             raise PurityError(f"plugin {plugin_id}: {rel}:{line} imports {name}; plugins may not load native "
-                              "code (D-10)")
+                              "code")
          if f.resolve() in connector and name in UI_MODULES:
             raise PurityError(f"plugin {plugin_id}: {rel}:{line} imports {name}; connectors run in headless "
-                              "builds and may import only the standard library and the studio's core (D-10)")
+                              "builds and may import only the standard library and the studio's core")
 
 
 class ImportGuard:
@@ -177,14 +177,14 @@ class ImportGuard:
          return None
       top = fullname.split(".")[0]
       if top in NATIVE_LOADERS:
-         raise ImportError(f"plugin {pid}: {rel} imports {fullname}; plugins may not load native code (D-10)")
+         raise ImportError(f"plugin {pid}: {rel} imports {fullname}; plugins may not load native code")
       if top in HOST_PACKAGES:
          return None
       spec = importlib.machinery.PathFinder.find_spec(fullname, path)
       if spec is not None and isinstance(spec.loader, importlib.machinery.ExtensionFileLoader) \
               and not any(d in Path(spec.origin).resolve().parents for d in STDLIB_DIRS):
          raise ImportError(f"plugin {pid}: {rel} imports {fullname}, a compiled extension module ({spec.origin}); "
-                           "plugins are pure Python only (D-10)")
+                           "plugins are pure Python only")
       return None
 
 

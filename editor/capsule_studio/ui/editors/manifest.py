@@ -1,11 +1,11 @@
-"""!Manifest panel [S2] (engine I4: capsule.assets/1 "includes" and "text_tables"): the other asset manifests this
+"""!Manifest panel [the older studio] (capsule.assets/1 "includes" and "text_tables"): the other asset manifests this
 one includes and the text tables it lists, with the engine's check of the whole.
 
 Two lists (Includes, Text tables) with Add... / Remove / Up / Down (core.asset_tables: every change is checked by the
 engine's expand_manifest(): a cycle, a missing file or a palette defined twice is refused), the tables the manifest
 reaches through its includes with their languages, the keys a language lacks that another has, and Check (the
 engine's asset compiler over the whole manifest with the game's code page and field placeholders: its fit report's
-numbers, the ones the build prints). S4 (engine C10): the build language and its fallback (the manifest's "language"
+numbers, the ones the build prints). The build language and its fallback (the manifest's "language"
 and "fallback_language", chosen among its tables' languages; the engine's select_language() checks them: several
 languages and none named, an unknown language or fallback), the keys each language lacks and how many the fallback
 fills in; Check compiles in the chosen build language. Every change is one undo step of the manifest.
@@ -32,9 +32,9 @@ LISTS = (("includes", "Includes (asset manifests)", "Asset manifests (*.json)"),
          ("text_tables", "Text tables", "Text tables (*.json)"))
 ## Missing keys shown per language.
 MISSING_SHOWN = 5
-## S4: the language combos' entry for a key left out.
+## The language combos' entry for a key left out.
 NOT_SET = "(not set)"
-## S4: the language keys and their labels.
+## The language keys and their labels.
 LANGUAGE_ROWS = (("language", "Build language"), ("fallback_language", "Fallback language"))
 
 
@@ -69,8 +69,8 @@ class ManifestPanel(EditorPanel):
          v.addLayout(row)
          layout.addWidget(box, 1)
       side = QtWidgets.QVBoxLayout()
-      # S4 (C10): the build language and its fallback
-      lang_box = QtWidgets.QGroupBox("Languages (engine C10)")
+      # The build language and its fallback
+      lang_box = QtWidgets.QGroupBox("Languages")
       lform = QtWidgets.QFormLayout(lang_box)
       ## The language combos by manifest key.
       self.language_boxes = {}
@@ -128,7 +128,7 @@ class ManifestPanel(EditorPanel):
                docs = {r.path: s.table(r.path) for r in refs}
                fallback = asset_tables.language_setting(self.doc, "fallback_language")
                for lang, keys in asset_tables.missing_translations(docs).items():
-                  filled = asset_tables.fallback_keys(docs, lang, fallback)   # S4: the fallback's share
+                  filled = asset_tables.fallback_keys(docs, lang, fallback)   # the fallback's share
                   note = f" ({len(filled)} from the fallback {fallback})" if filled else ""
                   text += f"\n{lang} lacks {len(keys)} keys{note}, e.g. {', '.join(keys[:MISSING_SHOWN])}"
             except DocumentError as e:
@@ -137,7 +137,7 @@ class ManifestPanel(EditorPanel):
       self._fill_languages()
 
    def _fill_languages(self) -> None:
-      """!S4: the build language and fallback combos and the engine's verdict.
+      """!The build language and fallback combos and the engine's verdict.
       @return None
       """
       doc = self.doc   # a local alias (Doxygen reads some `doc` uses as a new member)
@@ -161,7 +161,7 @@ class ManifestPanel(EditorPanel):
       self.language_verdict.setStyleSheet("color: #c03030;" if problem else "")
 
    def _language_chosen(self, key: str) -> bool:
-      """!S4: a language combo changed (one undo step; the engine's rule must accept it).
+      """!A language combo changed (one undo step; the engine's rule must accept it).
       @param key  "language" or "fallback_language"
       @return True when it went through
       """
@@ -173,7 +173,7 @@ class ManifestPanel(EditorPanel):
       return self.set_language(key, value)
 
    def set_language(self, key: str, value: str | None) -> bool:
-      """!S4: sets the build language or the fallback.
+      """!sets the build language or the fallback.
       @param key    "language" or "fallback_language"
       @param value  a language of the tables, or None to leave it out
       @return True when it went through

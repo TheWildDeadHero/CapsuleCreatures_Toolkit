@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!Tests for capsule_studio.core.structure.resources (D-25, engine E8: the
+"""!Tests for capsule_studio.core.structure.resources (the
 structure manifest's resources, the moves' costs and bases), what follows
 them (stats, record roles, the generation list, effect logic, bench
 scenarios) and the `battle FILE resource ...` commands. No Qt.
@@ -60,16 +60,16 @@ class ResourceModelTests(BattleTestCase):
       self.assertEqual(resources.lines(doc)[-1], f"1/{resources.max_formulas()} resource formulas")   # ep_regen
       self.assertEqual(resources.persist_roles(doc), ["current_hp", "current_mp", "current_ep"])
       self.assertEqual(resources.compile_check(doc)[1], None)
-      # a battler pool reaches its stat's highest value (the engine's analysed bounds, C1)
+      # a battler pool reaches its stat's highest value (the engine's analysed bounds)
       compiled = self.project.compile()[0]
       mp = next(r for r in compiled["resources"] if r["name"] == "mp")
       self.assertEqual(resources.pool_caps(doc)["mp"], compiled["stats"][mp["stat"]]["bounds"][1])
       self.assertEqual(resources.formula_choices(doc), ["ep_regen"])
       # the roles a pool may be kept in: the record's fitting roles not taken by another pool
-      # (F3: the Starter's 8-bit bond role fits too)
+      # (the Starter's 8-bit bond role fits too)
       self.assertEqual(resources.role_choices(doc, resources.BATTLER, "ep"),
-                       ["current_ep", "hatch_counter", "egg", "bond"])   # B2: the egg roles are free custom roles
-      # G4's form role is the form's; F3's bond role is free (no pool keeps it)
+                       ["current_ep", "hatch_counter", "egg", "bond"])   # the egg roles are free custom roles
+      # The growth's form role is the form's; the step effects' bond role is free (no pool keeps it)
       self.assertEqual(resources.role_choices(doc, resources.BATTLER), ["hatch_counter", "egg", "bond"])
       with doc.edit("Custom"):
          record.add_custom_role(doc, "mana_store", 10)
@@ -138,9 +138,9 @@ class ResourceModelTests(BattleTestCase):
       self.assertTrue(resources.reset_cost(doc, "Flare Claw"))
       self.assertEqual(resources.cost_of(doc, "Flare Claw"), {})
 
-   def test_c1_cost_rules(self) -> None:
-      """!Engine C1's rules: the fallback move pays nothing (no cost to edit), a hit point cost stays below the most
-      hit points, a regen number lies in REGEN_RANGE, a persist role narrower than its pool is refused with the
+   def test_cost_rules(self) -> None:
+      """!Engine the move costs' rules: the fallback move pays nothing (no cost to edit), a hit point cost stays below
+      the most hit points, a regen number lies in REGEN_RANGE, a persist role narrower than its pool is refused with the
       engine's message; the formula count is reported.
       @return None
       """
@@ -219,7 +219,7 @@ class ResourceModelTests(BattleTestCase):
       payers = [m["name"] for m in battle.entries(p.battle, "moves") if "mp" in m.get("cost", {})]
       with p.structure.edit("Rename"):
          n = resources.rename_resource(p.structure, "mp", "mana")
-      self.assertEqual(n, len(payers) + 3)   # the costs, Recharge's, Mana Drop's and Mana Tea's (G2) logic
+      self.assertEqual(n, len(payers) + 3)   # the costs, Recharge's, Mana Drop's and Mana Tea's logic
       self.assertEqual(resources.resource_entry(p.battle, "mana")["stat"], "mp")   # the stat keeps its name
       self.assertEqual(battle.entry(p.battle, "moves", "Fireball")["cost"], {"mana": 8})
       self.assertIn("restore holder mana 2;", p.effect_source(PASSIVES).text)

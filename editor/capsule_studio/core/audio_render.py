@@ -1,4 +1,4 @@
-"""![S7] Playing audio through the engine (engine M4, D-34): the studio builds the engine's apps/audio_render for
+"""!Playing audio through the engine: the studio builds the engine's apps/audio_render for
 the project's audio table and runs it, headless, through the real audio core.
 
 The build. capsule_audio_render(<target> <manifest>) (engine cmake/parts/audio_hal.cmake) makes an audio_render
@@ -19,13 +19,13 @@ compiles the audio core (seconds); later ones regenerate the preview table and l
 
 A render writes (apps/audio_render, format §11): out.wav (signed 16-bit stereo, 13,379 Hz; 4x with HQ),
 state.jsonl (the core's Snapshot per frame), tones.txt (tone register writes), segments.bin (the 8-bit mix) and
-summary.json (frames, the end frames, the L1-L4 hashes; engine C14a: end_frame is the frame whose ticks ran the
+summary.json (frames, the end frames, the L1-L4 hashes; end_frame is the frame whose ticks ran the
 last END, status_end_frame the first frame the player's status shows it ended). RenderResult reads them;
 StateTimeline keeps what the player-state view draws.
 
-Two sounds at once (the sound effect tester's priority and channel-stealing preview): C14b: Renderer.priority() runs
-them in the C++ core (audio_render --sound 0 --then: sound 1 before blank F, on the preview table;
-priority_from_render() reads the state), its WAV the core's output. priority_preview() runs them on the engine's
+Two sounds at once (the sound effect tester's priority and channel-stealing preview): the sound controls:
+Renderer.priority() runs them in the C++ core (audio_render --sound 0 --then: sound 1 before blank F, on the preview
+table; priority_from_render() reads the state), its WAV the core's output. priority_preview() runs them on the engine's
 Python reference model of the core (tests/audio_reference.py) with the same rules, for machines without a toolchain
 (its WAV: the sampled channels' 8-bit mix); the studio's tests hold the two to the same outcome.
 
@@ -114,7 +114,7 @@ DEFAULT_PRIORITY_FRAMES = 300
 REFERENCE_MODEL = ("tests", "audio_reference.py")
 ## Module name the reference model is loaded as.
 REFERENCE_MODULE = "capsule_studio_audio_reference"
-## C14b: audio_render --then's separator between the sound number and the blank (THEN_SEPARATOR).
+## audio_render --then's separator between the sound number and the blank (THEN_SEPARATOR).
 THEN_SEPARATOR = "@"
 ## WAV header fields: RIFF chunk header, fmt chunk size, PCM tag, bytes per s16 sample, bits.
 WAV_HEADER_BYTES, WAV_FMT_BYTES, WAV_PCM, S16_BYTES, S16_BITS = 44, 16, 1, 2, 16
@@ -134,7 +134,7 @@ WAV_CHANNELS_AT, WAV_RATE_AT, WAV_BITS_AT = 22, 24, 34
 CHANNEL_ON = 0xC7
 ## Player status: tracks bits, paused bit.
 PLAYER_TRACKS, PLAYER_PAUSED = 0xFFFF, 0x80000000
-## C15b: TrackState::flags' bit for a track that exists (engine state.h kTrackExists: it runs; its END clears the bit
+## TrackState::flags' bit for a track that exists (engine state.h kTrackExists: it runs; its END clears the bit
 ## at once, the player's status bits follow at the next tick).
 TRACK_EXISTS = 0x80
 ## The reference model's "no channel" index.
@@ -208,7 +208,7 @@ def hook_text(table: Path | None, preview: Path) -> str:
    lines = ["# Written by the studio (core.audio_render): the audio_render programs of its audio editor.",
             "function(capsule_studio_audio_targets)",
             "   if(NOT COMMAND capsule_audio_render)",
-            '      message(FATAL_ERROR "the engine has no capsule_audio_render() (M4 audio)")',
+            '      message(FATAL_ERROR "the engine has no capsule_audio_render()")',
             "   endif()"]
    if table is not None:
       lines.append(f"   capsule_audio_render({TABLE_TARGET} {quoted(table)})")
@@ -549,7 +549,7 @@ class FrameState:
    tracks: list[tuple[int, int, int, int, int]]
    ## Channels.
    channels: list[ChannelFrame]
-   ## C15b: per track rank, whether the track exists (TRACK_EXISTS in its flags: it has not run its END).
+   ## Per track rank, whether the track exists (TRACK_EXISTS in its flags: it has not run its END).
    running: list[bool] = field(default_factory=list)
 
 
@@ -601,7 +601,7 @@ class StateTimeline:
       self.frames.append(FrameState(int(snap.get("frame", len(self.frames) + 1)), players, tracks, chans, running))
 
    def tracks_running(self, frame: int, player: int | None = None) -> int:
-      """!C15b: the tracks that exist in a frame (TRACK_EXISTS), of one player or of all.
+      """!The tracks that exist in a frame (TRACK_EXISTS), of one player or of all.
       @param frame   index into frames
       @param player  player index (owners' first element), or None for every player
       @return count
@@ -637,7 +637,7 @@ class RenderResult:
    summary: dict[str, Any]
    ## What was rendered ("sound 3 (song:town)").
    what: str = ""
-   ## C14b: the two sounds' outcome when this render was Renderer.run_priority()'s, else None.
+   ## The two sounds' outcome when this render was Renderer.run_priority()'s, else None.
    priority: PriorityPreview | None = None
 
    @property
@@ -665,7 +665,7 @@ class RenderResult:
 
    @property
    def end_frame(self) -> int:
-      """!The render frame whose ticks ran the sound's last END (engine C14a: exactly midi_song.frames_to_end()'s
+      """!The render frame whose ticks ran the sound's last END (exactly midi_song.frames_to_end()'s
       frame + the empty first blank; 0: it did not end within the render).
       @return frame
       """
@@ -673,7 +673,7 @@ class RenderResult:
 
    @property
    def status_end_frame(self) -> int:
-      """!C14b (engine C14a): the first render frame whose state shows the player ended (the tick after the last
+      """!The first render frame whose state shows the player ended (the tick after the last
       END: what a game's IsSEPlaying-style wait sees; 0: it did not end).
       @return frame
       """
@@ -681,7 +681,7 @@ class RenderResult:
 
    @property
    def then_end_frame(self) -> int:
-      """!C15b (engine C14a): with --then, the render frame whose ticks ran the second sound's last END (0: none, or
+      """!with --then, the render frame whose ticks ran the second sound's last END (0: none, or
       it did not end).
       @return frame
       """
@@ -689,7 +689,7 @@ class RenderResult:
 
    @property
    def then_status_end_frame(self) -> int:
-      """!C15b (engine C14a): with --then, the first render frame whose state shows the second sound's player ended.
+      """!with --then, the first render frame whose state shows the second sound's player ended.
       @return frame
       """
       return int(self.summary.get("then_status_end_frame", 0))
@@ -735,7 +735,7 @@ class RenderResult:
       end = (f"ends on frame {s.get('end_frame')} (status {s.get('status_end_frame')})" if s.get("end_frame")
              else "did not end")
       out = [f"{self.what}: {s.get('frames')} frames, {end}, {s.get('rate')} Hz"]
-      if "then_end_frame" in s:   # C15b: the --then sound's end (a two-sound render)
+      if "then_end_frame" in s:   # the --then sound's end (a two-sound render)
          then = (f"ends on frame {s.get('then_end_frame')} (status {s.get('then_status_end_frame')})"
                  if s.get("then_end_frame") else "did not end")
          out.append(f"second sound: {then}")
@@ -947,7 +947,7 @@ class Renderer:
       changed = not hook.is_file() or hook.read_text(encoding="utf-8") != text
       if changed:
          hook.write_text(text, encoding="utf-8")
-      # the table compiler's output folders (engine C14a's capsule_audio_table() makes them as well; kept for an
+      # the table compiler's output folders (capsule_audio_table() makes them as well; kept for an
       # engine before it, whose Makefile builds failed without them)
       for target in (TABLE_TARGET, PREVIEW_TARGET, PREVIEW_HQ_TARGET):
          (self.folder / GENERATED_FOLDER / target).mkdir(parents=True, exist_ok=True)
@@ -1132,7 +1132,7 @@ class Renderer:
 
    def priority(self, first: int, second: int, delay: int, frames: int = DEFAULT_PRIORITY_FRAMES,
                 progress: Progress | None = None) -> PriorityPreview:
-      """!C14b: two sound numbers started `delay` frames apart in the C++ core (audio_render --then): who owns each
+      """!two sound numbers started `delay` frames apart in the C++ core (audio_render --then): who owns each
       channel (priority and channel stealing between them). prepare_priority() then run_priority().
       @param first     the first sound number
       @param second    the second sound number
@@ -1146,7 +1146,7 @@ class Renderer:
       return self.run_priority(sounds, pid, (first, second), delay, frames, progress)
 
    def prepare_priority(self, first: int, second: int) -> tuple[list[PreviewSound], list[int]]:
-      """!C14b: the part of priority() that reads the Document (the GUI thread): the preview table of the two sounds.
+      """!The part of priority() that reads the Document (the GUI thread): the preview table of the two sounds.
       @param first   the first sound number
       @param second  the second sound number
       @return (the preview table's two sounds, their players' indices)
@@ -1158,7 +1158,7 @@ class Renderer:
 
    def run_priority(self, sounds: Sequence[PreviewSound], pid: Sequence[int], numbers: tuple[int, int], delay: int,
                     frames: int = DEFAULT_PRIORITY_FRAMES, progress: Progress | None = None) -> PriorityPreview:
-      """!C14b: renders prepare_priority()'s table (no Document access): preview sound 0 with frame 1's calls, sound
+      """!renders prepare_priority()'s table (no Document access): preview sound 0 with frame 1's calls, sound
       1 with frame 1 + delay's (--then: sound 1 before blank F = FIRST_RENDER_FRAME + delay), for `frames` frames
       after the first.
       @param sounds    prepare_priority()'s sounds
@@ -1203,7 +1203,7 @@ def song_player(doc: audio.AudioDocument, key: str) -> str:
    return str(ps[0].get("name"))
 
 
-# -- two sounds at once (C14b: the core; the reference model) ----------------------------------------------------------
+# -- two sounds at once (the core; the reference model) ----------------------------------------------------------
 
 def reference_model() -> ModuleType:
    """!The engine's Python model of the audio core (tests/audio_reference.py).
@@ -1262,7 +1262,7 @@ class PriorityPreview:
    channels: list[int] = field(default_factory=list)
    ## Both sounds are on one player (the second replaces the first; no stealing between them).
    same_player: bool = False
-   ## C14b: the render it came from (Renderer.run_priority(): the C++ core), or None (the reference model).
+   ## The render it came from (Renderer.run_priority(): the C++ core), or None (the reference model).
    render: RenderResult | None = None
 
    def lines(self) -> list[str]:
@@ -1362,7 +1362,7 @@ def priority_preview(doc: audio.AudioDocument, first: int, second: int, delay: i
 
 
 def priority_sounds(doc: audio.AudioDocument, first: int, second: int) -> tuple[list[PreviewSound], list[int]]:
-   """!C14b: the preview table's two sounds of a priority preview and their players' indices.
+   """!The preview table's two sounds of a priority preview and their players' indices.
    @param doc     AudioDocument
    @param first   the first sound number
    @param second  the second sound number
@@ -1380,7 +1380,7 @@ def priority_sounds(doc: audio.AudioDocument, first: int, second: int) -> tuple[
 
 def priority_from_render(numbers: tuple[int, int], delay: int, frames: int, pid: Sequence[int],
                          result: RenderResult) -> PriorityPreview:
-   """!C14b: a PriorityPreview from audio_render's state (state.jsonl) of Renderer.run_priority(), by
+   """!A PriorityPreview from audio_render's state (state.jsonl) of Renderer.run_priority(), by
    priority_preview()'s rules: preview frame f is render frame f + FIRST_RENDER_FRAME (the first sound's calls come
    before it); a channel's holder is the track linked to it, its owner the holder while the channel sounds; a steal
    is a channel whose holder changes sound between frames (two players); the second sound is refused when its player

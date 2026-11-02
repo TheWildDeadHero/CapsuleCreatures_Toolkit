@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""!Tests for the script language's words [S2] (no Qt): core.script_words (the engine's word lists, the route
-steps, the statement templates, completions by context), core.scripts' I4 outline (movements, marts, route steps,
-map triggers with conditions) and settings (object_base, warn_unused, glitches), and `script words / list /
+"""!Tests for the script language's words [the older studio] (no Qt): core.script_words (the engine's word lists, the
+route steps, the statement templates, completions by context), core.scripts' script port outline (movements, marts,
+route steps, map triggers with conditions) and settings (object_base, warn_unused, glitches), and `script words / list /
 settings`. The scripts are a small neutral set written by the tests.
 """
 from __future__ import annotations
@@ -19,12 +19,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from capsule_studio.cli.main import main as cli  # noqa: E402
 from capsule_studio.core import script_words, scripts  # noqa: E402
 
-## The statement words engine I4 (D-29) added (later packages add more: DS1's override; their templates come with
+## The statement words script port added (later packages add more: the doors' override; their templates come with
 ## their studio side).
-I4_STATEMENTS = ("lock", "release", "wait_msg", "remove", "visible", "set_template", "door", "weather", "fade",
+PORT_STATEMENTS = ("lock", "release", "wait_msg", "remove", "visible", "set_template", "door", "weather", "fade",
                  "set_metatile", "respawn", "set_warp", "sound", "wait_sound", "mart", "wait_state")
-## A source with the I4 declarations and map triggers.
-SOURCE = """// I4 statements, declarations and triggers
+## A source with the script port declarations and map triggers.
+SOURCE = """// The script port statements, declarations and triggers
 var mode : u8 map;
 const SIGN = 2;
 step hop;
@@ -62,7 +62,7 @@ class ScriptCase(unittest.TestCase):
       @return None
       """
       ## Temporary folder.
-      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_i4_scripts_"))
+      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_port_scripts_"))
       (self.tmp / "main.cscript").write_text(SOURCE, encoding="utf-8")
       ## The manifest.
       self.manifest = self.tmp / "scripts.json"
@@ -90,11 +90,11 @@ class WordTests(unittest.TestCase):
    """!The words come from the engine's compilers."""
 
    def test_engine_lists(self) -> None:
-      """!Every I4 statement word, kind list, trigger kind and route step is offered.
+      """!Every script port statement word, kind list, trigger kind and route step is offered.
       @return None
       """
       sc = script_words.compiler()
-      self.assertTrue(set(sc.I4_WORDS) <= set(script_words.statement_words()))
+      self.assertTrue(set(sc.PORT_WORDS) <= set(script_words.statement_words()))
       kinds = script_words.statement_kinds()
       for word, export in (("door", "DOOR_KINDS"), ("weather", "WEATHER_KINDS"), ("fade", "FADE_KINDS"),
                            ("set_warp", "SET_WARP_KINDS"), ("wait_sound", "SOUND_WAITS"),
@@ -118,13 +118,13 @@ class WordTests(unittest.TestCase):
       self.assertTrue({"on_warp_into", "set_metatile", "to_black", "loose", "camera"} <= words)
 
    def test_templates_compile(self) -> None:
-      """!Every I4 statement has a template, and each compiles with the engine's compiler.
+      """!Every script port statement has a template, and each compiles with the engine's compiler.
       @return None
       """
       sc = script_words.compiler()
-      self.assertTrue(set(I4_STATEMENTS) <= set(sc.I4_WORDS))
-      self.assertTrue(set(I4_STATEMENTS) <= set(script_words.STATEMENT_TEMPLATES))
-      # S3: a template naming the world's data (override sets) compiles in test_d30_formats against the sandbox
+      self.assertTrue(set(PORT_STATEMENTS) <= set(sc.PORT_WORDS))
+      self.assertTrue(set(PORT_STATEMENTS) <= set(script_words.STATEMENT_TEMPLATES))
+      # A template naming the world's data (override sets) compiles in test_doors_overrides_formats against the sandbox
       body = "\n".join("    " + t for w, t in script_words.STATEMENT_TEMPLATES.items()
                        if w not in script_words.WORLD_TEMPLATES)
       source = script_words.TEMPLATE_DECLARATIONS + "script templates {\n" + body + "\n}\n"
@@ -158,7 +158,7 @@ class WordTests(unittest.TestCase):
 
 
 class OutlineTests(ScriptCase):
-   """!core.scripts with the I4 declarations."""
+   """!core.scripts with the script port declarations."""
 
    def test_outline_and_triggers(self) -> None:
       """!Movements, marts, route steps; a map's entries with their conditions.
@@ -191,7 +191,7 @@ class OutlineTests(ScriptCase):
       self.assertEqual((data["object_base"], data["warn_unused"], data["glitches"]), (top, False, {"game.fix": True}))
 
    def test_commands(self) -> None:
-      """!script list --kind movement, settings with the I4 options, words.
+      """!script list --kind movement, settings with the script port options, words.
       @return None
       """
       status, out = self.run_cli("script", "list", self.manifest, "--kind", "step")

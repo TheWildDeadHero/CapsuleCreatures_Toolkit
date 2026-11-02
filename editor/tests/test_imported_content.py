@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!The I4 text and script editors on a large imported game [S2] (no Qt): skipped unless CAPSULE_IMPORTED_CONTENT
+"""!The text and script editors on a large imported game (no Qt): skipped unless CAPSULE_IMPORTED_CONTENT
 names an importer's output folder for one game (assets-imported/<game>: text/text_assets.json, text/fonts/,
 world/scripts/scripts.json). Nothing is written there: the round trip compares each file with what a save would
 write, in memory. The times are printed (stderr) and held to generous bounds.
@@ -74,7 +74,7 @@ class ImportedContentTests(unittest.TestCase):
          self.assertIsNone(fonts.problem(d, ctx.page), d.path.name)
 
    def test_scripts(self) -> None:
-      """!The scripts compile; the outline has the I4 declarations and triggers.
+      """!The scripts compile; the outline has the imported declarations and triggers.
       @return None
       """
       t = time.perf_counter()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!Tests for the studio side of the engine's G1 (D-26 section 1), no Qt:
+"""!Tests for the studio side of the AI profiles, no Qt:
 
 - AI profiles (core.ai, `battle FILE ai ...`): the engine's rule names and numbers, profiles and rules edited
   (refusals with the engine's messages), a rename following the parties and the bench scenarios, the parties'
@@ -29,7 +29,7 @@ from capsule_studio.core.document import DocumentError  # noqa: E402
 from capsule_studio.core.structure import conditions, delayed_hits  # noqa: E402
 from test_battle import BattleTestCase  # noqa: E402
 
-## The Starter's AI profiles (samples/starter/battle.json, G1) and a party naming one.
+## The Starter's AI profiles (samples/starter/battle.json) and a party naming one.
 STARTER_DEFAULT, STARTER_BATTLER, PARTY = "Basic", "Battler", "Novice Kit"
 
 

@@ -1,4 +1,4 @@
-"""![S7] `capsule-studio audio MANIFEST ...`: a game's audio manifest (capsule.audio/1, engine M4 / D-34) from the
+"""!`capsule-studio audio MANIFEST ...`: a game's audio manifest (capsule.audio/1, the audio / ) from the
 command line, every action of the audio editor's panels: songs (their tracks, notes, commands and tempo; rendered
 through the engine's audio_render with tracks muted or solo, the player state over time), instrument sets, voices,
 envelopes, keymaps (key splits), drum sets and bank windows, waves, samples (WAV import, the levels), MIDI import
@@ -53,7 +53,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    @param sub  argparse subparsers
    @return None
    """
-   p = sub.add_parser("audio", help="a game's audio: songs, instruments, samples, MIDI import, sounds (M4) (S7)")
+   p = sub.add_parser("audio", help="a game's audio: songs, instruments, samples, MIDI import, sounds")
    p.add_argument("manifest", help="audio manifest (capsule.audio/1, audio.json)")
    s = p.add_subparsers(dest="audio_command", metavar="ACTION")
    s.required = True
@@ -696,7 +696,7 @@ def cmd_priority(args: argparse.Namespace) -> int:
       if args.model or ar.toolchain():
          pp = ar.priority_preview(doc, a, b, args.delay, args.frames)
       else:
-         pp = _renderer(doc).priority(a, b, args.delay, args.frames)   # C14b: in the C++ core
+         pp = _renderer(doc).priority(a, b, args.delay, args.frames)   # in the C++ core
    except (ar.AudioRenderError, bench.BenchError) as e:
       raise CommandError(str(e)) from e
    print(f"(run in {'the C++ core' if pp.render is not None else 'the reference model'})")

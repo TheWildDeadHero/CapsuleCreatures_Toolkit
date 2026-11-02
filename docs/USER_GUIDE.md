@@ -227,6 +227,44 @@ graphics** (tiles, tilemaps and palettes of full-screen scenes),
 **Screen plans** (a screen's layers, windows, sprites and transitions,
 exported as C++) and **Manifest** (included files and text tables).
 
+Four pages after **Animation** are the battle animation tools (the
+engine's generic parts, nothing game-specific):
+
+- **Anim scripts**: open an animation bank (a `.canim` text or a bank
+  file; **Sample** is the engine sandbox's) and step a script frame by
+  frame as the engine's player runs it: the commands run on each frame,
+  the player's state (run or wait mode, arguments, call stack, the visual
+  and sound counts) and a timeline of sprites, tasks, sound, background,
+  control and the game's own commands. How long each sprite or task lives
+  is the game's code: set it per symbol (frames, or an argument slot).
+- **Affine anims**: the commands that scale and rotate a sprite (frames,
+  loops, jumps, end), with a preview that steps them as the engine does
+  and shows each step's matrix. **Save as...** names the file
+  (`NAME.affine.json`; saved with the manifest from then on) and
+  **Export C++...** writes the `af::Cmd` arrays a game includes.
+- **Scanline effects**: a register (a layer's scroll, window 0's edges,
+  the blend weights) given a value per line by the engine's wave, a weight
+  ramp or a growing window; the screen, the table and a plot, frame by
+  frame.
+- **Anim scenes**: the engine sandbox's scenes as the engine draws them,
+  through its `capsule_anim_view` (built with the engine's tests; **Find**
+  looks in the engine's build folders, **Browse...** picks it).
+
+**VM extensions** (after the battle animation tools) shows a game's VM
+extension manifests (`capsule.vm-ext/1`): the opcodes a game adds to the
+engine's script machines, each an *alias* of the engine's generic steps
+(data only) or a *native* function with the reason no generic step works.
+**Open manifests...** reads a game's manifests (**Sample** is the engine
+sandbox's); **Add usage...** adds the banks' usage records (how often each
+opcode is emitted) and **Add GBA sizes...** an `nm -S -C` listing of a GBA
+build (each native's bytes). The left side shows each command table's
+progress (aliases and their share, natives left, opcodes no bank uses),
+the middle the opcodes (filter by kind, name or reason), the right the
+chosen opcode's operands and steps or reason, and the engine's checks.
+**Copy report** puts the natives with their reasons, owners and sizes on
+the clipboard. The manifests are the game's source files: the view does
+not edit them.
+
 ### Scripts
 
 The script editor, on the scripts manifest: the `.cscript` sources as tabs

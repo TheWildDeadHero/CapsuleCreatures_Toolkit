@@ -1,15 +1,16 @@
-"""!`capsule-studio text-table ...`, `font ...`, `text-box ...` and `manifest ...` (engine I4 text, [S2]).
+"""!`capsule-studio text-table ...`, `font ...`, `text-box ...` and `manifest ...` (text, [the older studio]).
 
 - text-table: a text table (capsule.texts/1, core.text_tables): its texts, wrap modes, fonts and box; `fit` checks
   every authored text against the box with the engine's rule; `controls` lists the control codes.
 - font: a proportional font (capsule.font/2, core.fonts): its metrics and glyphs, a preview PNG.
-- text-box: an asset manifest's text box styles (S4: assets of kind text_box, engine C10; core.text_boxes):
+- text-box: an asset manifest's text box styles (assets of kind text_box, the field options; core.text_boxes):
   settings, Font control fonts, checks, a preview PNG at a wait or a frame of the typing, the typing's timeline,
-  S2's editor-data styles migrated into assets, a style's box applied to a table. S5 (engine N3): `set` takes the
+  The older studio's editor-data styles migrated into assets, a style's box applied to a table. `set` takes the
   art (palette, frame.image, frame.palette, window.arrow_image as JSON); `menu` shows / sets / clears a style's
   menu (core.menu_styles), `menu-run` runs it over a key script and says what happened, `menu-preview` draws a
   frame of the run to a PNG.
-- manifest: an asset manifest's includes and text tables (core.asset_tables), S4: its languages (the build language
+- manifest: an asset manifest's includes and text tables (core.asset_tables), the field options: its languages (the
+build language
   and fallback, the engine's verdict, missing translations) and the engine's check of the whole manifest with its
   fit report (--language).
 
@@ -43,7 +44,7 @@ MISSING_SHOWN = 5
 TABLE_TEXT_ARGS = 2
 ## Mark of a line wider than its box.
 OVER_MARK = "OVER"
-## S4: the value that leaves a setting out (its default; a language key removed).
+## The value that leaves a setting out (its default; a language key removed).
 LEAVE_OUT = "-"
 
 
@@ -128,8 +129,8 @@ def _register_tables(sub: argparse._SubParsersAction) -> None:
    q.add_argument("--json", action="store_true")
    _context_args(q)
    q.set_defaults(run=cmd_table_fit)
-   q = s.add_parser("language", help="set the table's language (- leaves it out: the table is in every language; "
-                                     "C10)")
+   q = s.add_parser("language", help="set the table's language (- leaves it out: the table is in every "
+                                     "language)")
    q.add_argument("table")
    q.add_argument("language")
    q.set_defaults(run=cmd_table_language)
@@ -271,7 +272,8 @@ def _register_boxes(sub: argparse._SubParsersAction) -> None:
       q.add_argument("--columns", type=int, help="a grid's columns")
       _context_args(q)
       q.set_defaults(run=run)
-   q = s.add_parser("migrate", help="turn S2's editor-data styles (editor.text_boxes) into text_box assets")
+   q = s.add_parser("migrate", help="turn older studios' editor-data styles (editor.text_boxes) into text_box "
+                                    "assets")
    q.add_argument("manifest")
    q.set_defaults(run=cmd_box_migrate)
    q = s.add_parser("apply", help="set a table's box to a style's width and lines")
@@ -301,19 +303,19 @@ def _register_manifest(sub: argparse._SubParsersAction) -> None:
    q.add_argument("--fit-report", help="write the fit report (JSON) here")
    _context_args(q)
    q.set_defaults(run=cmd_manifest_check)
-   q.add_argument("--language", help="the build's language (the asset compiler's --language; C10)")
+   q.add_argument("--language", help="the build's language (the asset compiler's --language)")
    q = s.add_parser("translations", help="the keys a language's tables lack that another language has (other "
                                          "languages: the manifest's own, and tables of the same name in sibling "
                                          "folders)")
    q.add_argument("manifest")
    q.set_defaults(run=cmd_manifest_translations)
    q = s.add_parser("languages", help="the languages of the manifest's tables, the build language and fallback, the "
-                                      "engine's verdict and each language's missing keys (C10)")
+                                      "engine's verdict and each language's missing keys")
    q.add_argument("manifest")
    q.add_argument("--language", help="check a build in this language (the asset compiler's --language)")
    q.set_defaults(run=cmd_manifest_languages)
    for word, key in (("language", "language"), ("fallback", "fallback_language")):
-      q = s.add_parser(word, help=f"set the manifest's {key} (- leaves it out; C10)")
+      q = s.add_parser(word, help=f"set the manifest's {key} (- leaves it out)")
       q.add_argument("manifest")
       q.add_argument("value")
       q.set_defaults(run=cmd_manifest_language, key=key)
@@ -519,7 +521,7 @@ def cmd_font_info(args: argparse.Namespace) -> int:
    rows = fonts.glyph_rows(doc, ctx.page)
    print(f"{doc.path.name}: {doc.data.get('name')!r}, cell {cw}x{ch}, line height {doc.data.get('line_height', ch)}, "
          f"letter spacing {doc.data.get('letter_spacing', 0)}, {len(rows)} glyphs")
-   # S6b (C13a): the rows a window draws of each glyph
+   # The rows a window draws of each glyph
    gh = fonts.glyph_height(doc)
    print(f"  glyph height: {gh} (a window draws {fonts.drawn_rows(doc)} rows of each glyph)" if gh else
          f"  glyph height: the whole cell ({ch} rows)")
@@ -634,7 +636,7 @@ def cmd_box_list(args: argparse.Namespace) -> None:
             f"typing {w['typing']}, speed-up {w['speedup']}")
    legacy = text_boxes.legacy_styles(doc)
    if legacy:
-      print(f"  {len(legacy)} editor-data styles of S2 (`text-box migrate` makes them text_box assets)")
+      print(f"  {len(legacy)} editor-data styles of older studios (`text-box migrate` makes them text_box assets)")
 
 
 def cmd_box_show(args: argparse.Namespace) -> int:
@@ -644,7 +646,7 @@ def cmd_box_show(args: argparse.Namespace) -> int:
    doc = _manifest(args.manifest)
    s = _style(doc, args.key)
    print(json.dumps(s, indent=1))
-   print(f"window storage: {text_boxes.storage(s).text()}")   # S6b (C13c): what window::attach() needs
+   print(f"window storage: {text_boxes.storage(s).text()}")   # what window::attach() needs
    problems = text_boxes.check(s, None, text_boxes.font_keys(doc), doc.base_dir)
    for p in problems:
       print(p)
@@ -687,7 +689,7 @@ def cmd_box_set(args: argparse.Namespace) -> None:
    key = str(_style(doc, args.key)["key"])
    group, _sep, name = args.setting.rpartition(SETTING_SEPARATOR)
    raw: Any = args.value
-   if (group, name) in ART_SETTINGS:   # S5 (N3): the style's art
+   if (group, name) in ART_SETTINGS:   # the style's art
       raw = None if raw == LEAVE_OUT else (_json_value(raw) if name == text_boxes.ARROW_IMAGE_KEY else
                                            [p.strip() for p in raw.split(",") if p.strip()]
                                            if name == text_boxes.PALETTE_KEY else raw)
@@ -708,7 +710,7 @@ def cmd_box_set(args: argparse.Namespace) -> None:
    _edit(doc, "Text box", lambda: text_boxes.set_value(doc, key, group, name, raw))
 
 
-## S5: the style's art settings `text-box set` takes as (group, name).
+## The style's art settings `text-box set` takes as (group, name).
 ART_SETTINGS = (("", text_boxes.PALETTE_KEY), ("frame", text_boxes.FRAME_PALETTE_KEY),
                 ("frame", text_boxes.FRAME_IMAGE_KEY), ("window", text_boxes.ARROW_IMAGE_KEY))
 
@@ -725,7 +727,7 @@ def _json_value(text: str) -> Any:
 
 
 def cmd_box_menu(args: argparse.Namespace) -> int:
-   """!text-box menu (S5). @param args  parsed arguments
+   """!text-box menu. @param args  parsed arguments
    @return 0
    """
    if args.action == "fields":
@@ -802,7 +804,7 @@ def _menu_run(args: argparse.Namespace) -> tuple[Document, dict[str, Any], menu_
 
 
 def cmd_box_menu_run(args: argparse.Namespace) -> int:
-   """!text-box menu-run (S5). @param args  parsed arguments
+   """!text-box menu-run. @param args  parsed arguments
    @return 0
    """
    _doc, style, run = _menu_run(args)
@@ -814,7 +816,7 @@ def cmd_box_menu_run(args: argparse.Namespace) -> int:
 
 
 def cmd_box_menu_preview(args: argparse.Namespace) -> None:
-   """!text-box menu-preview (S5). @param args  parsed arguments
+   """!text-box menu-preview. @param args  parsed arguments
    @return None
    """
    doc, _style_copy, run = _menu_run(args)

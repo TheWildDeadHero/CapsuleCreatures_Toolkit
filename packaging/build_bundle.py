@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!Builds and smoke-tests the prebuilt studio bundle for this machine's platform (D-40 RI).
+"""!Builds and smoke-tests the prebuilt studio bundle for this machine's platform (RI).
 
     python3 build_bundle.py build [--version V] [--work DIR] [--require-licence]
     python3 build_bundle.py smoke ARCHIVE [--work DIR]
@@ -87,7 +87,7 @@ UNUSED_QT = ("Qml", "Quick", "Network", "Multimedia", "WebEngine", "Pdf", "Sql",
 QT_CORE = {"linux": "libQt6Core.so.6", "win32": "Qt6Core.dll", "darwin": "QtCore"}
 ## Seconds each smoke run may take.
 SMOKE_TIMEOUT = 600
-## Version used when none is given (the toolkit's own D-10 calendar version).
+## Version used when none is given (the toolkit's own calendar version).
 VERSION_FALLBACK = "0000.00.00.0000"
 
 
@@ -460,7 +460,7 @@ def main(argv: list[str] | None = None) -> int:
    sub = p.add_subparsers(dest="command", metavar="COMMAND")
    sub.required = True
    q = sub.add_parser("build", help="build this platform's bundle")
-   q.add_argument("--version", help="release version (D-10 YYYY.MM.DD.MMMM; default: the toolkit's __calver__)")
+   q.add_argument("--version", help="release version (YYYY.MM.DD.MMMM; default: the toolkit's __calver__)")
    q.add_argument("--work", default=str(TOOLKIT / "build" / "bundle"), help="new or empty work folder")
    q.add_argument("--require-licence", action="store_true", help="stop when the toolkit has no licence file")
    q.set_defaults(run=cmd_build)

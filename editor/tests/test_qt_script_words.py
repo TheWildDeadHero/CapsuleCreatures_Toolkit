@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""!The script editor with the I4 statements [S2] (Qt, offscreen; skipped without PySide6): the outline's
-movements, marts and route steps, the map triggers with conditions, the completion list by context, Insert
-statement, the I4 settings, and the colours of the engine's words. Uses test_script_words.py's neutral source.
+"""!The script editor with the script port statements [the older studio] (Qt, offscreen; skipped without PySide6): the
+outline's movements, marts and route steps, the map triggers with conditions, the completion list by context, Insert
+statement, the script port settings, and the colours of the engine's words. Uses test_script_words.py's neutral source.
 """
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ from test_script_words import SOURCE  # noqa: E402
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
 class ScriptWordsQtTests(unittest.TestCase):
-   """!The window on the neutral I4 source."""
+   """!The window on the neutral script port source."""
 
    @classmethod
    def setUpClass(cls) -> None:
@@ -42,7 +42,7 @@ class ScriptWordsQtTests(unittest.TestCase):
       """
       from capsule_studio.ui.script_shell import ScriptWindow
       ## Temporary folder.
-      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_qt_i4_scripts_"))
+      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_qt_port_scripts_"))
       QtCore.QSettings.setPath(QtCore.QSettings.Format.NativeFormat, QtCore.QSettings.Scope.UserScope,
                                str(self.tmp / "settings"))
       (self.tmp / "main.cscript").write_text(SOURCE, encoding="utf-8")
@@ -104,7 +104,7 @@ class ScriptWordsQtTests(unittest.TestCase):
       self.assertIn("face", ed.completions())
 
    def test_insert_statement_and_settings(self) -> None:
-      """!Insert statement writes a template that compiles; the I4 settings write the manifest.
+      """!Insert statement writes a template that compiles; the script port settings write the manifest.
       @return None
       """
       ed = self.editor_at_end("\nscript inserted {\n    ")
@@ -124,7 +124,7 @@ class ScriptWordsQtTests(unittest.TestCase):
       self.assertNotIn("object_base", data)
 
    def test_colours(self) -> None:
-      """!An I4 statement word and a trigger kind are coloured as keywords.
+      """!An script port statement word and a trigger kind are coloured as keywords.
       @return None
       """
       from capsule_studio.ui.editors.script import engine_keywords

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""!Tests for the I4 text tables [S2] (no Qt): core.text_tables (capsule.texts/1 edits checked by the engine, the
-fit check with the engine's rule, control codes), core.asset_tables (includes, text tables, languages, the engine's
-fit report), core.manifest_io's kept json layout, and the `text-table` and `manifest` commands. Uses the neutral
-game of text_fixture.py.
+"""!Tests for the script port text tables [the older studio] (no Qt): core.text_tables (capsule.texts/1 edits checked by
+the engine, the fit check with the engine's rule, control codes), core.asset_tables (includes, text tables, languages,
+the engine's fit report), core.manifest_io's kept json layout, and the `text-table` and `manifest` commands. Uses the
+neutral game of text_fixture.py.
 """
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ class GameCase(unittest.TestCase):
       @return None
       """
       ## Temporary folder.
-      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_i4_text_"))
+      self.tmp = Path(tempfile.mkdtemp(prefix="capsule_port_text_"))
       ## The game.
       self.game = fx.make_game(self.tmp)
 

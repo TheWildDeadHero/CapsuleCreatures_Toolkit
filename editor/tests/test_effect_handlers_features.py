@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!Tests for the studio side of the engine's E13b (package S17), no Qt:
+"""!Tests for the studio side of the effect handlers, no Qt:
 
 - point handlers of moves, volatiles and side conditions (core.holders on
   their .ceffect point members; the owner lists from the engine's
@@ -13,10 +13,10 @@
 - the bench's owner_texts switch and the data's member level (core.bench,
   `bench owner-texts`);
 - the read commands keeping their project alive (the weak reference from a
-  Document to its project, S16's generation fix).
+  Document to its project, the record fields' generation fix).
 
 The Starter (neutral) tests run everywhere; the classic ones (the reference
-repo's templates/classic has E13b's moves, side conditions and points) are
+repo's templates/classic has the effect handlers' moves, side conditions and points) are
 skipped without the reference repo. Expected values come from the data or
 the engine, not written down.
 """
@@ -42,8 +42,8 @@ from capsule_studio.core.structure import conditions, turn  # noqa: E402
 from sample_data import copy_battle_data, classic_data, make_game, needs_classic  # noqa: E402
 from test_battle import BattleTestCase  # noqa: E402
 
-## Classic sample names E13b's rows use (reference README): a move with move_type handlers, a move with a power
-## handler against a volatile, that volatile, the screens and the weather that turns Sky Ball's type.
+## Classic sample names the effect handlers' rows use (reference README): a move with move_type handlers, a move with a
+## power handler against a volatile, that volatile, the screens and the weather that turns Sky Ball's type.
 SKY_BALL, WHIRL, AIRBORNE, HARD_WALL, GLOW_WALL, RAIN = ("Sky Ball", "Whirl", "airborne", "Hard Wall", "Glow Wall",
                                                          "Rain")
 
@@ -89,8 +89,8 @@ class OwnerListTests(unittest.TestCase):
       self.assertTrue(holders.takes_source(["move"], "move"))
       self.assertFalse(holders.takes_source(["user.passive"], "side"))
 
-   def test_c5_engine_features(self) -> None:
-      """!C5: try_switch takes per_foe in the handler picker (the engine's PER_FOE_HOOKS: a foe's trap); the bench's
+   def test_engine_hit_categories(self) -> None:
+      """!try_switch takes per_foe in the handler picker (the engine's PER_FOE_HOOKS: a foe's trap); the bench's
       trapped records are a row type of their own (the engine's TRAPPED_RECORD), with their text.
       @return None
       """
@@ -105,7 +105,7 @@ class OwnerListTests(unittest.TestCase):
 
 
 class PointMemberCommentTests(unittest.TestCase):
-   """!review3 probe p_points as a regression (C5): a point member added to a classic move keeps its source's
+   """!review3 probe p_points as a regression: a point member added to a classic move keeps its source's
    comments."""
 
    @needs_classic
@@ -146,8 +146,8 @@ class StarterTests(BattleTestCase):
          holders.handlers(p.battle, "moves", "No Such Move")
 
    def test_palette_words_names(self) -> None:
-      """!The palette has E13b's statements (and one per primitive of the effect compiler), each parses; the
-      silent flag is a mode word; the new hooks and refs come from the engine's tables.
+      """!The palette has the effect handlers' statements (and one per primitive of the effect compiler), each parses;
+      the silent flag is a mode word; the new hooks and refs come from the engine's tables.
       @return None
       """
       ec = engine.tool("effect_compiler")
@@ -225,7 +225,7 @@ class StarterTests(BattleTestCase):
 
 
 class ReadCommandProjectTests(unittest.TestCase):
-   """!The read commands keep their project alive while helpers reach it through a Document (S17 check of S16's
+   """!The read commands keep their project alive while helpers reach it through a Document (check of the record fields'
    generation fix: format list, turn show, transfer list, learning / exp show, intro)."""
 
    def test_project_alive(self) -> None:
@@ -256,7 +256,7 @@ class ReadCommandProjectTests(unittest.TestCase):
 
 @needs_classic
 class ClassicTests(BattleTestCase):
-   """!E13b's owners on the reference repo's classic template."""
+   """!The effect handlers' owners on the reference repo's classic template."""
 
    def sample(self) -> Path:
       """!The classic template.

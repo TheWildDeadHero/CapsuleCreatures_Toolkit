@@ -1,13 +1,13 @@
-"""!`capsule-studio map-field WORLD ...` (engine F2, D-27 section 3): the world's object kinds, map tags and flight
+"""!`capsule-studio map-field WORLD ...`: the world's object kinds, map tags and flight
 points and the maps' darkness, tags and escape points (core.map_field), everything the World page's Field panel
 does.
 
     map-field WORLD list
-    map-field WORLD kind add|remove NAME | kind rename OLD NEW      (the maps' objects follow; C8: and the battle's
+    map-field WORLD kind add|remove NAME | kind rename OLD NEW      (the maps' objects follow; and the battle's
                                                                     field actions; a removal is refused while used)
     map-field WORLD tag add|remove NAME | tag rename OLD NEW        (the maps' tags follow, and the field actions)
     map-field WORLD darkness list | add LIT BRIGHTNESS | remove | set LEVEL lit|brightness VALUE
-                                                                    (C8: the world's darkness levels)
+                                                                    (the world's darkness levels)
     map-field WORLD flight add NAME MAP X Y [--label L] [--facing F]
     map-field WORLD flight set NAME label|map|x|y|facing VALUE
     map-field WORLD flight remove NAME
@@ -67,7 +67,7 @@ def register(sub: argparse._SubParsersAction) -> None:
    r = f.add_parser("remove")
    r.add_argument("name")
    r.set_defaults(run=cmd_flight_remove)
-   q = a.add_parser("darkness", help="the world's darkness levels (C8)")
+   q = a.add_parser("darkness", help="the world's darkness levels")
    d = q.add_subparsers(dest="darkness_command", metavar="OP")
    d.required = True
    d.add_parser("list").set_defaults(run=cmd_darkness_list)
@@ -99,7 +99,7 @@ def _save(p: Project) -> int:
       print(f"not saved: {error}")
       return 1
    p.save_all()
-   if p.followed_battle:   # C8: the battle field actions the saved world's renames made follow
+   if p.followed_battle:   # the battle field actions the saved world's renames made follow
       print("battle: " + ", ".join(p.followed_battle))
    return 0
 
@@ -123,7 +123,7 @@ def _edit(args: argparse.Namespace, label: str, fn: Callable[[Project], object])
 
 
 def cmd_list(args: argparse.Namespace) -> int:
-   """!Prints the world's F2 parts.
+   """!Prints the world's field actions parts.
    @param args  parsed arguments
    @return 0
    """

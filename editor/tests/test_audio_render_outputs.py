@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""![C15b] Without Qt or a toolchain: the studio's cover of engine C14a's audio_render outputs. The state timeline
+"""!Without Qt or a toolchain: the studio's cover of the audio fixes' audio_render outputs. The state timeline
 reads TrackState::flags' kTrackExists bit (TRACK_EXISTS: the tracks still running per frame, of one player or all),
 and a render's summary text names the --then sound's end frames (then_end_frame / then_status_end_frame).
 """

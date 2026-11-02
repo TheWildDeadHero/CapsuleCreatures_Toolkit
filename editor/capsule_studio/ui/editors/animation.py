@@ -1,5 +1,5 @@
-"""!Animation panel: sprite frames, frame durations, bitmap import, preview. [S3] A direction-grid sprite (D-30) shows
-the grid view (ui/editors/sprite_grid.py) in place of the steps and playback."""
+"""!Animation panel: sprite frames, frame durations, bitmap import, preview. [the doors and overrides] A direction-grid
+sprite shows the grid view (ui/editors/sprite_grid.py) in place of the steps and playback."""
 from __future__ import annotations
 
 import re
@@ -50,7 +50,7 @@ BUDGET_SPAN = 2
 ## Property grid columns the palette strip spans (from the animation label to the loop box).
 PALETTE_SPAN = 5
 
-## Columns of the steps table: frame, duration, milliseconds, mirroring (I3).
+## Columns of the steps table: frame, duration, milliseconds, mirroring.
 STEP_COLUMNS = 4
 ## Steps table column of the frame (with its thumbnail).
 FRAME_COLUMN = 0
@@ -58,7 +58,7 @@ FRAME_COLUMN = 0
 DURATION_COLUMN = 1
 ## Steps table column of the duration in milliseconds.
 MS_COLUMN = 2
-## Steps table column of the step's mirroring (I3 "flips").
+## Steps table column of the step's mirroring (the imported events and sprites "flips").
 FLIP_COLUMN = 3
 ## The mirroring choices, by flips value (asset::kFlipH 1, kFlipV 2).
 FLIP_NAMES = ("none", "horizontal", "vertical", "both")
@@ -66,8 +66,8 @@ FLIP_NAMES = ("none", "horizontal", "vertical", "both")
 FLIP_H = 1
 ## Flips bit of a vertical mirror.
 FLIP_V = 2
-## Property grid row of the I3 sprite settings (stream, step table).
-I3_ROW = 2
+## Property grid row of the imported sprite sprite settings (stream, step table).
+SPRITE_SETTINGS_ROW = 2
 ## Half speed shows each entry twice as long.
 HALF_SPEED_DIVISOR = 2
 ## Size of a frame thumbnail in the steps table, pixels.
@@ -158,7 +158,7 @@ class AnimationPanel(EditorPanel):
       row.addWidget(button("From images...", lambda: self.new_from_images(), "Create a sprite from bitmap files"))
       left.addLayout(row)
       left.addWidget(button("New direction grid...", lambda: self.new_grid(),
-                            "[S3] A sprite whose frames are a grid: columns down, up, left (right mirrors left), "
+                            "A sprite whose frames are a grid: columns down, up, left (right mirrors left), "
                             "one row per named frame"))
       row = QtWidgets.QHBoxLayout()
       row.addWidget(button("Rename...", lambda: self.rename_sprite()))
@@ -196,12 +196,12 @@ class AnimationPanel(EditorPanel):
       props.addWidget(self.loop, 0, LOOP_COLUMN)
       props.addWidget(self.budget, 1, SIZE_LABEL_COLUMN, 1, BUDGET_SPAN)
       props.addWidget(self.palette_strip, 1, ANIM_LABEL_COLUMN, 1, PALETTE_SPAN)
-      ## I3: only the shown frame is in VRAM.
+      ## Only the shown frame is in VRAM.
       self.stream = QtWidgets.QCheckBox("Streamed")
       self.stream.setToolTip("Only the frame shown is in the sprite slot's tiles (uploaded when it changes), so the "
                              "frames together may use more tiles than a slot holds; one frame must fit")
       self.stream.clicked.connect(lambda on: self._stream_edited(on))
-      ## I3: the walk animations' step table is set.
+      ## The walk animations' step table is set.
       self.has_steps = QtWidgets.QCheckBox("Step table")
       self.has_steps.setToolTip("The walk animations pause on one of two standing entries between steps and a new "
                                 "step starts after the other one, so the feet alternate: first stand, second stand, "
@@ -218,7 +218,7 @@ class AnimationPanel(EditorPanel):
          w.valueChanged.connect(lambda _v: self._steps_edited())
          step_row.addWidget(w)
       step_row.addStretch(1)
-      props.addLayout(step_row, I3_ROW, SIZE_LABEL_COLUMN, 1, LOOP_COLUMN + 1)
+      props.addLayout(step_row, SPRITE_SETTINGS_ROW, SIZE_LABEL_COLUMN, 1, LOOP_COLUMN + 1)
 
       # -- steps
       ## Steps of the animation: frame, duration, milliseconds.
@@ -272,7 +272,7 @@ class AnimationPanel(EditorPanel):
       self.zoom.setValue(PLAYBACK_ZOOM)
       self.zoom.setPrefix("x")
       self.zoom.valueChanged.connect(lambda *a: self.view.set_zoom(*a))
-      ## I3: plays each entry for twice its duration, as gfx::sprites::set_half_speed() does (slow walks in place).
+      ## Plays each entry for twice its duration, as gfx::sprites::set_half_speed() does (slow walks in place).
       self.half_speed = QtWidgets.QCheckBox("Half speed")
       self.half_speed.setToolTip("Preview the animation at half speed, as the engine plays a slow walk in place "
                                  "(gfx::sprites::set_half_speed())")
@@ -296,14 +296,14 @@ class AnimationPanel(EditorPanel):
       ## Frame images in GBA colors, per frame index (rebuilt on change).
       self.frame_images = []
       self.frames_timeline = []
-      ## I3: each display frame's mirroring, as frames_timeline.
+      ## Each display frame's mirroring, as frames_timeline.
       self.flips_timeline = []
 
       layout = QtWidgets.QHBoxLayout(self)
       box = QtWidgets.QWidget()
       box.setLayout(left)
       layout.addWidget(box, LIST_STRETCH)
-      # [S3] the frame steps and playback, or (a direction-grid sprite, D-30) the grid view in their place
+      # The frame steps and playback, or (a direction-grid sprite) the grid view in their place
       ## The steps and playback page.
       self.frames_page = QtWidgets.QWidget()
       frames_lay = QtWidgets.QHBoxLayout(self.frames_page)
@@ -313,7 +313,7 @@ class AnimationPanel(EditorPanel):
          box.setLayout(part)
          frames_lay.addWidget(box, stretch)
       split_box(frames_lay)   # [RZ] steps | playback
-      ## [S3] The direction-grid view.
+      ## The direction-grid view.
       self.grid_box = GridBox(self)
       ## The page shown: steps or grid.
       self.pages = QtWidgets.QStackedWidget()
@@ -367,7 +367,7 @@ class AnimationPanel(EditorPanel):
       @return None
       """
       a = self.sprite()
-      # [S3] a direction-grid sprite shows the grid view (its animations are by rows, not steps)
+      # A direction-grid sprite shows the grid view (its animations are by rows, not steps)
       grid = sprite_grid.is_grid(a)
       self.pages.setCurrentWidget(self.grid_box if grid else self.frames_page)
       if grid:
@@ -728,7 +728,7 @@ class AnimationPanel(EditorPanel):
          "Set duration", lambda: sprites.set_durations(doc, self.key, [row], d, self.anim), [row]))
 
    def _flip_chosen(self, row: int, value: int) -> None:
-      """!A step's mirroring was picked (I3); the selected steps take it when the row is one of them.
+      """!A step's mirroring was picked; the selected steps take it when the row is one of them.
       @param row    the row of the combo
       @param value  0 none, 1 horizontal, 2 vertical, 3 both
       @return None
@@ -739,7 +739,7 @@ class AnimationPanel(EditorPanel):
          "Mirror steps", lambda: sprites.set_flips(doc, self.key, rows, value, self.anim), rows))
 
    def _sprite_edit(self, label: str, fn: Callable[[], object]) -> None:
-      """!A sprite setting changed (I3: stream, step table).
+      """!A sprite setting changed (stream, step table).
       @param label  undo label
       @param fn     the change
       @return None
@@ -748,7 +748,7 @@ class AnimationPanel(EditorPanel):
          self._edit(label, fn)
 
    def _stream_edited(self, on: bool) -> None:
-      """!I3: the Streamed box changed: the sprite's stream flag set (one undo step).
+      """!The Streamed box changed: the sprite's stream flag set (one undo step).
       @param on  the box's new state
       @return None
       """
@@ -756,7 +756,7 @@ class AnimationPanel(EditorPanel):
       self._sprite_edit("Stream", lambda: sprites.set_stream(doc, self.key, on))
 
    def _steps_edited(self) -> None:
-      """!The step table box or an entry changed (I3).
+      """!The step table box or an entry changed.
       @return None
       """
       table = [w.value() for w in self.step_table] if self.has_steps.isChecked() else None
@@ -766,7 +766,7 @@ class AnimationPanel(EditorPanel):
          self._sprite_edit("Step table", lambda: sprites.set_step_table(doc, self.key, table))
 
    def import_indexed_sheet(self, path: str | None = None) -> None:
-      """!Adds every frame of an indexed sheet to the sprite (I3; asks for the file when none is given).
+      """!Adds every frame of an indexed sheet to the sprite (asks for the file when none is given).
       @param path  the palette PNG, or None to ask
       @return None
       """
@@ -829,7 +829,7 @@ class AnimationPanel(EditorPanel):
          self._fill_sprite(keep_rows=[])
 
    def new_grid(self, key: str | None = None, size: tuple[int, int] = sprite_grid.NEW_GRID_SIZE) -> bool:
-      """![S3] Adds a direction-grid sprite of empty shape frames (asks its key when none is given).
+      """!Adds a direction-grid sprite of empty shape frames (asks its key when none is given).
       @param key   "sprite:NAME", or None to ask
       @param size  frame size
       @return True when added
@@ -913,7 +913,7 @@ class AnimationPanel(EditorPanel):
       if f < len(self.frame_images):
          img = self.frame_images[f]
          fl = self.flips_timeline[pos] if pos < len(self.flips_timeline) else 0
-         if img is not None and fl:   # I3: the step is drawn mirrored
+         if img is not None and fl:   # the step is drawn mirrored
             img = mirror(img, bool(fl & FLIP_H), bool(fl & FLIP_V))
          self.view.set_image(img)
       self.position.setText(f"frame {f}  ·  {pos + 1}/{len(tl)}  ({sprites.frames_to_ms(pos)} ms)")
