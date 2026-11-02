@@ -56,22 +56,27 @@ class VmExtPanel(EditorPanel):
       """
       super().__init__(host, parent)
       ## The manifests read, or None.
-      self.ext: core.Extensions | None = None
+      self.ext = None   # type: core.Extensions | None
       ## The manifests' files.
-      self.manifests: list[Path] = []
+      self.manifests = []   # type: list[Path]
       ## The usage records.
-      self.usage: list[Path] = []
+      self.usage = []   # type: list[Path]
       ## The size listing, or None.
-      self.sizes: Path | None = None
+      self.sizes = None   # type: Path | None
       ## The rows the list shows, in its order.
-      self.shown: list[core.OpRow] = []
+      self.shown = []   # type: list[core.OpRow]
 
       left = QtWidgets.QWidget()
       lv = QtWidgets.QVBoxLayout(left)
-      lv.addWidget(button("Open manifests...", self.open_manifests, "Read capsule.vm-ext/1 manifests (one game's)"))
-      lv.addWidget(button("Sample", self.open_sample, "The engine sandbox's manifest (simple shapes)"))
-      lv.addWidget(button("Add usage...", self.add_usage, "The banks' usage records (capsule.vm-usage/1)"))
-      lv.addWidget(button("Add GBA sizes...", self.add_sizes, "An nm -S -C listing of a GBA build"))
+      open_manifests_button = button("Open manifests...", self.open_manifests,
+                                     "Read capsule.vm-ext/1 manifests (one game's)")
+      lv.addWidget(open_manifests_button)
+      open_sample_button = button("Sample", self.open_sample, "The engine sandbox's manifest (simple shapes)")
+      lv.addWidget(open_sample_button)
+      add_usage_button = button("Add usage...", self.add_usage, "The banks' usage records (capsule.vm-usage/1)")
+      lv.addWidget(add_usage_button)
+      add_sizes_button = button("Add GBA sizes...", self.add_sizes, "An nm -S -C listing of a GBA build")
+      lv.addWidget(add_sizes_button)
       ## The files given.
       self.files = QtWidgets.QListWidget()
       lv.addWidget(self.files, 1)
@@ -118,7 +123,8 @@ class VmExtPanel(EditorPanel):
       self.checks = QtWidgets.QPlainTextEdit()
       self.checks.setReadOnly(True)
       rv.addWidget(self.checks, 1)
-      rv.addWidget(button("Copy report", self.copy_report, "The natives with their reasons, owners and sizes"))
+      copy_report_button = button("Copy report", self.copy_report, "The natives with their reasons, owners and sizes")
+      rv.addWidget(copy_report_button)
       split_box(rv)   # the op above the checks (the button stays with the checks' pane)
 
       layout = QtWidgets.QHBoxLayout(self)

@@ -124,14 +124,19 @@ def font_glyphs(codepage: Any = None, fonts: Sequence[Path] | None = None) -> di
    return {code: fc.render(chars[ch]) for code, ch in page.chars.items() if ch in chars}
 
 
+## A C++ integer literal after "=" (group 1: its digits with the prefix, without the suffix).
 _INT_LITERAL = r"(0[xX][0-9a-fA-F']+|0[bB][01']+|\d[\d']*)[uUlL]*\b"
-"""!A C++ integer literal after "=" (group 1: its digits with the prefix, without the suffix)."""
 
+## Radix of a "0x" literal.
 _HEX_BASE = 16
+## Radix of a "0b" literal.
 _BINARY_BASE = 2
+## Radix of a literal with a leading 0.
 _OCTAL_BASE = 8
+## Radix of any other literal.
 _DECIMAL_BASE = 10
-_RADIX_PREFIX = len("0x")   # "0x" / "0b" before the digits
+## Length of the "0x" / "0b" prefix before the digits.
+_RADIX_PREFIX = len("0x")
 
 
 def cpp_int(literal: str) -> int:
