@@ -1240,6 +1240,8 @@ Battle data (editing commands save only when the result compiles):
 ./capsule-studio sample list                         # the engine's sample projects (starter_battle, sandbox_map)
 ./capsule-studio sample copy sandbox_map ../MyWorld  # a sample as a game of your own (data/starter copied along)
 ./capsule-studio sample check ../MyWorld             # exit 1 when a path leads out of the game folder
+./capsule-studio usage sandbox_map --build ../build  # what the game's data uses (usage/sandbox_map.json)
+./capsule-studio usage sandbox_map --build ../build --link capsule_sandbox_map.nm   # linked but unused modules
 ./capsule-studio battle data/battle.json validate
 ./capsule-studio battle data/battle.json info
 ./capsule-studio battle data/battle.json stats Emberkit 50 --genes 15 --trait Fierce

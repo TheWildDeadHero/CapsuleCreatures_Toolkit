@@ -40,7 +40,9 @@ COMMAND_MODULES = ["assets_cmds", "sprite_cmds", "text_cmds", "world_cmds", "fie
                    # [S7] engine M4 (D-34): the audio manifest (songs, instruments, samples, MIDI, sounds)
                    "audio_cmds",
                    # D-40 RP: the engine's sample projects (list, copy as a game of your own, check)
-                   "sample_cmds"]
+                   "sample_cmds",
+                   # D-36: a game's usage report (the engine modules and items its data uses, the link compared)
+                   "usage_cmds"]
 ## Modules (relative to this package) that add actions to the `battle FILE` group (each has a
 ## register_actions(subparsers) function; battle_cmds calls them).
 BATTLE_ACTION_MODULES = ["structure_cmds", "tier_stage_cmds", "condition_cmds", "turn_progress_cmds", "logic_cmds",
