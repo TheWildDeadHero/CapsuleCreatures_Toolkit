@@ -336,6 +336,7 @@ capsule-studio sample copy sandbox_map MyWorld                # a sample project
 capsule-studio project files MyGame/reference/project.json    # what a game names
 capsule-studio world validate MyGame/data/world.json          # compile a world with the engine
 capsule-studio world render MyGame/data/world.json meadow meadow.png   # draw a map to a PNG
+capsule-studio usage MyGame --build build/gba-release          # what the game's data uses (its usage report)
 ```
 
 The command line needs no display and no Qt, so it runs in scripts, CI and
