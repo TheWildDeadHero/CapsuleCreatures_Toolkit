@@ -32,8 +32,9 @@ CHOICE_KEY = "build/game/"
 EMULATOR_KEY = "build/emulator/"
 ## The Build drop-down's choice that builds every target.
 ALL_TARGETS = "all"
-## Title of the buttons, menus and messages.
+## Title of the Build button, its menu and its messages.
 BUILD = "Build"
+## Title of the Build and Debug button, its menu and its messages.
 BUILD_AND_DEBUG = "Build and Debug"
 ## Title of the Build log.
 LOG_TITLE = "Build log"
@@ -43,9 +44,11 @@ LOG_LINES = 20000
 LOG_HEIGHT = 220
 ## Space around the Build log's row of buttons, pixels.
 LOG_MARGIN = 4
-## Shortcuts.
+## Build's shortcut.
 BUILD_KEY = "Ctrl+B"
+## Build and Debug's shortcut.
 DEBUG_KEY = "F5"
+## Stop's shortcut.
 STOP_KEY = "Shift+F5"
 ## The methods a page saves everything with, tried in order (World/Scripts/Battle, Assets, Project/Audio).
 SAVE_METHODS = ("save_all", "save_file", "save")
@@ -136,24 +139,32 @@ class BuildBar(QtCore.QObject):
       @param save_pages    saves every page with unsaved changes; False when one could not be saved
       """
       super().__init__(window)
+      ## The Studio window.
       self._window = window
+      ## Gives the open game's reference/project.json, or None.
       self._project_path = project_path
+      ## Saves every page with unsaved changes.
       self._save_pages = save_pages
+      targets = game_build.targets()
+      first = targets[0].target_id   # this computer's own target
       ## Every target this computer builds.
-      self.targets = game_build.targets()
-      ## The Build drop-down's choice (a target id or ALL_TARGETS) and preset.
-      self.build_choice = self.targets[0].target_id
+      self.targets = targets
+      ## The Build drop-down's choice (a target id or ALL_TARGETS).
+      self.build_choice = first
+      ## Whether Build uses the debug preset.
       self.build_debug = False
       ## The Build and Debug drop-down's choice.
-      self.debug_choice = self.targets[0].target_id
-      ## Plans still to run, the step queue of the one running, and the one running.
-      self._plans: list[game_build.BuildPlan] = []
-      self._steps: list[game_build.Step] = []
-      self._plan: game_build.BuildPlan | None = None
+      self.debug_choice = first
+      ## Plans still to run.
+      self._plans = []
+      ## The steps still to run of the plan running.
+      self._steps = []
+      ## The plan running, or None.
+      self._plan = None
       ## Targets that failed in this build (for the summary).
-      self._failed: list[str] = []
+      self._failed = []
       ## The program running now, or None.
-      self.process: QtCore.QProcess | None = None
+      self.process = None
       ## True while the game (the run step) is what runs.
       self.running_game = False
       ## Unfinished output line of the program running.
@@ -194,7 +205,7 @@ class BuildBar(QtCore.QObject):
       self.build_menu = QtWidgets.QMenu(BUILD, w)
       group = QtGui.QActionGroup(self.build_menu)
       ## Target id (or ALL_TARGETS) -> its action in the Build drop-down.
-      self.build_choices: dict[str, QtGui.QAction] = {}
+      self.build_choices = {}
       for t in self.targets:
          self.build_choices[t.target_id] = self._choice(self.build_menu, group, t.title, t.target_id, True)
       self.build_choices[ALL_TARGETS] = self._choice(self.build_menu, group, "All targets", ALL_TARGETS, True)
@@ -212,12 +223,12 @@ class BuildBar(QtCore.QObject):
       self.debug_menu = QtWidgets.QMenu(BUILD_AND_DEBUG, w)
       group = QtGui.QActionGroup(self.debug_menu)
       ## Target id -> its action in the Build and Debug drop-down.
-      self.debug_choices: dict[str, QtGui.QAction] = {}
+      self.debug_choices = {}
       for t in self.targets:
          self.debug_choices[t.target_id] = self._choice(self.debug_menu, group, t.title, t.target_id, False)
       self.debug_menu.addSeparator()
       ## Run kind -> Choose emulator... action.
-      self.emulator_actions: dict[str, QtGui.QAction] = {}
+      self.emulator_actions = {}
       for t in self.targets:
          if t.run_kind == game_build.RUN_NATIVE:
             continue

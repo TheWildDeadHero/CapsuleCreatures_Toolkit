@@ -53,26 +53,33 @@ KOS_ENVIRON_DEFAULT = "/opt/toolchains/dc/kos/environ.sh"
 ## What the missing-toolchain messages point to.
 SETUP_HINT = "run the umbrella's ./setup (setup.cmd on Windows) to install it"
 
-## Kinds of run (BuildTarget.run_kind).
+## Kind of run (BuildTarget.run_kind): the program starts itself.
 RUN_NATIVE = "native"
+## Kind of run: the ROM starts in a GBA emulator.
 RUN_GBA = "gba"
+## Kind of run: the disc image starts in a Dreamcast emulator.
 RUN_DREAMCAST = "dreamcast"
 
 ## Flatpak application folders (system-wide and per user), for emulators installed through Flatpak.
 FLATPAK_APP_FOLDERS = (Path("/var/lib/flatpak/app"), Path.home() / ".local/share/flatpak/app")
-## mGBA: program names on PATH, its Flatpak id, and install locations off PATH.
+## mGBA's program names on PATH.
 MGBA_PROGRAMS = ("mgba-qt", "mgba", "mGBA")
+## mGBA's Flatpak id.
 MGBA_FLATPAK = "io.mgba.mGBA"
+## mGBA's install locations off PATH (macOS, Windows).
 MGBA_KNOWN = ("/Applications/mGBA.app/Contents/MacOS/mGBA", "C:/Program Files/mGBA/mGBA.exe",
               "C:/Program Files (x86)/mGBA/mGBA.exe")
-## mGBA built from a clone in the workspace (the folder beside the umbrella), relative to that clone.
+## The folder of an mGBA clone in the workspace (the folder beside the umbrella).
 MGBA_CLONE = "mgba"
+## mGBA's program in that clone's build folders, relative to the clone.
 MGBA_CLONE_BUILDS = ("build/qt/mgba-qt", "build/mgba-qt", "build/qt/mGBA.exe", "build/mGBA.exe")
-## No$GBA's program file and where it is looked for (beside the umbrella, in Wine's C: drive).
+## No$GBA's program file.
 NOCASH_EXE = "NO$GBA.EXE"
+## Folders No$GBA is looked for in (beside the umbrella, and in Wine's C: drive).
 NOCASH_FOLDERS = ("no$gba", "nocash", "NO$GBA")
-## Dreamcast emulators on PATH, in order of preference, and Flycast's Flatpak id.
+## Dreamcast emulators on PATH, in order of preference.
 DC_PROGRAMS = ("flycast", "redream", "lxdream")
+## Flycast's Flatpak id.
 DC_FLATPAK = "org.flycast.Flycast"
 
 
@@ -89,7 +96,7 @@ class BuildTarget:
    release_preset: str
    ## What starts it (RUN_NATIVE, RUN_GBA, RUN_DREAMCAST).
    run_kind: str
-   ## The runnable file's suffix after capsule_<name> ("" or ".exe" for an executable, ".gba", ".cdi").
+   ## The runnable file's suffix after capsule_NAME ("" or ".exe" for an executable, ".gba", ".cdi").
    output_suffix: str
    ## A second runnable file when the first is not made ("": none); a Dreamcast build without mkdcdisc makes the
    ## .elf only, which the emulators also start.
@@ -120,13 +127,16 @@ class Step:
       tools, which a lookup on the Studio's own PATH would miss).
       @return its path, or argv[0] when it is not found there
       """
-      return shutil.which(self.argv[0], path=self.env.get("PATH") or os.environ.get("PATH")) or self.argv[0]
+      name = self.argv[0]
+      search = self.env.get("PATH") or os.environ.get("PATH")
+      return shutil.which(name, path=search) or name
 
    def shown(self) -> str:
       """!The command as a line for the log.
       @return the command line
       """
-      return shlex.join(self.argv)
+      argv = self.argv
+      return shlex.join(argv)
 
 
 @dataclass
@@ -138,7 +148,7 @@ class BuildPlan:
    preset: str
    ## The game's folder (with reference/project.json).
    game: Path
-   ## The project's name (its target is capsule_<name>).
+   ## The project's name (its target is capsule_NAME).
    name: str
    ## The build folder (FOLDER/build/PRESET).
    out: Path
@@ -155,7 +165,7 @@ class BuildPlan:
       """!The runnable file the build made (the executable, ROM or disc image).
       @return its path, or None before it exists
       """
-      return find_output(self.out, self.name, self.target)
+      return find_output(out=self.out, name=self.name, build_target=self.target)
 
 
 def host_target() -> BuildTarget:
@@ -213,7 +223,7 @@ def game_folder(path: str | Path) -> Path:
 
 
 def project_name(folder: Path) -> str:
-   """!The project's "name" (its build target is capsule_<name>).
+   """!The project's "name" (its build target is capsule_NAME).
    @param folder  the game folder
    @return the name
    @throws ValueError when the manifest cannot be read or has no name
@@ -229,7 +239,7 @@ def project_name(folder: Path) -> str:
 
 
 def find_output(out: Path, name: str, build_target: BuildTarget) -> Path | None:
-   """!The runnable file a build made: capsule_<name><suffix> in the build folder (or below it).
+   """!The runnable file a build made: capsule_NAME plus the target's suffix, in the build folder (or below it).
    @param out  the build folder
    @param name  the project's name
    @param build_target  the target
