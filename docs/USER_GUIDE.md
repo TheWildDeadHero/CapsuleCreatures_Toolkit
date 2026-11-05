@@ -105,7 +105,9 @@ The first scene makes the game run as soon as it is built:
 
 The game's `"name"` keeps letters, digits and `_` (`My Game` becomes
 `My_Game`): the engine builds it as `capsule_<name>`. Build and run it with
-the umbrella's `./build PRESET --game FOLDER` (`./build gba-release --game
+the Studio's **Build** and **Build and Debug** buttons ([Building and
+running a game](#building-and-running-a-game)), or with the umbrella's
+`./build PRESET --game FOLDER` (`./build gba-release --game
 ~/Games/MyGame`: `MyGame/build/gba-release/capsule_MyGame.gba`); the
 umbrella's getting-started guide (B7) has every step. The **GBA memory**
 page lists those build folders. `capsule-studio new GAME --template NAME`
@@ -148,9 +150,9 @@ open**. The copy holds:
   name in capitals and its game code `CNEW`.
 
 The Studio refuses a folder that has files, or one inside the engine or
-the Studio's own folder. Build the copy like any game, with the umbrella's
-`./build gba-release --game FOLDER` (or `desktop-release`): it plays as the
-sample does. On the command line, `capsule-studio sample list` lists the
+the Studio's own folder. Build the copy like any game, with the **Build**
+button or the umbrella's `./build gba-release --game FOLDER` (or
+`desktop-release`): it plays as the sample does. On the command line, `capsule-studio sample list` lists the
 samples, `capsule-studio sample copy NAME FOLDER [--name N]` makes the same
 copy and `capsule-studio sample check FOLDER` says whether anything in a
 game folder leads out of it.
@@ -161,7 +163,7 @@ The page list on the left goes to each part of the game; Ctrl+1 to Ctrl+6
 go to a page. A page with unsaved changes is marked `*`, and its tooltip
 names its file. The menu bar shows the **Studio** menu (Open project..., New
 game..., Add world to game..., the pages, Quit), then the menus of the page in front, then
-**Help**. Only the page in front takes keyboard shortcuts, so Ctrl+S saves
+**Build** and **Help**. Only the page in front takes keyboard shortcuts, so Ctrl+S saves
 what you are looking at.
 
 Each page keeps its own copy of its files: a change on one page reaches the
@@ -322,6 +324,39 @@ or continue without a file). Edit a world in one window at a time: the map
 editor and a world tool open on the same world do not see each other's
 unsaved changes. The Studio's World page holds them all in one window.
 
+### Building and running a game
+
+The **Build** toolbar at the top of the Studio builds the open game:
+
+- **Build** (Ctrl+B) builds the target picked in its drop-down (the arrow
+  beside it): **This PC** (the system the Studio runs on: Linux, macOS or
+  Windows), **Game Boy Advance**, **Dreamcast** (not on Windows), or **All
+  targets**. It uses the release preset unless the drop-down's **Debug
+  preset** is ticked.
+- **Build and Debug** (F5) builds the debug preset of the target picked in
+  its own drop-down, then starts it: the program on this PC, the ROM in mGBA
+  (No$GBA when mGBA is not found; in Wine off Windows), the disc image in
+  Flycast (Redream or lxdream otherwise). **Choose ... emulator...** in the
+  drop-down names the emulator's program instead; **Look for one** goes back
+  to the one found.
+- **Stop** (Shift+F5) stops the build, or the game it started. Building
+  again while the game runs stops the game first.
+
+Both save every page with unsaved changes first; a page that cannot be
+saved stops the build. The build is the same as the umbrella's `./build
+PRESET --game FOLDER`: the result goes to the game's `build/PRESET/`
+folder (`build/gba-debug/capsule_MyGame.gba`). Every command and its output
+goes to the **Build log** at the bottom of the window, which opens with the
+build (Build > Show build log hides it again). The choices are remembered
+for each game.
+
+When this computer lacks what a target needs (CMake, a C++ compiler,
+devkitARM and libgba for the GBA, KallistiOS for the Dreamcast; Ninja and
+MSYS2's UCRT64 compilers on Windows), nothing is built and a message names
+what is missing: the umbrella's `./setup` (`setup.cmd`) installs it. The
+environment variables `CAPSULE_GBA_EMULATOR`, `CAPSULE_DC_EMULATOR` and
+`CAPSULE_NOCASH_GBA` name the emulators for every game.
+
 ## The command line
 
 `capsule-studio --help` lists the command groups (`validate`, `sprite`,
@@ -337,6 +372,9 @@ capsule-studio project files MyGame/reference/project.json    # what a game name
 capsule-studio world validate MyGame/data/world.json          # compile a world with the engine
 capsule-studio world render MyGame/data/world.json meadow meadow.png   # draw a map to a PNG
 capsule-studio usage MyGame --build build/gba-release          # what the game's data uses (its usage report)
+capsule-studio build MyGame --target gba                       # the Build button (release; --debug for debug)
+capsule-studio build MyGame --target gba --run                 # Build and Debug: build, then start it in mGBA
+capsule-studio build MyGame --list                             # the targets this computer builds, and what is missing
 ```
 
 The command line needs no display and no Qt, so it runs in scripts, CI and

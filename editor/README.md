@@ -175,6 +175,28 @@ see each other's unsaved changes, and the one that saves last overwrites
 the maps the other changed. The Studio's World page holds the map and the
 world tools in one window, so they share the same documents.
 
+**Build** and **Build and Debug** (the Build toolbar and Build menu;
+`ui/build_bar.py`, `core/game_build.py`) build the open game with the
+engine's presets, exactly as the umbrella's `./build PRESET --game FOLDER`
+(configure from `engine/` into `FOLDER/build/PRESET` with the game in
+`CAPSULE_GAMES`, then build). Each button's drop-down picks the target:
+this computer (its own preset family: `desktop-*` on Linux and macOS,
+`windows-*` on Windows), the GBA (`gba-*`), the Dreamcast (`dc-*`, not on
+Windows) and, for Build, all of them. Build (Ctrl+B) uses the release preset
+unless Debug preset is ticked; Build and Debug (F5) always builds the debug
+preset, then starts the result: the executable, the ROM in mGBA (on PATH,
+Flatpak, installed, or built in the workspace's `mgba` clone; No$GBA,
+through Wine off Windows, as the backup) or the disc image in Flycast,
+Redream or lxdream. Choose ... emulator... in its drop-down names a program
+instead (`CAPSULE_GBA_EMULATOR` / `CAPSULE_DC_EMULATOR` name a command for
+every tool). Stop (Shift+F5) stops the build or the game. Both first save
+every page with unsaved changes; a page that cannot be saved stops the
+build. Missing tools (CMake 3.24, a C++ compiler; Ninja and MSYS2's UCRT64
+gcc on Windows; devkitARM, libgba and gbafix; KallistiOS's `environ.sh`)
+are named before anything runs. The output goes to the Build log dock. The
+targets live in `core/game_build.py` alone, so the editors name no
+platform. `capsule-studio build` is the same on the command line.
+
 Started without a project, it opens a small start window (Open project...,
 New game..., Open a sample..., recent projects, Continue without a project).
 
@@ -1241,6 +1263,11 @@ Battle data (editing commands save only when the result compiles):
 ./capsule-studio sample copy sandbox_map ../MyWorld  # a sample as a game of your own (data/starter copied along)
 ./capsule-studio sample check ../MyWorld             # exit 1 when a path leads out of the game folder
 ./capsule-studio usage sandbox_map --build ../build  # what the game's data uses (usage/sandbox_map.json)
+./capsule-studio build ../MyWorld                    # the Studio's Build: this computer, release preset
+./capsule-studio build ../MyWorld --target all       # every target this computer builds (desktop, gba, dreamcast)
+./capsule-studio build ../MyWorld --target gba --run # Build and Debug: gba-debug, then the ROM in mGBA / No$GBA
+./capsule-studio build ../MyWorld --list             # the targets here, their presets and what is missing
+./capsule-studio build ../MyWorld --dry-run          # the commands, without running them
 ./capsule-studio usage sandbox_map --build ../build --link capsule_sandbox_map.nm   # linked but unused modules
 ./capsule-studio battle data/battle.json validate
 ./capsule-studio battle data/battle.json info
@@ -1493,6 +1520,7 @@ capsule_studio/
                  scripts, map events, map objects,
                  locations,
                  project manifests,
+                 building and starting a game (game_build.py),
                  finding the engine); used by
                  everything below
   cli/           the capsule-studio command; each command group registers itself
@@ -1508,6 +1536,7 @@ capsule_studio/
     script_shell.py  script editor window: sources, problems, outline, settings
     project_shell.py  project settings window: hosts project panels (build settings, GBA memory, code page)
     studio_shell.py  the Studio window: every tool's window above as a page, on one game
+    build_bar.py  the Studio's Build / Build and Debug buttons, Build menu and Build log
     *_app.py     each tool's entry point (studio_app, world_app = map editor, encounter_app,
                  event_app, object_app, location_app, battle_app, script_app, project_app)
   plugins/       the extension host (D-10): plugin.json, calendar versions, the

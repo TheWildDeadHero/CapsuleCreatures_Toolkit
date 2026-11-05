@@ -46,6 +46,11 @@ Studio > Open data file (read-only)... shows any JSON file as a tree
 world/scripts/story.json, ui/menus.json or overworld/field.json, which no
 page edits.
 
+The Build toolbar and Build menu (ui/build_bar.py, core.game_build) build the open game: Build (Ctrl+B) for
+the target picked in its drop-down (this computer, the GBA, the Dreamcast, or all of them), Build and Debug (F5)
+the debug preset of its drop-down's target, then start it (the executable, the ROM in mGBA or No$GBA, the disc
+image in Flycast). Both save every page with unsaved changes first; the output goes to the Build log.
+
 Each page is the standalone tool's own window, embedded: the tools stay one
 code base and run by themselves too (map-editor, encounter-editor,
 event-editor, object-editor, location-editor, scene-editor, script-editor,
@@ -84,6 +89,7 @@ from ..core.document import DocumentError
 from ..core.world import Project
 from ..plugins import registry
 from . import json_view, profiler
+from .build_bar import SAVE_METHODS, BuildBar
 from .panes import NARROW, WIDE, splitter
 from .widgets import StartPage, headless, remember_file, report_failure
 
@@ -294,6 +300,9 @@ class StudioWindow(QtWidgets.QMainWindow):
                             [NAV_WIDTH, None])
       self.setCentralWidget(self.split)
       self._build_menu()
+      ## The Build toolbar, Build menu and Build log (ui/build_bar.py).
+      self.build_bar = BuildBar(self, lambda: self._project_path, lambda: self.save_all_pages())
+      self.menuBar().insertMenu(self.help_action, self.build_bar.menu)
       ## Start page, shown until a project is open.
       self.start = StartPage(
          TITLE,
@@ -332,6 +341,9 @@ class StudioWindow(QtWidgets.QMainWindow):
       """
       self._project_path = path
       self._game_name = name
+      bar = getattr(self, "build_bar", None)
+      if bar is not None:
+         bar.game_changed()
 
    # -- pages -------------------------------------------------------------------
 
@@ -497,7 +509,10 @@ class StudioWindow(QtWidgets.QMainWindow):
       self._page_menus = [a for a in window.menuBar().actions() if a.menu() is not None and a not in skipped]
       for a in self._page_menus:
          bar.addAction(a)
-      bar.removeAction(self.help_action)   # Help stays last
+      build = self.build_bar.menu.menuAction()
+      bar.removeAction(build)   # then Build and Help, which stays last
+      bar.removeAction(self.help_action)
+      bar.addAction(build)
       bar.addAction(self.help_action)
 
    def _update_item(self, page_id: str) -> None:
@@ -614,6 +629,22 @@ class StudioWindow(QtWidgets.QMainWindow):
          self.start.refresh()
          self.start.show()
 
+   def save_all_pages(self) -> bool:
+      """!Saves every built page with unsaved changes (Build and Build and Debug do, first).
+      @return False when a page could not be saved (it is shown)
+      """
+      for pid, w in list(self.windows.items()):
+         if not w.windowTitle().split(" - ")[0].endswith(" *"):
+            continue
+         save = next((getattr(w, m) for m in SAVE_METHODS if callable(getattr(w, m, None))), None)
+         if save is None:
+            continue
+         if not save():
+            self.show_page(pid)
+            return False
+         self._update_item(pid)
+      return True
+
    def _confirm_all(self) -> bool:
       """!Asks every built page about its unsaved changes.
       @return True to go ahead
@@ -677,7 +708,7 @@ class StudioWindow(QtWidgets.QMainWindow):
       if not self.open_game(project):
          return False
       game = project.parent.parent
-      build = f"build it with ./build gba-release --game {game}"
+      build = f"build it with the Build button (or ./build gba-release --game {game})"
       if getattr(self.windows.get("world"), "project", None) is not None:
          self._show_start_map()
          self.show_status(f"{TITLE}: copied {dialog.sample().name} into {game}; {build}")
@@ -937,6 +968,7 @@ class StudioWindow(QtWidgets.QMainWindow):
       @return None
       """
       if self._confirm_all():
+         self.build_bar.stop()   # the build, or the game it started
          for w in self.windows.values():
             self._stop_panels(w)
          if self.recorder.recording():   # keep the report
