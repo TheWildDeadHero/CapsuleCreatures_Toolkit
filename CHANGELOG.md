@@ -5,6 +5,13 @@ versions, `YYYY.MM.DD.MMMM` (the UTC date and the minutes since midnight).
 
 ## Unreleased
 
+- **Build** and **Build and Debug** in the Studio: a toolbar and Build menu
+  that build the open game for this computer, the GBA, the Dreamcast or
+  every target (each button's drop-down picks), save every page first and
+  show the output in a Build log; Build and Debug starts the result (the
+  program, the ROM in mGBA or No$GBA, the disc image in Flycast).
+  `capsule-studio build GAME [--target ID|all] [--debug] [--run]` does the
+  same on the command line.
 - **Battle animation tools** (M5 S8) in the scene editor and the Studio's
   Assets page: **Anim scripts** (an animation bank's scripts stepped
   frame by frame as the engine's player runs them, with a timeline of

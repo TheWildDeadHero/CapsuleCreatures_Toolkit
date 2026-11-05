@@ -1317,27 +1317,39 @@ def toolchain_text(missing: Sequence[str]) -> str:
            "validated and saved meanwhile.")
 
 
+def cmake_missing() -> str | None:
+   """!Whether CMake is missing or too old (the bench and core.game_build both need it).
+   @return what is missing, or None when CMake CMAKE_MIN or newer is on PATH
+   """
+   cmake = shutil.which("cmake")
+   if cmake is None:
+      return f"CMake {CMAKE_MIN[0]}.{CMAKE_MIN[1]} or newer (cmake on PATH)"
+   try:
+      out = subprocess.run([cmake, "--version"], capture_output=True, text=True, timeout=VERSION_TIMEOUT).stdout
+   except (OSError, subprocess.TimeoutExpired):
+      out = ""
+   m = VERSION_RE.search(out)
+   if m is None or (int(m["major"]), int(m["minor"])) < CMAKE_MIN:
+      found = m.group(0) if m is not None else "unknown"
+      return f"CMake {CMAKE_MIN[0]}.{CMAKE_MIN[1]} or newer (found {found})"
+   return None
+
+
+def compiler_missing() -> str | None:
+   """!Whether this machine lacks a C++ compiler for host builds.
+   @return what is missing, or None when one of COMPILERS (or $CXX) is on PATH
+   """
+   cxx = os.environ.get(CXX_ENV)
+   if not (cxx and shutil.which(cxx.split()[0])) and not any(shutil.which(c) for c in COMPILERS):
+      return "a C++20 compiler (" + ", ".join(COMPILERS) + f" on PATH, or {CXX_ENV})"
+   return None
+
+
 def toolchain() -> list[str]:
    """!What the bench's build needs and this machine lacks.
    @return missing items (empty: CMake and a C++ compiler are here)
    """
-   missing = []
-   cmake = shutil.which("cmake")
-   if cmake is None:
-      missing.append(f"CMake {CMAKE_MIN[0]}.{CMAKE_MIN[1]} or newer (cmake on PATH)")
-   else:
-      try:
-         out = subprocess.run([cmake, "--version"], capture_output=True, text=True, timeout=VERSION_TIMEOUT).stdout
-      except (OSError, subprocess.TimeoutExpired):
-         out = ""
-      m = VERSION_RE.search(out)
-      if m is None or (int(m["major"]), int(m["minor"])) < CMAKE_MIN:
-         found = m.group(0) if m is not None else "unknown"
-         missing.append(f"CMake {CMAKE_MIN[0]}.{CMAKE_MIN[1]} or newer (found {found})")
-   cxx = os.environ.get(CXX_ENV)
-   if not (cxx and shutil.which(cxx.split()[0])) and not any(shutil.which(c) for c in COMPILERS):
-      missing.append("a C++20 compiler (" + ", ".join(COMPILERS) + f" on PATH, or {CXX_ENV})")
-   return missing
+   return [m for m in (cmake_missing(), compiler_missing()) if m is not None]
 
 
 # -- results ----------------------------------------------------------------------------------------------------------
