@@ -42,6 +42,7 @@ location-editor     starts the location editor (location-editor.cmd on Windows)
 script-editor       starts the script editor (script-editor.cmd on Windows)
 project-settings    starts the project settings window (project-settings.cmd on Windows)
 audio-editor        starts the audio editor: songs, instruments, samples, MIDI import, sound effects (audio-editor.cmd)
+manifest-designer   starts the manifest designer: a manifest as a drag-and-drop diagram (manifest-designer.cmd)
 capsule-studio      the command-line tools (capsule-studio.cmd on Windows)
 Doxyfile            documentation rule for the Python sources (warnings are errors)
 ```
@@ -105,6 +106,7 @@ and the panel in `capsule_studio/ui/editors/`.
 ./script-editor path/to/scripts.json        # Windows: script-editor.cmd
 ./project-settings path/to/reference/project.json   # Windows: project-settings.cmd
 ./audio-editor path/to/audio.json           # Windows: audio-editor.cmd
+./manifest-designer path/to/manifest.json   # Windows: manifest-designer.cmd (--system ID: a new one)
 ./capsule-studio validate path/to/assets.json
 ```
 

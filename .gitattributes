@@ -10,6 +10,7 @@ battle-editor   text eol=lf
 battle-structure text eol=lf
 battle-logic    text eol=lf
 encounter-editor text eol=lf
+manifest-designer text eol=lf
 event-editor    text eol=lf
 object-editor   text eol=lf
 location-editor text eol=lf

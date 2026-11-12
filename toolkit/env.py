@@ -82,6 +82,7 @@ TOOLS = {
    "object-editor": ("capsule_studio.ui.object_app", ["core", "ui"]),
    "location-editor": ("capsule_studio.ui.location_app", ["core", "ui"]),
    "audio-editor": ("capsule_studio.ui.audio_app", ["core", "ui", "audio"]),
+   "manifest-designer": ("capsule_studio.ui.designer_app", ["core", "ui"]),
    "studio": ("capsule_studio.ui.studio_app", ["core", "ui", "audio"]),
 }
 ## Source folders made importable inside the environment (through a .pth file).

@@ -112,6 +112,15 @@ STEP_DATA = 1
 STEP_GROUP = 2
 
 
+def register_schema(schema: str, empty: JsonDict) -> None:
+   """!Lets a Document hold another schema: a manifest designer system's (core.designer.registry registers each).
+   @param schema  the schema
+   @param empty   its new, empty manifest
+   @return None
+   """
+   EMPTY.setdefault(schema, copy.deepcopy(empty))
+
+
 class DocumentError(Exception):
    """!An edit was refused (unknown asset, duplicate key, ...)."""
    pass

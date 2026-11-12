@@ -1047,6 +1047,37 @@ work everywhere, so the editor stays usable without an audio device.
   outcome), whose mix has the sampled channels only. **Clips** plays the saved table's clips with their parameters
   (volume, pan, pitch, hold, release, chorus, priority).
 
+## Manifest designer
+
+`manifest-designer` (D-43, being built on the long-term `manifest-designer`
+branch) shows a manifest as a drag-and-drop diagram, inspired by Node-RED
+(palette, nodes with typed ports, curved wires, add-by-typing, a wire
+dropped in empty space adds a wired node) and draw.io (shapes, notes,
+frames that carry their contents, connectors, resize handles, grid and
+alignment guides, align / distribute / same size, front / back). One canvas
+serves every **designer system**:
+
+- `core/designer/` (no Qt) holds the model (`model.py`: elements, ports,
+  links, kinds, fields, problems), `system.py` (`DesignerSystem`: what a
+  system supplies, the shared shapes, the editor block), `registry.py`,
+  the shared edits (`ops.py`), checks (`checks.py`: types, one-wire inputs,
+  required inputs, loops, frames), auto-layout (`layout.py`) and
+  `session.py` (`DesignSession`: every edit is one `Document` step, and the
+  diagram is read back from the manifest after each one).
+- A system subclasses `DesignerSystem`: its schema, its palette
+  (`ElementKind`s with `PortSpec`s and `PropertySpec`s), which data types
+  connect, `read()` (manifest to diagram) and `write()` (diagram back into
+  the manifest, keeping keys it does not own), its own checks, and live
+  values. The base adds the shapes and free connectors and keeps them, with
+  the view, in the manifest's `editor` block (`"editor": {"designer":
+  {...}}`), which compilers drop.
+- `ui/designer/` draws it: `canvas.py` (scene and view), `items.py`,
+  `palette.py`, `inspector.py`, `window.py`.
+- **Sample flow** (`sample-flow`, `capsule.sampleflow/1`, dev only) is
+  whole numbers through Add, Subtract, Multiply, Compare, Choose and Show
+  nodes, with live values: invented data that exercises every base
+  feature. The battle AI designer (D-18) is the first real system to come.
+
 ## Command line
 
 The same editing works without a display, for scripts, CI and containers.
@@ -1268,6 +1299,15 @@ Battle data (editing commands save only when the result compiles):
 ./capsule-studio build ../MyWorld --target gba --run # Build and Debug: gba-debug, then the ROM in mGBA / No$GBA
 ./capsule-studio build ../MyWorld --list             # the targets here, their presets and what is missing
 ./capsule-studio build ../MyWorld --dry-run          # the commands, without running them
+./capsule-studio designer systems --all              # the manifest designer's systems (D-43)
+./capsule-studio designer new flow.json --system sample-flow
+./capsule-studio designer add flow.json number --at 0,0 --set value=5
+./capsule-studio designer connect flow.json n1.value n3.a
+./capsule-studio designer add-wired flow.json show --at 480,40 --from n3.result
+./capsule-studio designer move flow.json n1 n2 --by 20,0   # also remove, resize, set, label, frame, duplicate,
+                                                          # align, distribute, same-size, front, back, layout
+./capsule-studio designer show flow.json --json      # elements, links, live values and problems
+./capsule-studio designer check flow.json            # exit status 1 on errors
 ./capsule-studio usage sandbox_map --build ../build --link capsule_sandbox_map.nm   # linked but unused modules
 ./capsule-studio battle data/battle.json validate
 ./capsule-studio battle data/battle.json info
@@ -1521,6 +1561,7 @@ capsule_studio/
                  locations,
                  project manifests,
                  building and starting a game (game_build.py),
+                 the manifest designer's model, systems and edits (designer/),
                  finding the engine); used by
                  everything below
   cli/           the capsule-studio command; each command group registers itself
@@ -1537,8 +1578,10 @@ capsule_studio/
     project_shell.py  project settings window: hosts project panels (build settings, GBA memory, code page)
     studio_shell.py  the Studio window: every tool's window above as a page, on one game
     build_bar.py  the Studio's Build / Build and Debug buttons, Build menu and Build log
+    designer/    the manifest designer's canvas, items, palette, inspector and window (D-43)
     *_app.py     each tool's entry point (studio_app, world_app = map editor, encounter_app,
-                 event_app, object_app, location_app, battle_app, script_app, project_app)
+                 event_app, object_app, location_app, battle_app, script_app, project_app,
+                 designer_app)
   plugins/       the extension host (D-10): plugin.json, calendar versions, the
                  pure-Python rule, loading, what extensions register (no Qt)
   extensions/    the studio's own extensions, loaded through the same host

@@ -324,6 +324,44 @@ or continue without a file). Edit a world in one window at a time: the map
 editor and a world tool open on the same world do not see each other's
 unsaved changes. The Studio's World page holds them all in one window.
 
+### The manifest designer
+
+`manifest-designer` (being built: the base is here, the systems that use it
+come next) shows a manifest as a drag-and-drop diagram, in the manner of
+Node-RED and draw.io. Each kind of data has its own **designer system**,
+which says what its boxes are and how they connect; the right one opens with
+the file (from its `schema`). The first real system will be the battle AI
+designer; until then only **Sample flow**, a small system on invented
+numbers for developing the designer, is offered (New > Sample flow).
+
+- The **palette** on the left lists what can be added, by category, with a
+  search box. Drag an entry onto the canvas, or double-click it. Double-click
+  empty canvas (or press Ctrl+Space) to add something by typing.
+- **Wires** run from a node's output port (right) to an input port (left).
+  While one is drawn, ports it cannot end on fade (the wrong data type, or
+  an input that already has its one wire). Drop a wire in empty space to add
+  a node that is already wired to it.
+- **Shapes** (rectangle, rounded box, ellipse, diamond, note, text, frame)
+  are for notes around the data. Drag the small arrow under any element to
+  another to draw a **connector**; drag a selected shape's corner to resize
+  it. A **frame** holds what lies inside it and carries it when moved.
+- Moving snaps to the grid, and to other elements' edges and centres (an
+  orange guide shows which). Arrow keys nudge the selection (Shift: by one
+  unit); Delete removes it. **Arrange** aligns, distributes and sizes the
+  selection on the first element picked; **Tidy up** (Ctrl+L) lays the nodes
+  out along the flow.
+- The **inspector** on the right edits the selected element's fields; the
+  **Problems** list below the canvas names what is wrong (click one to find
+  it). Nodes show their live value where the system has one.
+- The canvas scrolls with the wheel and the scroll bars; Ctrl+wheel zooms;
+  the middle button or Space+drag pans.
+
+The diagram is the manifest: there is no separate diagram file. Positions
+and fields go into the manifest, and notes, frames, connectors and the view
+into its `editor` block, which the engine's compilers drop. Every change is
+one Undo step. `capsule-studio designer` makes the same changes from the
+command line.
+
 ### Building and running a game
 
 The **Build** toolbar at the top of the Studio builds the open game:
@@ -375,6 +413,8 @@ capsule-studio usage MyGame --build build/gba-release          # what the game's
 capsule-studio build MyGame --target gba                       # the Build button (release; --debug for debug)
 capsule-studio build MyGame --target gba --run                 # Build and Debug: build, then start it in mGBA
 capsule-studio build MyGame --list                             # the targets this computer builds, and what is missing
+capsule-studio designer show flow.json                         # a designer manifest's elements, wires and problems
+capsule-studio designer connect flow.json n1.value n3.a        # the canvas's edits (add, move, set, connect, ...)
 ```
 
 The command line needs no display and no Qt, so it runs in scripts, CI and

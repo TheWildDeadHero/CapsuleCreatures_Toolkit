@@ -5,6 +5,15 @@ versions, `YYYY.MM.DD.MMMM` (the UTC date and the minutes since midnight).
 
 ## Unreleased
 
+- **Manifest designer** (in progress, D-43): `manifest-designer`, a
+  drag-and-drop canvas that shows a manifest as a diagram, in the manner of
+  Node-RED (a palette, nodes with typed ports, wires) and draw.io (shapes,
+  notes, frames, connectors, snapping, alignment guides, align and
+  distribute, tidy-up). Each kind of data plugs in as a designer system;
+  this first part is the shared base, with **Sample flow** (invented data)
+  to exercise it. The manifest stays the only file; every change is one
+  Undo step, and `capsule-studio designer` makes the same changes from the
+  command line.
 - **Build** and **Build and Debug** in the Studio: a toolbar and Build menu
   that build the open game for this computer, the GBA, the Dreamcast or
   every target (each button's drop-down picks), save every page first and
