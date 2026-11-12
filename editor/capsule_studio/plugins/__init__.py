@@ -2,9 +2,12 @@
 
 Plugins extend the tools without forking them. This studio hosts the
 **extension** kind (data-specific editing): panels, map tools, map
-overlays, hover text, command-line commands and validators, registered
-through an ExtensionContext (registry.py). Connectors (compiler-side data,
-D-10 §4) are not hosted yet; the loader refuses them with a message.
+overlays, hover text, command-line commands, validators, battle templates,
+designer systems, file formats and previews, registered through an
+ExtensionContext (registry.py). Connectors (D-10 §4: typed data blocks a
+plugin adds to the game's manifests, compiled by the engine's
+tools/connectors.py) load through the engine; the Plugin data panel and
+`capsule-studio ext` edit their blocks (core.plugin_data).
 
   - manifest.py: plugin.json (capsule.plugin/1)
   - versions.py: calendar versions, requirements, deprecation
@@ -17,5 +20,5 @@ D-10 §4) are not hosted yet; the loader refuses them with a message.
 Nothing here imports Qt: hosts with a user interface call panel factories
 and tool options themselves.
 """
-from .registry import API, Diagnostic, MapOverlay, MapTool, Registry  # noqa: F401
+from .registry import API, Diagnostic, FileFormat, MapOverlay, MapTool, Preview, Registry  # noqa: F401
 from .view import MapView  # noqa: F401

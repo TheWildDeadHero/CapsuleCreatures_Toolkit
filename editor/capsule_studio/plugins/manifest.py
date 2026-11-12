@@ -4,7 +4,7 @@
       "schema": "capsule.plugin/1",
       "id": "acme.day_cycle",            reverse-domain style, unique per project
       "version": "2026.10.17.0690",          calendar version (see versions.py)
-      "api": 2,                              plugin API number it was written for (1 or 2: templates)
+      "api": 3,                              plugin API number it was written for (2: templates, 3: connectors)
       "requires": {"capsule_studio": ">=2026.10.01.0000", "plugins": ["acme.base"]},
       "extension": {"module": "day_cycle.extension"},
       "connector": {"module": "day_cycle.connector"},

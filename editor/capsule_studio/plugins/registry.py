@@ -22,9 +22,21 @@ loads; ctx is an ExtensionContext. Registration points:
   - battle templates (plugin API 2, D-23 section 3.5): a template folder
     (template.json, capsule.template/1) the New game / New battle data
     dialog and `capsule-studio template list` offer (core.templates).
+  - designer systems (plugin API 3): a system of the manifest designer
+    (its node kinds and how a diagram reads and writes a manifest), shown
+    by the designer as one of its systems.
+  - file formats (plugin API 3): a FileFormat that exports a plugin's
+    connector data to a file and imports it back (Plugin data > Import /
+    Export, `capsule-studio ext export` / `ext import`).
+  - previews (plugin API 3): a Preview that shows a record's connector data
+    as text beside the Plugin data inspector (`capsule-studio ext preview`).
 
-Plugin API 2 adds battle templates to API 1; a plugin written for API 1
-loads unchanged (loader: MIN_API to API).
+A plugin's connector (plugin API 3, the engine's tools/connectors.py)
+declares typed data blocks at attach points; the Studio builds the Plugin
+data inspector from those declarations and runs the connector's checks
+live (core.plugin_data). Plugin API 2 adds battle templates to API 1 and
+API 3 adds connectors, designer systems, formats and previews; a plugin
+written for an older API loads unchanged (loader: MIN_API to API).
 
 Map tools and overlays receive a view.MapView: the project, the map and
 edit(), which runs a change as a document command (undo, redo, dirty
@@ -49,8 +61,11 @@ if TYPE_CHECKING:
    from .manifest import PluginInfo
    from .view import MapView
 
-## Plugin API number this studio implements (plugin.json "api"; 2: battle templates).
-API = 2
+## Plugin API number this studio implements (plugin.json "api"; 2: battle templates; 3: connectors, designer
+## systems, formats and previews).
+API = 3
+## Oldest plugin API with connectors (plugin.json "connector").
+CONNECTOR_API = 3
 ## Oldest plugin API number this studio still loads (each API adds registration points; none was removed).
 MIN_API = 1
 ## Host id of the map editor (the default host of a panel).
@@ -124,6 +139,85 @@ class MapOverlay:
       raise NotImplementedError
 
 
+class FileFormat:
+   """!Exchanges a plugin's connector data with a file (plugin API 3). Subclass, set the class attributes and
+   override export_data(), import_data() or both. Both work on a core.plugin_data.PluginData: export reads the
+   blocks, import returns the changes, which the host applies as one undo step (the command line saves them)."""
+
+   ## Unique id (plugin-prefixed by the registry: "plugin/id").
+   id = "format"
+   ## Name in menus and lists.
+   title = "Format"
+   ## File name suffix, with its dot (".csv").
+   suffix = ".txt"
+   ## The plugin whose blocks it exchanges (default: the plugin that registers it).
+   plugin = ""
+
+   def export_data(self, data: Any) -> str:
+      """!The file's text.
+      @param data  core.plugin_data.PluginData
+      @return the text
+      """
+      raise NotImplementedError
+
+   def import_data(self, data: Any, text: str) -> list[tuple[str, str, Any]]:
+      """!The changes a file makes.
+      @param data  core.plugin_data.PluginData (to read the blocks there now)
+      @param text  the file's text
+      @return [(attach point, record name, block or None to remove it)]
+      @throws ValueError with a message when the file cannot be read
+      """
+      raise NotImplementedError
+
+   def can_export(self) -> bool:
+      """!Whether it overrides export_data().
+      @return True when it can export
+      """
+      return type(self).export_data is not FileFormat.export_data
+
+   def can_import(self) -> bool:
+      """!Whether it overrides import_data().
+      @return True when it can import
+      """
+      return type(self).import_data is not FileFormat.import_data
+
+
+class Preview:
+   """!Shows a record's connector data as text (plugin API 3), beside the Plugin data inspector."""
+
+   ## Unique id (plugin-prefixed by the registry).
+   id = "preview"
+   ## Its heading.
+   title = "Preview"
+   ## The plugin whose blocks it shows (default: the plugin that registers it).
+   plugin = ""
+   ## Attach points it shows (empty: every point of the plugin).
+   attach_points: tuple[str, ...] = ()
+
+   def render(self, data: Any, attach: str, name: str, block: Any) -> str:
+      """!The preview.
+      @param data    core.plugin_data.PluginData
+      @param attach  the record's attach point
+      @param name    the record's name
+      @param block   its block with the defaults filled in (as the inspector shows it)
+      @return text (a few lines)
+      """
+      raise NotImplementedError
+
+
+@dataclass
+class DesignerSystemSpec:
+   """!A registered manifest designer system (plugin API 3)."""
+   ## Plugin id.
+   plugin: str
+   ## System id (plugin-prefixed).
+   system_id: str
+   ## Name in the designer's system list.
+   title: str
+   ## callable() -> the system (the designer's DesignerSystem; it is imported by the designer, never here).
+   factory: Callable[[], Any]
+
+
 @dataclass
 class PanelSpec:
    """!A registered panel."""
@@ -137,6 +231,8 @@ class PanelSpec:
    factory: Callable[[Any], EditorPanel]
    ## Host ids that show it ("map-editor", ...).
    hosts: tuple[str, ...]
+   ## callable(registry) -> whether hosts show it now (None: always).
+   shown_if: Callable[[Registry], bool] | None = None
 
 
 @dataclass
@@ -185,7 +281,8 @@ class Registry:
 
    def add(self, kind: str, plugin: str, obj: Any) -> None:
       """!Records a contribution.
-      @param kind    "panel", "tool", "overlay", "hover", "command", "validator", "template"
+      @param kind    "panel", "tool", "overlay", "hover", "command", "validator", "template", "designer", "format",
+                     "preview"
       @param plugin  plugin id
       @param obj     the contribution
       @return None
@@ -205,7 +302,7 @@ class Registry:
       @return list of PanelSpec
       """
       ids = {host_id} if isinstance(host_id, str) else set(host_id)
-      return [p for p in self._of("panel") if ids & set(p.hosts)]
+      return [p for p in self._of("panel") if ids & set(p.hosts) and (p.shown_if is None or p.shown_if(self))]
 
    def map_tools(self) -> list[MapTool]:
       """!Registered map tools.
@@ -247,9 +344,49 @@ class Registry:
          except Exception as e:   # a broken validator must not break the editor
             found = [Diagnostic("error", f"validator failed: {e}")]
          for d in found:
-            d.plugin = pid
+            d.plugin = d.plugin or pid   # a validator reporting for other plugins names them (plugin data)
          out.extend(found)
       return out
+
+   def connectors(self) -> list[str]:
+      """!Ids of the loaded plugins with a connector (plugin API 3).
+      @return ids in load order
+      """
+      return [pid for pid, info in self.plugins.items() if info.connector is not None]
+
+   def designer_systems(self) -> list[DesignerSystemSpec]:
+      """!Registered manifest designer systems.
+      @return list in load order
+      """
+      return self._of("designer")
+
+   def formats(self, plugin_id: str | None = None) -> list[FileFormat]:
+      """!Registered file formats.
+      @param plugin_id  only those exchanging this plugin's blocks, or None for all
+      @return list in load order
+      """
+      return [f for f in self._of("format") if plugin_id is None or f.plugin == plugin_id]
+
+   def previews(self, plugin_id: str | None = None, attach: str | None = None) -> list[Preview]:
+      """!Registered previews.
+      @param plugin_id  only those of this plugin's blocks, or None
+      @param attach     only those showing this attach point, or None
+      @return list in load order
+      """
+      return [p for p in self._of("preview") if (plugin_id is None or p.plugin == plugin_id)
+              and (attach is None or not p.attach_points or attach in p.attach_points)]
+
+   def find(self, kind: str, item_id: str) -> Any:
+      """!A registered format or preview by id ("plugin/id", or the id alone when only one plugin uses it).
+      @param kind     "format" or "preview"
+      @param item_id  its id
+      @return the object, or None
+      """
+      items = self._of(kind)
+      exact = [o for o in items if o.id == item_id]
+      short = [o for o in items if o.id.split("/", 1)[-1] == item_id]
+      found = exact or short
+      return found[0] if len(found) == 1 else None
 
    def battle_templates(self) -> list[tuple[str, Path]]:
       """!Registered battle template folders.
@@ -300,9 +437,9 @@ class ExtensionContext:
       ## The studio's calendar version.
       self.studio_version = studio_version
 
-   def _ident(self, obj: MapTool | MapOverlay, kind: str) -> None:
+   def _ident(self, obj: MapTool | MapOverlay | FileFormat | Preview, kind: str) -> None:
       """!Checks and prefixes a contribution id.
-      @param obj   MapTool or MapOverlay
+      @param obj   MapTool, MapOverlay, FileFormat or Preview
       @param kind  for messages
       @return None
       """
@@ -312,17 +449,20 @@ class ExtensionContext:
          obj.id = f"{self.plugin.id}/{obj.id}"
 
    def add_panel(self, panel_id: str, title: str, factory: Callable[[Any], EditorPanel],
-                 hosts: Iterable[str] = (MAP_EDITOR,)) -> None:
+                 hosts: Iterable[str] = (MAP_EDITOR,), shown_if: Callable[[Registry], bool] | None = None) -> None:
       """!Registers a panel.
       @param panel_id  id (unique; used by --panel)
       @param title     tab title
       @param factory   callable(host) -> EditorPanel (import Qt inside it)
       @param hosts     host ids (MAP_EDITOR, a standalone tool's id, STUDIO)
+      @param shown_if  callable(registry) -> whether hosts show it (asked whenever a project's plugins load), or
+                       None for always
       @return None
       """
       if any(p.panel_id == panel_id for p in self._r._of("panel")):
          raise RegistrationError(f"plugin {self.plugin.id}: panel id {panel_id!r} is taken")
-      self._r.add("panel", self.plugin.id, PanelSpec(self.plugin.id, panel_id, title, factory, tuple(hosts)))
+      spec = PanelSpec(self.plugin.id, panel_id, title, factory, tuple(hosts), shown_if)
+      self._r.add("panel", self.plugin.id, spec)
 
    def add_map_tool(self, tool: MapTool) -> None:
       """!Registers a map tool.
@@ -394,3 +534,53 @@ class ExtensionContext:
       @return None
       """
       self._r.add("validator", self.plugin.id, fn)
+
+   def _api(self, what: str) -> None:
+      """!Refuses a plugin API 3 registration from a plugin written for an older API.
+      @param what  what it registers, for the message
+      @return None
+      """
+      if self.plugin.api < CONNECTOR_API:
+         raise RegistrationError(f"plugin {self.plugin.id}: {what} need plugin API {CONNECTOR_API} (plugin.json "
+                                 f"\"api\" is {self.plugin.api})")
+
+   def add_designer_system(self, system_id: str, title: str, factory: Callable[[], Any]) -> None:
+      """!Registers a manifest designer system (plugin API 3).
+      @param system_id  id (prefixed with the plugin's id)
+      @param title      name in the designer's system list
+      @param factory    callable() -> the system (import the designer inside it)
+      @return None
+      """
+      self._api("designer systems")
+      full = system_id if "/" in system_id else f"{self.plugin.id}/{system_id}"
+      if not system_id or any(d.system_id == full for d in self._r.designer_systems()):
+         raise RegistrationError(f"plugin {self.plugin.id}: designer system {full!r} needs a new id")
+      self._r.add("designer", self.plugin.id, DesignerSystemSpec(self.plugin.id, full, title, factory))
+
+   def add_format(self, fmt: FileFormat) -> None:
+      """!Registers a file format (plugin API 3).
+      @param fmt  FileFormat (export_data(), import_data() or both)
+      @return None
+      """
+      self._api("file formats")
+      if not isinstance(fmt, FileFormat):
+         raise RegistrationError(f"plugin {self.plugin.id}: file formats subclass registry.FileFormat")
+      if not (fmt.can_export() or fmt.can_import()):
+         raise RegistrationError(f"plugin {self.plugin.id}: format {fmt.id!r} neither exports nor imports")
+      if not fmt.suffix.startswith("."):
+         raise RegistrationError(f"plugin {self.plugin.id}: format {fmt.id!r}: suffix starts with a dot")
+      self._ident(fmt, "file format")
+      fmt.plugin = fmt.plugin or self.plugin.id
+      self._r.add("format", self.plugin.id, fmt)
+
+   def add_preview(self, preview: Preview) -> None:
+      """!Registers a preview (plugin API 3).
+      @param preview  Preview
+      @return None
+      """
+      self._api("previews")
+      if not isinstance(preview, Preview):
+         raise RegistrationError(f"plugin {self.plugin.id}: previews subclass registry.Preview")
+      self._ident(preview, "preview")
+      preview.plugin = preview.plugin or self.plugin.id
+      self._r.add("preview", self.plugin.id, preview)

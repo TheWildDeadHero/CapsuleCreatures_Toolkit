@@ -11,9 +11,11 @@ Plugin packages are imported under a private name per plugin, so two
 plugins may use the same package name; a plugin's modules import each
 other relatively (from . import x).
 
-Connector plugins (manifest and compiler data) need the
-compiler-side host, which is not built yet: such plugins are refused with a
-message saying so.
+A plugin with a connector (plugin API 3) is loaded once more by the engine's
+own tools/connectors.py (core.plugin_data.load_connector()), which checks its
+declarations the way the build does; a connector the engine refuses refuses
+the plugin. The studio itself never runs connector hooks except through the
+engine (core.plugin_data). A plugin may have a connector and no extension.
 
 The studio's own extensions live in capsule_studio/extensions/NAME/ and
 load the same way (builtin_registry()).
@@ -109,9 +111,9 @@ def load_plugin(reg: registry.Registry, info: manifest.PluginInfo, studio_versio
    missing = [d for d in info.requires_plugins if d not in reg.plugins]
    if missing:
       raise PluginError(f"plugin {info.id}: needs plugin(s) {', '.join(missing)} (list them first)")
-   if info.connector is not None:
-      raise PluginError(f"plugin {info.id}: has a connector; connectors (compiler-side data) are not "
-                        "supported by this studio yet")
+   if info.connector is not None and info.api < registry.CONNECTOR_API:
+      raise PluginError(f"plugin {info.id}: has a connector, which needs plugin API {registry.CONNECTOR_API} "
+                        f"(plugin.json \"api\" is {info.api})")
    try:
       purity.check_folder(info.id, info.folder)
       purity.check_sources(info.id, info.folder)
@@ -126,7 +128,15 @@ def load_plugin(reg: registry.Registry, info: manifest.PluginInfo, studio_versio
          sys.path.append(str(wheel))
    purity.install()
    purity.GUARD.watch(info.id, info.folder)
+   if info.connector is not None:
+      from ..core import plugin_data   # local: the engine is found only for plugins with a connector
+      try:
+         plugin_data.load_connector(info.folder)
+      except plugin_data.PluginDataError as e:
+         raise PluginError(f"plugin {info.id}: {e}") from None
    reg.plugins[info.id] = info
+   if info.extension is None:
+      return
    try:
       mod = _import(info, info.extension)
       fn = getattr(mod, "register", None)
