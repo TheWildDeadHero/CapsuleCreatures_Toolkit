@@ -41,7 +41,7 @@ def _shown(reg: Registry) -> bool:
 def data_of(project: Project) -> plugin_data.PluginData | None:
    """!A Project's plugin data (one per Project, so its checks stay cached).
    @param project  core.world.Project
-   @return PluginData, or None when the world is not part of a game
+   @return PluginData, or None when the world is not part of a game or lists no plugin with a connector
    """
    if project not in _DATA:
       _DATA[project] = plugin_data.for_project(project)

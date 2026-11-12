@@ -38,6 +38,8 @@ MAP_OF = {"map": lambda name: name, "layer": lambda name: name.split("/", 1)[0],
           "cell": lambda name: name.split("@", 1)[0]}
 ## Attach points whose diagnostics show on every map (they concern the whole world).
 WORLD_POINTS = ("project", "world")
+## A plugin folder's manifest.
+PLUGIN_MANIFEST = "plugin.json"
 ## The schema a store gives a listed file that does not exist yet (only maps can be: the world lists them first).
 EMPTY_SCHEMA = "capsule.map/2"
 
@@ -50,9 +52,16 @@ class PluginDataError(Exception):
 def tool() -> ModuleType:
    """!The engine's tools/connectors.py.
    @return the module
-   @throws engine.EngineNotFound when no engine checkout is found
+   @throws PluginDataError when no engine checkout is found, or the engine found has no connectors (older than
+           plugin API 3)
    """
-   return engine.tool("connectors")
+   try:
+      return engine.tool("connectors")
+   except engine.EngineNotFound as e:
+      raise PluginDataError(str(e)) from None
+   except ImportError:
+      raise PluginDataError("the engine found has no tools/connectors.py (plugins with a connector need an engine "
+                            "with connectors, plugin API 3)") from None
 
 
 def load_connector(folder: str | Path) -> Any:
@@ -533,15 +542,40 @@ class PluginData:
       return changes
 
 
+def lists_connectors(project_path: str | Path, game_folder: str | Path) -> bool:
+   """!Whether a game lists a plugin with a connector, read from the plugin.json files alone (no engine needed, so a
+   game without connectors never needs the engine's tools/connectors.py).
+   @param project_path  its reference/project.json
+   @param game_folder   its game folder
+   @return True when one of its plugin folders declares a connector (or cannot be read: the check then says why)
+   """
+   from ..plugins import project as plugin_project   # local: plugins imports core lazily too
+   try:
+      folders = plugin_project.plugin_folders(project_path, game_folder)
+   except (OSError, ValueError):
+      return True
+   for folder in folders:
+      try:
+         data = json.loads((folder / PLUGIN_MANIFEST).read_text(encoding="utf-8"))
+      except (OSError, ValueError):
+         continue   # the plugin loader reports a plugin it cannot read
+      if isinstance(data, dict) and data.get("connector") is not None:
+         return True
+   return False
+
+
 def for_project(project: Project, shared: Callable[[Path], Document | None] | None = None) -> PluginData | None:
    """!The plugin data of the game a world belongs to.
    @param project  core.world.Project
    @param shared   the Studio's other pages' documents (ProjectStore), or None
-   @return PluginData, or None when the world is not part of a game (no reference/project.json lists it)
+   @return PluginData, or None when the world is not part of a game (no reference/project.json lists it) or the game
+           lists no plugin with a connector
    """
    from ..plugins import project as plugin_project   # local: plugins imports core lazily too
-   path, _game = plugin_project.find_project(project.world.path)
-   return PluginData(path, ProjectStore(project, shared)) if path is not None else None
+   path, game = plugin_project.find_project(project.world.path)
+   if path is None or not lists_connectors(path, game):
+      return None
+   return PluginData(path, ProjectStore(project, shared))
 
 
 def for_files(project_path: str | Path) -> tuple[PluginData, FileStore]:

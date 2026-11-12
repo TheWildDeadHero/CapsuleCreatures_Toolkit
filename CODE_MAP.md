@@ -371,9 +371,9 @@ How to use it: find the file here, run `python3 toolkit/code_map.py find NAME` f
 - **`plugin_data.py`**: Plugin data: the connector blocks of a game's plugins (D-10 §4, plugin API 3), for the Plugin data panel and `capsule-studio ext`.
    - class: `FileStore, PluginData, PluginDataError, ProjectStore, Store`
    - type alias: `Change, Json`
-   - function: `attach_points, flatten, for_files, for_project, load_connector, schema_of, tool`
+   - function: `attach_points, flatten, for_files, for_project, lists_connectors, load_connector, schema_of, tool`
    - method: `FileStore.__init__, FileStore.document, FileStore.opened, FileStore.save, PluginData.__init__, PluginData._data, PluginData._key, PluginData._schema, PluginData.apply, PluginData.cells, PluginData.check, PluginData.complete, PluginData.diagnostics, PluginData.export, PluginData.game, PluginData.get, PluginData.import_changes, PluginData.names, PluginData.new_block, PluginData.plugin, PluginData.plugins, PluginData.points, PluginData.problems, PluginData.records, PluginData.reload, PluginData.schema, PluginData.set, PluginData.sources, PluginData.target, PluginData.targets, ProjectStore.__init__, ProjectStore.document, ProjectStore.opened, Store.document, Store.opened`
-   - constant: `EMPTY_SCHEMA, MAP_OF, WORLD_POINTS`
+   - constant: `EMPTY_SCHEMA, MAP_OF, PLUGIN_MANIFEST, WORLD_POINTS`
 - **`preview.py`**: Screen previews drawn the way the engine draws them, without any UI.
    - class: `Screen`
    - type alias: `CellRect, Color5, Glyphs`
