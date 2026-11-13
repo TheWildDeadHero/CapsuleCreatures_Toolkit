@@ -319,7 +319,7 @@ class PluginHostTests(unittest.TestCase):
       self.assertIn("removed from 2027.04.17", str(caught[0].message))
 
    def test_manifest_rules(self) -> None:
-      """!Ids, versions, the cli key (built-ins only), connectors refused by the loader.
+      """!Ids, versions, the cli key (built-ins only), an extension or a connector needed.
       @return None
       """
       good = {"schema": "capsule.plugin/1", "id": "acme.moods", "version": "2026.10.17.0690", "api": 1,
@@ -392,7 +392,8 @@ class PluginHostTests(unittest.TestCase):
 
    def test_refusals(self) -> None:
       """!Native files, platform wheels, ctypes, other API numbers, newer studio, missing dependencies,
-      connectors and broken register() are refused, naming the plugin and file; nothing stays registered.
+      connectors of plugins older than API 3 and broken register() are refused, naming the plugin and file;
+      nothing stays registered.
       @return None
       """
       cases = [
@@ -410,8 +411,8 @@ class PluginHostTests(unittest.TestCase):
                       requires={"capsule_studio": ">=2099.01.01.0000"}), "needs capsule-studio"),
          (self.plugin("acme.deps", {"ext/extension.py": "def register(ctx): pass\n"},
                       requires={"plugins": ["acme.base"]}), "needs plugin(s) acme.base"),
-         (self.plugin("acme.conn", {"ext/extension.py": "def register(ctx): pass\n"},
-                      connector={"module": "ext.connector"}), "connectors"),
+         (self.plugin("acme.conn", {"ext/extension.py": "def register(ctx): pass\n"}, api=2,
+                      connector={"module": "ext.connector"}), "needs plugin API 3"),
          (self.plugin("acme.broken", {"ext/extension.py": """
                 from capsule_studio.plugins import MapTool
                 class T(MapTool):

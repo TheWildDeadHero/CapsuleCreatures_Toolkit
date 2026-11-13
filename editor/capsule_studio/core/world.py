@@ -335,6 +335,18 @@ class Project:
       """
       return self._doc(self._path_of("maps", name), MAP_SCHEMA)
 
+   def document(self, path: str | Path, schema: str) -> Document:
+      """!The Document of any file of the game (opened once; saved with save_all()): the world's own Document for
+      world.json, a map's for its file, and other manifests (project.json, battle.json ...) beside them.
+      @param path    the file
+      @param schema  its schema (one of document.EMPTY)
+      @return Document
+      """
+      resolved = Path(path).resolve()
+      if resolved == self.world.path:
+         return self.world
+      return self._doc(resolved, schema)
+
    def documents(self) -> list[Document]:
       """!The world and every opened document.
       @return list of Documents

@@ -186,7 +186,8 @@ class DiscoveryTests(TemplateTestCase):
       plugin written for API 1 still loads.
       @return None
       """
-      self.assertEqual((registry.MIN_API, registry.API), (1, 2))
+      # API 3 (connectors, designer systems, formats, previews) kept everything API 2 registers.
+      self.assertEqual((registry.MIN_API, registry.API), (1, 3))
       reg = registry.Registry()
       loaded = loader.load_folders(reg, [self.plugin("acme.tpl", registry.API, 'ctx.add_battle_template("tpl")'),
                                          self.plugin("acme.old", registry.MIN_API, "pass"),

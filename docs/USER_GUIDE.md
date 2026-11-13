@@ -429,10 +429,20 @@ A game can extend the Studio without changing the toolkit. An extension
 (a plugin) is a folder with a `plugin.json` and a pure-Python package whose
 `register(ctx)` adds panels (tabs on the World page or a world tool), map
 tools, map overlays, hover text, command-line commands, validators or
-battle templates. A game lists its plugins in `reference/project.json`
+battle templates, and (plugin API 3) systems of the manifest designer, file
+formats and previews. A game lists its plugins in `reference/project.json`
 (`"plugins": ["plugins/day_cycle"]`), and opening the game loads them. The
 Studio's own world tools (encounters, events, objects, locations, override
 sets) are extensions too, loaded the same way. Plugins with native code are refused.
+
+A plugin can also bring a **connector**: its own data on the game's records
+(a mood on an opponent's party, a value on a map cell), which the game's
+build checks and compiles. While a game has one, the World page shows a
+**Plugin data** tab: pick the plugin, where its data goes and the record,
+then fill in the fields; problems show under them, and the plugin's
+previews and file formats (Import..., Export...) sit beside them. Every
+change can be undone and is saved with the world. `capsule-studio ext` does
+the same on the command line.
 [`editor/README.md`](../editor/README.md#extensions) has the plugin format.
 
 ## Known limits

@@ -5,6 +5,14 @@ versions, `YYYY.MM.DD.MMMM` (the UTC date and the minutes since midnight).
 
 ## Unreleased
 
+- **Plugin data and plugin API 3**: plugins with a connector load (through
+  the engine's `tools/connectors.py`); while a game has one, the World page
+  and the map editor show a **Plugin data** tab, an inspector built from the
+  connector's schemas with the records of each attach point, the
+  connectors' checks, previews and Import... / Export... with the plugin's
+  file formats; the checks also show under the map and in `world validate`.
+  New registration points: designer systems, file formats and previews.
+  `capsule-studio ext ...` does everything the tab does.
 - **Build** and **Build and Debug** in the Studio: a toolbar and Build menu
   that build the open game for this computer, the GBA, the Dreamcast or
   every target (each button's drop-down picks), save every page first and

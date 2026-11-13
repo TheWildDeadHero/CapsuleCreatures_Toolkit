@@ -1,0 +1,13 @@
+{
+  "schema": "capsule.plugin/1",
+  "id": "studio.plugin_data",
+  "title": "Plugin data",
+  "version": "2026.11.12.1080",
+  "api": 3,
+  "requires": {"capsule_studio": ">=2026.10.17.0000"},
+  "extension": {"module": "plugin_data_editor.extension"},
+  "cli": "ext",
+  "editor": {
+    "notes": "The studio's plugin data editor (D-10 section 4, plugin API 3): the Plugin data panel (a tab of the Studio's World page and the map editor while the game has a plugin with a connector: the inspector built from the connector's schemas, the records of each attach point, previews, import and export), the connectors' checks as a validator, and the ext command group. A built-in extension, loaded through the same plugin host as project plugins (capsule_studio.plugins)."
+  }
+}

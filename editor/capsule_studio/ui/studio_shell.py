@@ -85,7 +85,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from ..core import game_world, paths
 from ..core import project as project_core
-from ..core.document import DocumentError
+from ..core.document import Document, DocumentError
 from ..core.world import Project
 from ..plugins import registry
 from . import json_view, profiler
@@ -94,7 +94,6 @@ from .panes import NARROW, WIDE, splitter
 from .widgets import StartPage, headless, remember_file, report_failure
 
 if TYPE_CHECKING:
-   from ..core.document import Document
    from .audio_shell import AudioWindow
    from .battle_shell import BattleWindow
    from .project_shell import ProjectWindow
@@ -382,6 +381,7 @@ class StudioWindow(QtWidgets.QMainWindow):
       if page.page_id == "world":   # the World page's File menu offers the Studio's Add world to game... too
          self._add_world_to_file_menu(w)
          self._set_world_empty_state(w)
+         w.shared_document = lambda path: self.shared_document(path)
       for a in w.menuBar().actions():   # one Record performance: the Studio's
          if a.menu() is not None and a.text().replace("&", "") == "Help":
             self._skipped_menus.add(a)
@@ -397,6 +397,21 @@ class StudioWindow(QtWidgets.QMainWindow):
          self._park(page_id)
       self._update_item(page_id)
       return w
+
+   def shared_document(self, path: Path) -> Document | None:
+      """!Another page's open Document of a file (the World page's panels edit it, not a second copy of the file).
+      @param path  the resolved file
+      @return the Document, or None when no page other than the World page has it open
+      """
+      built = self.windows   # local names for "in": Doxygen 1.12 misreads "in self.x"
+      for page_id, w in built.items():
+         if page_id == "world":
+            continue
+         project = getattr(w, "project", None)
+         for doc in (getattr(w, "document", None), getattr(project, "battle", None)):
+            if isinstance(doc, Document) and doc.path == path:
+               return doc
+      return None
 
    def reset_page(self, page_id: str) -> None:
       """!Closes a page's window (without asking: the caller asked first); it

@@ -184,6 +184,9 @@ class WorldWindow(QtWidgets.QMainWindow):
       self.panels = []
       ## Why a panel's action did nothing while no world is open (EditorPanel.explain(); the Studio sets its own).
       self.no_world_reason = NO_WORLD_REASON
+      ## callable(path) -> another Studio page's open Document of a file, or None (the Studio sets it): panels that
+      ## edit the game's other manifests (Plugin data: battle.json, assets.json) edit that page's Document then.
+      self.shared_document = None
       ## The tab widget.
       self.tabs = QtWidgets.QTabWidget()
       self._build_menus()   # before the tabs: their signals update the menus

@@ -1068,6 +1068,26 @@ there. From the repository root:
 ./capsule-studio credits preview data/assets.json 1 page1.png
 ```
 
+Plugin data (D-10 §4, plugin API 3): the connector blocks of the game's
+plugins, as in the Plugin data tab. `--project` names the game; a change is
+saved only when it adds no error to the connectors' checks.
+
+```
+./capsule-studio ext points                                           # the attach points
+./capsule-studio --project GAME/reference/project.json ext plugins    # connectors and their fields
+./capsule-studio --project GAME/reference/project.json ext targets party
+./capsule-studio --project GAME/reference/project.json ext set sample.party_moods party "Novice Kit" --field mood=angry
+./capsule-studio --project GAME/reference/project.json ext set sample.party_moods cell "cave@-3,-4" --json '{"mood": "calm"}'
+./capsule-studio --project GAME/reference/project.json ext show sample.party_moods party "Novice Kit" --complete
+./capsule-studio --project GAME/reference/project.json ext list [--plugin ID] [--at POINT]
+./capsule-studio --project GAME/reference/project.json ext remove sample.party_moods party "Novice Kit"
+./capsule-studio --project GAME/reference/project.json ext check      # schemas, references, validate hooks
+./capsule-studio --project GAME/reference/project.json ext formats    # the plugins' file formats and previews
+./capsule-studio --project GAME/reference/project.json ext preview mood party "Novice Kit"
+./capsule-studio --project GAME/reference/project.json ext export moods-csv moods.csv
+./capsule-studio --project GAME/reference/project.json ext import moods-csv moods.csv [--dry-run]
+```
+
 Code pages (C-2, D-20): which 8-bit code each character of the game's
 language gets. GAME is the game's `reference/project.json`, its folder or
 any file in it; texts are checked with the page of the game they belong to.
@@ -1567,18 +1587,28 @@ package whose `register(ctx)` adds any of
 - battle templates (plugin API 2: `ctx.add_battle_template("templates/mine")`,
   a folder with a `template.json`, `capsule.template/1`, relative to the
   plugin folder), offered by New game... / New battle data... and
-  `capsule-studio template list`.
+  `capsule-studio template list`,
+- designer systems (plugin API 3: `ctx.add_designer_system(id, title,
+  factory)`, a system of the manifest designer),
+- file formats (plugin API 3: `ctx.add_format(fmt)`, a `registry.FileFormat`
+  with `export_data(data)` and / or `import_data(data, text)` that exchanges
+  its plugin's connector blocks with a file: Plugin data > Import... /
+  Export..., `capsule-studio ext export` / `ext import`),
+- previews (plugin API 3: `ctx.add_preview(preview)`, a `registry.Preview`
+  whose `render(data, attach, name, block)` shows a record's block as text
+  beside the Plugin data inspector, `capsule-studio ext preview`).
 
-This studio has plugin API 2 and still loads plugins written for API 1.
+This studio has plugin API 3 and still loads plugins written for API 1 and 2.
 
 ```json
 {
   "schema": "capsule.plugin/1",
   "id": "acme.day_cycle",
   "version": "2026.10.17.0690",
-  "api": 2,
+  "api": 3,
   "requires": {"capsule_studio": ">=2026.10.17.0000"},
-  "extension": {"module": "day_cycle.extension"}
+  "extension": {"module": "day_cycle.extension"},
+  "connector": {"module": "day_cycle.connector"}
 }
 ```
 
@@ -1592,8 +1622,44 @@ Plugins are pure Python only: a plugin folder holding native binaries or
 platform wheels, or code importing ctypes / cffi or compiled modules (other
 than the standard library's and the studio's PySide6, for UI), is refused
 with a message naming the file. A plugin's modules import each other
-relatively (`from . import x`). Connectors (compiler-side data, D-10 §4)
-are not hosted yet: a plugin with a connector is refused.
+relatively (`from . import x`).
+
+### Connectors and plugin data
+
+A plugin's **connector** (plugin API 3, D-10 §4) adds the game's own data to
+its manifests: typed blocks at attach points (the project, the world, maps,
+map cells, layers, the battle data's species, moves, items, parties and
+presenters, assets), checked by the connector's hooks and compiled into code
+the game links. The engine's `tools/connectors.py` runs it in the build (the
+engine's `docs/CONNECTORS.md`); the studio loads the same connector through
+that module, so it offers exactly the fields and checks the build has. A
+plugin may have a connector, an extension or both; one without an extension
+needs no Studio code at all.
+
+While the game has a plugin with a connector, the World page (and the map
+editor) shows a **Plugin data** tab:
+
+- the plugin, the attach point and the record (cells: a map, which follows
+  the Map tab, and a cell; **Go** shows a cell without a block yet); records
+  with a block are marked;
+- **Add block** / **Remove block**, and an inspector built from the
+  connector's schema: numbers in their range, check boxes, choices, text,
+  references chosen from the game's own names, JSON for lists and nested
+  blocks; each field shows its default until set;
+- the record's problems: its schema, its references and the connector's
+  validate hooks, on the open documents (unsaved changes count);
+- the plugin's previews of the record, and its file formats (**Import...**,
+  **Export...**).
+
+Each change is one undo step on the file holding the record (an import is
+one step over every file it changes), saved with the world. When another
+page of the Studio has that file open (the Battle page's `battle.json`),
+the tab edits that page's document. The connectors' errors also show under
+the map and in `world validate`.
+
+The engine's sample plugin (`samples/plugins/party_moods`) has both parts:
+a connector (moods on the opponents' parties, maps and cells) and a Studio
+extension (a CSV format and a preview).
 
 A panel edits only through the host's Document and the core functions; it
 never opens files or talks to another panel. Another application hosts the
