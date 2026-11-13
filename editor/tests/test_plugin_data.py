@@ -179,7 +179,9 @@ class CoreTests(PluginDataWorld):
       self.assertEqual(read_json(self.battle)["parties"][0]["ext"], {SAMPLE_ID: {"mood": "angry"}})
       # A page of the Studio holding the file: its Document is the one edited.
       shared = project.document(self.battle, "capsule.battle/1")
-      other = plugin_data.for_project(Project.open(self.world), lambda path: shared if path == self.battle else None)
+      # Stores ask with resolved paths (Windows' short temp names resolve to long ones).
+      battle = self.battle.resolve()
+      other = plugin_data.for_project(Project.open(self.world), lambda path: shared if path == battle else None)
       other.set(SAMPLE_ID, "party", OTHER_PARTY, {"mood": "calm"})
       self.assertEqual(shared.data["parties"][1]["ext"], {SAMPLE_ID: {"mood": "calm"}})
 
