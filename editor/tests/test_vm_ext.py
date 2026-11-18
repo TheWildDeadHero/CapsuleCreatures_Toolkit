@@ -20,11 +20,17 @@ try:
    HAVE_ENGINE = True
 except engine.EngineNotFound:
    HAVE_ENGINE = False
+## Step D: the engine has the script VM's natives sample (an older pinned engine does not).
+HAVE_SCRIPT_SAMPLE = HAVE_ENGINE and (engine.root() / core.SCRIPT_SAMPLE).is_file()
 
 ## The sandbox's ops: 6 aliases, 2 natives.
 SANDBOX_ALIASES = 6
 ## Its natives.
 SANDBOX_NATIVES = 2
+## Step D: the engine's script natives sample's natives.
+SCRIPT_SAMPLE_NATIVES = 3
+## Its wheels package's bytes in the test listing.
+WHEELS_BYTES = 0x40
 
 
 @unittest.skipUnless(HAVE_ENGINE, "no engine checkout (set CAPSULE_ENGINE)")
@@ -76,6 +82,52 @@ class ExtensionModelTests(unittest.TestCase):
       report = core.report_text(ext)
       self.assertIn("battle: 8 ops, 6 aliases (75%), 2 natives, 6 unused", report)
       self.assertIn("slide\tsandbox\t64 B", report)
+
+   @unittest.skipUnless(HAVE_SCRIPT_SAMPLE, "the engine has no script natives sample (D-36 step D)")
+   def test_script_sample(self) -> None:
+      """!Step D: the script VM's generic ops and the natives sample: progress, classes, the filters, the report.
+      @return None
+      """
+      manifests, usage = core.script_sample()
+      ext = core.load(manifests, usage)
+      self.assertEqual(ext.tables(), ["script", "script:native"])
+      ops, natives = ext.summary()
+      self.assertEqual((ops.generic, ops.natives, ops.aliases), (ops.ops, 0, 0))
+      self.assertEqual((natives.natives, natives.unused), (SCRIPT_SAMPLE_NATIVES, 0))
+      self.assertEqual(ext.native_classes(), [("Game-specific rules", 1, 2), ("Stand-ins", 1, 1),
+                                              ("Not implemented (M6)", 1, 1)])
+      self.assertEqual(len(ext.filtered(None, core.FILTERS["Generic ops"])), ops.ops)
+      beacon = next(r for r in ext.rows if r.name == "light_beacon")
+      self.assertEqual((beacon.implemented, beacon.milestone, beacon.uses), (False, "M6", 1))
+      self.assertIn("Stand-ins: 1 natives, 1 uses", core.report_text(ext))
+
+   @unittest.skipUnless(HAVE_SCRIPT_SAMPLE, "the engine has no script natives sample (D-36 step D)")
+   def test_script_owner_sizes(self) -> None:
+      """!Step D: a script native's GBA bytes are its owner's namespaces' code.
+      @return None
+      """
+      manifests, _usage = core.script_sample()
+      with tempfile.TemporaryDirectory() as tmp:
+         sizes = Path(tmp) / "nm.txt"
+         sizes.write_text("08000000 00000040 T sample::wheels::run(int)\n", encoding="utf-8")
+         ext = core.load(manifests, [], sizes)
+      wheel = next(r for r in ext.rows if r.name == "spin_wheel")
+      self.assertEqual((wheel.gba_bytes, wheel.owner_bytes, wheel.uses), (None, WHEELS_BYTES, 2))
+
+   @unittest.skipUnless(HAVE_SCRIPT_SAMPLE, "the engine has no script natives sample (D-36 step D)")
+   def test_game_files(self) -> None:
+      """!Step D: a game's natives manifest and usage record are found under its folders.
+      @return None
+      """
+      with tempfile.TemporaryDirectory() as tmp:
+         content, build = Path(tmp) / "content" / "world" / "scripts", Path(tmp) / "build" / "game"
+         content.mkdir(parents=True)
+         build.mkdir(parents=True)
+         (content / core.GAME_NATIVES_FILE).write_text("{}", encoding="utf-8")
+         (build / core.GAME_USAGE_FILE).write_text("{}", encoding="utf-8")
+         manifests, usage = core.game_files([Path(tmp) / "content", Path(tmp) / "build"])
+      self.assertEqual([p.name for p in manifests], ["script_vm.json", core.GAME_NATIVES_FILE])
+      self.assertEqual([p.name for p in usage], [core.GAME_USAGE_FILE])
 
    def test_refused(self) -> None:
       """!A manifest the engine refuses is an ExtensionError with its reason.

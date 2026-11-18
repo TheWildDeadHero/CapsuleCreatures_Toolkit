@@ -28,11 +28,21 @@ try:
    HAVE_ENGINE = True
 except engine.EngineNotFound:
    HAVE_ENGINE = False
+## Step D: the engine's script natives sample.
+SCRIPT_SAMPLE = Path("tests") / "data" / "vm_ext" / "script_natives_vm_ext.json"
+## Whether the engine has it (an older pinned engine does not).
+HAVE_SCRIPT_SAMPLE = HAVE_ENGINE and (engine.root() / SCRIPT_SAMPLE).is_file()
 
 ## Times the event loop runs to settle.
 SETTLE_ROUNDS = 4
 ## The shot's size.
 SHOT_SIZE = (1280, 720)
+## The progress tree's aliases column (step D put the generic ops' column before it).
+ALIASES_COLUMN = 3
+## Step D: the script sample's natives, and the op list's implemented and milestone columns.
+SCRIPT_SAMPLE_NATIVES = 3
+## The columns.
+IMPLEMENTED_COLUMN, MILESTONE_COLUMN = 9, 10
 
 
 @unittest.skipIf(QtWidgets is None, "PySide6 is not installed (run in the toolkit environment)")
@@ -102,7 +112,7 @@ class VmExtPanelTests(unittest.TestCase):
       self.p.open_sample()
       self.settle()
       self.assertEqual(self.p.progress.topLevelItemCount(), 1)
-      self.assertEqual(self.p.progress.topLevelItem(0).text(2), "6 (75%)")
+      self.assertEqual(self.p.progress.topLevelItem(0).text(ALIASES_COLUMN), "6 (75%)")
       self.assertEqual(self.p.ops.topLevelItemCount(), 8)
       self.assertIn("no errors", self.p.checks.toPlainText())
       self.p.kind_box.setCurrentText("Natives")
@@ -120,6 +130,30 @@ class VmExtPanelTests(unittest.TestCase):
       shots = os.environ.get("VM_EXT_SHOTS")
       if shots:
          self.w.grab().save(str(Path(shots) / "toolkit_extensions_sample.png"))
+
+   @unittest.skipUnless(HAVE_SCRIPT_SAMPLE, "the engine has no script natives sample (D-36 step D)")
+   def test_script_sample(self) -> None:
+      """!Step D: the script VM's generic ops and the natives sample, their classes and columns; a game's folders.
+      @return None
+      """
+      self.p.open_script_sample()
+      self.settle()
+      self.assertEqual(self.p.progress.topLevelItemCount(), 2)
+      self.assertEqual(self.p.classes.topLevelItemCount(), SCRIPT_SAMPLE_NATIVES)
+      self.assertIn("no errors", self.p.checks.toPlainText())
+      self.p.kind_box.setCurrentText("Natives")
+      self.p.fill()
+      self.assertEqual(self.p.ops.topLevelItemCount(), SCRIPT_SAMPLE_NATIVES)
+      first = self.p.ops.topLevelItem(0)
+      self.assertEqual((first.text(IMPLEMENTED_COLUMN), first.text(MILESTONE_COLUMN)), ("yes", "M2"))
+      self.assertIn("Implemented by the game: yes", self.p.detail.toPlainText())
+      self.p.kind_box.setCurrentText("Generic ops")
+      self.p.fill()
+      self.assertGreater(self.p.ops.topLevelItemCount(), SCRIPT_SAMPLE_NATIVES)
+      self.assertFalse(self.p.open_game_folders([self.root]))   # no natives manifest there
+      shots = os.environ.get("VM_EXT_SHOTS")
+      if shots:
+         self.w.grab().save(str(Path(shots) / "toolkit_extensions_script.png"))
 
    def test_refused(self) -> None:
       """!A manifest the engine refuses leaves the view as it was and says why.
