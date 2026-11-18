@@ -470,9 +470,9 @@ How to use it: find the file here, run `python3 toolkit/code_map.py find NAME` f
    - constant: `BLACK, FIRST_COPY_NUMBER, MAX_SLOT, METATILE_TILES, PLACE_KEYS, RGB_BYTES, RGBA_BYTES, TARGET_REF_KEYS, TILE_PIXELS, TILES_PER_METATILE`
 - **`vm_ext.py`**: [VX] VM extension manifests (D-39, capsule.vm-ext/1): the model behind the Studio's VM extensions view.
    - class: `ExtensionError, Extensions, OpRow, TableSummary`
-   - function: `_step_text, load, report_text, sandbox_manifest, tool`
-   - method: `Extensions.filtered, Extensions.summary, Extensions.tables, TableSummary.alias_percent`
-   - constant: `FILTERS, PERCENT, SANDBOX_MANIFEST, USAGE_SCHEMA`
+   - function: `_step_text, game_files, load, native_class, report_text, sandbox_manifest, script_sample, tool`
+   - method: `Extensions.filtered, Extensions.native_classes, Extensions.summary, Extensions.tables, TableSummary.alias_percent`
+   - constant: `FILTERS, GAME_NATIVES_FILE, GAME_USAGE_FILE, NATIVE_CLASSES, OTHER_CLASS, PERCENT, SANDBOX_MANIFEST, SCRIPT_SAMPLE, SCRIPT_SAMPLE_USAGE, SCRIPT_VM_MANIFEST, USAGE_SCHEMA`
 - **`world.py`**: A world being edited: the world manifest plus its tilesets and maps.
    - class: `CachedTileset, EventEntry, Project`
    - type alias: `CacheKey, CompiledTileset, Image, JsonDict, LayerSpec`
@@ -1053,9 +1053,9 @@ How to use it: find the file here, run `python3 toolkit/code_map.py find NAME` f
    - constant: `COLUMNS, FIRST_COLUMN, GAP, GAP_BACK, OFFSET_COLUMN, OWN_PHASE, PER_ROW, PHASE_COLUMN, PREVIEW_ZOOM, TABLE_HEIGHT, TARGET_BACK, TICK_MS`
 - **`vm_ext.py`**: [VX] VM extensions view (D-39): a game's VM extension manifests (capsule.vm-ext/1) as the build reads them, with the engine's checks, the banks' usage and the natives' sizes on the GBA (core/vm_ext.py over the engine's tools/vm_ext.py).
    - class: `VmExtPanel`
-   - function: `_horizontal`
-   - method: `VmExtPanel.__init__, VmExtPanel.add_sizes, VmExtPanel.add_usage, VmExtPanel.copy_report, VmExtPanel.current, VmExtPanel.fill, VmExtPanel.load, VmExtPanel.open_manifests, VmExtPanel.open_sample, VmExtPanel.show_op`
-   - constant: `ALL_TABLES, COLUMNS, JSON_FILTER, LOAD_ERRORS, NAME_COLUMN, NONE_SHOWN, SIZES_FILTER`
+   - function: `_gba_bytes, _horizontal`
+   - method: `VmExtPanel.__init__, VmExtPanel.add_sizes, VmExtPanel.add_usage, VmExtPanel.copy_report, VmExtPanel.current, VmExtPanel.fill, VmExtPanel.load, VmExtPanel.open_game, VmExtPanel.open_game_folders, VmExtPanel.open_manifests, VmExtPanel.open_sample, VmExtPanel.open_script_sample, VmExtPanel.show_op`
+   - constant: `ALL_TABLES, COLUMNS, GAME_MANIFESTS, JSON_FILTER, LOAD_ERRORS, NAME_COLUMN, NONE_SHOWN, OWNER_BYTES_MARK, SIZES_FILTER`
 - **`world_doors.py`**: [S3] The World page's "Doors and draw order" panel (D-30, engine DS1): the world's door bindings by metatile (every cell showing a metatile animates with a door; a warp's own door, on the Events tab, wins on its cell) and the object draw order rule (sub-priority from a sprite's bottom edge on screen and its elevation), with a preview of two objects at rows and elevations of your choice: which one the engine draws in front and their sort keys.
    - class: `WorldDoorsPanel`
    - method: `WorldDoorsPanel.__init__, WorldDoorsPanel._base_changed, WorldDoorsPanel._binding_picked, WorldDoorsPanel._field_changed, WorldDoorsPanel._fill_bindings, WorldDoorsPanel._fill_metatiles, WorldDoorsPanel._fill_rule, WorldDoorsPanel._form, WorldDoorsPanel._levels, WorldDoorsPanel._ranges, WorldDoorsPanel._run, WorldDoorsPanel._value, WorldDoorsPanel.add_binding, WorldDoorsPanel.apply_binding, WorldDoorsPanel.current_document, WorldDoorsPanel.refresh, WorldDoorsPanel.remove_binding, WorldDoorsPanel.reset_rule, WorldDoorsPanel.sprites, WorldDoorsPanel.stop, WorldDoorsPanel.update_preview, WorldDoorsPanel.world`
@@ -1695,8 +1695,8 @@ How to use it: find the file here, run `python3 toolkit/code_map.py find NAME` f
 - **`test_qt_vm_ext.py`**: The Extensions view (ui/editors/vm_ext.py) in the asset editor, offscreen: the engine sandbox's sample (progress, the op list and its filters, an op's details, the checks, the report on the clipboard), and a refused manifest (the status bar says why).
    - class: `VmExtPanelTests`
    - type alias: `QtWidgets`
-   - method: `VmExtPanelTests.settle, VmExtPanelTests.setUp, VmExtPanelTests.setUpClass, VmExtPanelTests.tearDown, VmExtPanelTests.tearDownClass, VmExtPanelTests.test_refused, VmExtPanelTests.test_registered, VmExtPanelTests.test_sample`
-   - constant: `HAVE_ENGINE, SETTLE_ROUNDS, SHOT_SIZE`
+   - method: `VmExtPanelTests.settle, VmExtPanelTests.setUp, VmExtPanelTests.setUpClass, VmExtPanelTests.tearDown, VmExtPanelTests.tearDownClass, VmExtPanelTests.test_refused, VmExtPanelTests.test_registered, VmExtPanelTests.test_sample, VmExtPanelTests.test_script_sample`
+   - constant: `ALIASES_COLUMN, HAVE_ENGINE, HAVE_SCRIPT_SAMPLE, IMPLEMENTED_COLUMN, MILESTONE_COLUMN, SCRIPT_SAMPLE, SCRIPT_SAMPLE_NATIVES, SETTLE_ROUNDS, SHOT_SIZE`
 - **`test_qt_wav_player_fallback.py`**: Qt smoke (offscreen; skipped without PySide6): the WAV player's fallback when Qt Multimedia fails while playing (the player goes silent, its clock runs on, the render bar hands the WAV to the system's player and says why), and Play on a machine without Qt Multimedia or an audio output (the offscreen platform) staying silent.
    - class: `QtWavPlayerFallbackTests`
    - type alias: `QtWidgets`
@@ -1825,8 +1825,8 @@ How to use it: find the file here, run `python3 toolkit/code_map.py find NAME` f
    - constant: `ERROR_STATUS, GAME, NM`
 - **`test_vm_ext.py`**: [VX] The Extensions view's model (core/vm_ext.py, D-39) over the engine's tools/vm_ext.py: the engine sandbox's manifest (simple shapes), progress per table, filters, usage records, GBA sizes and the report.
    - class: `ExtensionModelTests`
-   - method: `ExtensionModelTests.test_filters, ExtensionModelTests.test_refused, ExtensionModelTests.test_sample, ExtensionModelTests.test_usage_and_sizes`
-   - constant: `HAVE_ENGINE, SANDBOX_ALIASES, SANDBOX_NATIVES`
+   - method: `ExtensionModelTests.test_filters, ExtensionModelTests.test_game_files, ExtensionModelTests.test_refused, ExtensionModelTests.test_sample, ExtensionModelTests.test_script_owner_sizes, ExtensionModelTests.test_script_sample, ExtensionModelTests.test_usage_and_sizes`
+   - constant: `HAVE_ENGINE, HAVE_SCRIPT_SAMPLE, SANDBOX_ALIASES, SANDBOX_NATIVES, SCRIPT_SAMPLE_NATIVES, WHEELS_BYTES`
 - **`test_world.py`**: Tests for capsule_studio.core.world / maps / tilesets / mapview and the world, map and tileset commands (no Qt needed).
    - class: `ImportTests, MapEditTests, MapGroupTests, MetatileBlockTests, ProjectTests, TilesetEditTests, TransparentColorTests, WorldCliTests, WorldTestCase`
    - function: `sandbox_world`

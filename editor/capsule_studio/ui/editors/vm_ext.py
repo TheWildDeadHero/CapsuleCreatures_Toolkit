@@ -8,6 +8,11 @@ alias candidate is proven, ops no bank uses). Middle: the ops of the table chose
 reason; a native's GBA bytes and every op's uses are columns. Right: the op chosen (operands, its steps or its
 reason, owner, tier, waits, glitch hooks) and the checks' errors and warnings; Copy report puts the natives' list
 on the clipboard. Nothing here edits a manifest: they are the game's source files.
+
+D-36 package 2 step D: Script sample opens the engine's field script VM with its natives sample; Open game... finds
+the engine's script VM, a game's natives manifest and its scripts usage record under the folders chosen (the
+import's content, the build folder). The script VM's generic ops have their own filter; a script native shows
+whether the game implements it, its milestone, and its owner's GBA bytes; the natives are summarised by class.
 """
 from __future__ import annotations
 
@@ -31,8 +36,12 @@ JSON_FILTER = "JSON files (*.json);;All files (*)"
 SIZES_FILTER = "nm listings (*.txt *.nm);;All files (*)"
 ## What loading may raise.
 LOAD_ERRORS = (core.ExtensionError, engine.EngineNotFound, OSError)
-## The op list's columns.
-COLUMNS = ("Table", "Id", "Name", "Kind", "Owner", "Waits", "Bytes", "GBA bytes", "Uses")
+## The op list's columns (step D: a script native's implemented flag and milestone; its GBA bytes are its owner's).
+COLUMNS = ("Table", "Id", "Name", "Kind", "Owner", "Waits", "Bytes", "GBA bytes", "Uses", "Implemented", "Milestone")
+## Marks GBA bytes that are a script native's owner's, not its own.
+OWNER_BYTES_MARK = " (owner)"
+## Step D: a game's script VM files: the engine's script VM and the game's natives manifest.
+GAME_MANIFESTS = 2
 ## The table filter's entry for every table.
 ALL_TABLES = "(every table)"
 ## A value the view does not have.
@@ -73,6 +82,12 @@ class VmExtPanel(EditorPanel):
       lv.addWidget(open_manifests_button)
       open_sample_button = button("Sample", self.open_sample, "The engine sandbox's manifest (simple shapes)")
       lv.addWidget(open_sample_button)
+      script_sample_button = button("Script sample", self.open_script_sample,
+                                    "The engine's field script VM with its natives sample (simple shapes)")
+      lv.addWidget(script_sample_button)
+      open_game_button = button("Open game...", self.open_game,
+                                "A game's script natives: its import's content folder, then its build folder")
+      lv.addWidget(open_game_button)
       add_usage_button = button("Add usage...", self.add_usage, "The banks' usage records (capsule.vm-usage/1)")
       lv.addWidget(add_usage_button)
       add_sizes_button = button("Add GBA sizes...", self.add_sizes, "An nm -S -C listing of a GBA build")
@@ -82,9 +97,14 @@ class VmExtPanel(EditorPanel):
       lv.addWidget(self.files, 1)
       ## Each table's progress.
       self.progress = QtWidgets.QTreeWidget()
-      self.progress.setHeaderLabels(["Table", "Ops", "Aliases", "Natives", "Proven", "Unused"])
+      self.progress.setHeaderLabels(["Table", "Ops", "Generic", "Aliases", "Natives", "Proven", "Unused"])
       self.progress.setRootIsDecorated(False)
       lv.addWidget(self.progress, 1)
+      ## Step D: the script natives by class.
+      self.classes = QtWidgets.QTreeWidget()
+      self.classes.setHeaderLabels(["Natives by class", "Natives", "Uses"])
+      self.classes.setRootIsDecorated(False)
+      lv.addWidget(self.classes, 1)
       split_box(lv)   # the files above the progress: the user drags the boundary
 
       middle = QtWidgets.QWidget()
@@ -149,6 +169,43 @@ class VmExtPanel(EditorPanel):
       except engine.EngineNotFound as e:
          self.host.show_status(f"Sample: {e}")
 
+   def open_script_sample(self) -> None:
+      """!Step D: reads the engine's script VM with its natives sample and the sample's usage record.
+      @return None
+      """
+      try:
+         manifests, usage = core.script_sample()
+      except engine.EngineNotFound as e:
+         self.host.show_status(f"Script sample: {e}")
+         return
+      self.load(manifests, usage, None)
+
+   def open_game(self) -> None:
+      """!Step D: asks for a game's import content folder (then, optionally, its build folder) and reads the script
+      VM with the game's natives manifest and scripts usage record found there.
+      @return None
+      """
+      content = QtWidgets.QFileDialog.getExistingDirectory(self, "The game's imported content", "")
+      if not content:
+         return
+      build = QtWidgets.QFileDialog.getExistingDirectory(self, "The game's build folder (Cancel: none)", "")
+      self.open_game_folders([Path(content)] + ([Path(build)] if build else []))
+
+   def open_game_folders(self, folders: list[Path]) -> bool:
+      """!Step D: reads the script VM files found under folders (core.game_files()).
+      @param folders  the import's content, the build folder
+      @return True when a natives manifest was found and read
+      """
+      try:
+         manifests, usage = core.game_files(folders)
+      except engine.EngineNotFound as e:
+         self.host.show_status(f"Open game: {e}")
+         return False
+      if len(manifests) < GAME_MANIFESTS:
+         self.host.show_status(f"Open game: no {core.GAME_NATIVES_FILE} under {', '.join(str(f) for f in folders)}")
+         return False
+      return self.load(manifests, usage, None)
+
    def add_usage(self) -> None:
       """!Asks for usage records and reads them with the manifests.
       @return None
@@ -190,8 +247,11 @@ class VmExtPanel(EditorPanel):
       self.progress.clear()
       for s in ext.summary():
          self.progress.addTopLevelItem(QtWidgets.QTreeWidgetItem(
-            [s.table, str(s.ops), f"{s.aliases} ({s.alias_percent}%)", str(s.natives), str(s.proven),
+            [s.table, str(s.ops), str(s.generic), f"{s.aliases} ({s.alias_percent}%)", str(s.natives), str(s.proven),
              str(s.unused) if s.unused is not None else NONE_SHOWN]))
+      self.classes.clear()
+      for label, natives, uses in ext.native_classes():
+         self.classes.addTopLevelItem(QtWidgets.QTreeWidgetItem([label, str(natives), str(uses)]))
       lines = [f"error: {e}" for e in ext.errors] + [f"warning: {w}" for w in ext.warnings]
       self.checks.setPlainText("\n".join(lines) if lines else "Checks: no errors, no warnings.")
       self.fill()
@@ -209,14 +269,14 @@ class VmExtPanel(EditorPanel):
       if self.ext is None:
          return
       table = self.table_box.currentText()
-      kinds = core.FILTERS.get(self.kind_box.currentText(), ("alias", "native"))
+      kinds = core.FILTERS.get(self.kind_box.currentText(), core.FILTERS["All ops"])
       self.shown = self.ext.filtered(None if table in ("", ALL_TABLES) else table, kinds, self.search.text())
       for r in self.shown:
          self.ops.addTopLevelItem(QtWidgets.QTreeWidgetItem(
             [r.table, f"{r.id:#04x}", r.name, r.kind, r.owner, "yes" if r.waits else "",
-             str(r.size) if r.size is not None else NONE_SHOWN,
-             str(r.gba_bytes) if r.gba_bytes is not None else NONE_SHOWN,
-             str(r.uses) if r.uses is not None else NONE_SHOWN]))
+             str(r.size) if r.size is not None else NONE_SHOWN, _gba_bytes(r),
+             str(r.uses) if r.uses is not None else NONE_SHOWN,
+             NONE_SHOWN if r.implemented is None else ("yes" if r.implemented else "no"), r.milestone or ""]))
       if self.shown:
          self.ops.setCurrentItem(self.ops.topLevelItem(0))
 
@@ -243,6 +303,10 @@ class VmExtPanel(EditorPanel):
                "Operands: " + (", ".join(r.operands) if r.operands else "none")]
       if r.kind == "native":
          lines += [f"Native: {r.symbol}", f"Reason: {r.reason}"]
+         if r.implemented is not None:   # step D: a script native
+            lines += [f"Implemented by the game: {'yes' if r.implemented else 'no (its generic stand-in)'}",
+                      f"Milestone: {r.milestone or NONE_SHOWN}, class: {core.native_class(r.reason)}",
+                      f"Owner's GBA bytes: {r.owner_bytes if r.owner_bytes is not None else NONE_SHOWN}"]
          if r.steps:
             lines += [f"Alias candidate ({r.parity}):"] + [f"   {s}" for s in r.steps]
       else:
@@ -260,6 +324,16 @@ class VmExtPanel(EditorPanel):
          return
       QtWidgets.QApplication.clipboard().setText(core.report_text(self.ext))
       self.host.show_status("Extensions: the natives' report is on the clipboard")
+
+
+def _gba_bytes(r: core.OpRow) -> str:
+   """!An op's GBA bytes as the list shows them (step D: a script native's are its owner's, marked).
+   @param r  the row
+   @return the text
+   """
+   if r.gba_bytes is not None:
+      return str(r.gba_bytes)
+   return f"{r.owner_bytes}{OWNER_BYTES_MARK}" if r.owner_bytes is not None else NONE_SHOWN
 
 
 def _horizontal() -> object:
