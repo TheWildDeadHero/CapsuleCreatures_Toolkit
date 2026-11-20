@@ -293,8 +293,12 @@ game's own words, so a Starter game says Rivals and Talents.
 
 The project settings: **Build settings** (the engine settings compiled
 into this game: VRAM upload queue sizes, ROM wait states, the screen arena),
-**GBA memory** (a build folder's memory report, from a GBA build) and
-**Code page** (which 8-bit code each character of the game's language gets).
+**GBA memory** (a build folder's memory report, from a GBA build),
+**Build usage** (which engine modules and script ops the game uses, the bytes
+each module takes on the GBA, and the game's exclusion manifest: tick what
+the build says the game can leave out, then **Save**; the next build checks
+it and does not compile what it excludes) and **Code page** (which 8-bit
+code each character of the game's language gets).
 
 ### Audio
 
