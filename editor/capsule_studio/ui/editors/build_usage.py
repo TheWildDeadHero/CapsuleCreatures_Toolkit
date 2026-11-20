@@ -24,6 +24,7 @@ from PySide6 import QtCore, QtWidgets
 from ...core import engine, exclusion, gba_memory, project
 from ...core.document import DocumentError
 from ..panel import EditorPanel
+from ..panes import splitter
 from ..widgets import button
 from .gba_memory import SETTINGS_KEY
 
@@ -88,11 +89,12 @@ class BuildUsagePanel(EditorPanel):
       self.modules = self._table(MODULE_COLUMNS)
       ## The script ops.
       self.ops = self._table(OP_COLUMNS)
-      tables = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
+      boxes = []
       for title, table in (("Engine modules", self.modules), ("Script ops", self.ops)):
          box = QtWidgets.QGroupBox(title)
          QtWidgets.QVBoxLayout(box).addWidget(table)
-         tables.addWidget(box)
+         boxes.append(box)
+      tables = splitter(QtCore.Qt.Orientation.Horizontal, boxes)   # the studio's pane rules (panes.py)
 
       actions = QtWidgets.QHBoxLayout()
       actions.addWidget(button("Exclude all suggested", lambda: self.take_suggestion(),
@@ -205,7 +207,8 @@ class BuildUsagePanel(EditorPanel):
       """!Reads the folder's usage files and the game's manifest.
       @return True when the folder has the game's report
       """
-      self.usage, self.manifest = None, None
+      self.usage = None
+      self.manifest = None
       folder, doc = self.build_folder(), self.doc
       lines: list[str] = []
       try:
@@ -249,7 +252,8 @@ class BuildUsagePanel(EditorPanel):
          self.module_rows = exclusion.module_rows(usage, self.manifest) if usage is not None else []
          self.op_rows = exclusion.op_rows(usage, self.manifest) if usage is not None else []
       except exclusion.ExclusionError as e:
-         self.module_rows, self.op_rows = [], []
+         self.module_rows = []
+         self.op_rows = []
          self.notes.setText(str(e))
       self._fill_modules()
       self._fill_ops()
