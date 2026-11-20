@@ -20,6 +20,7 @@ from ..core import engine, project
 from ..core.document import DocumentError
 from . import profiler
 from .editors.build_settings import BuildSettingsPanel
+from .editors.build_usage import BuildUsagePanel
 from .editors.codepage_panel import CodePagePanel
 from .editors.gba_memory import GbaMemoryPanel
 from .panes import fit_panel
@@ -29,8 +30,9 @@ if TYPE_CHECKING:
    from ..core.document import Document
    from .panel import EditorPanel
 
-## Project panels, in tab order ([S6] engine UM: the GBA memory settings and report after the build settings).
-PROJECT_PANELS = [BuildSettingsPanel, GbaMemoryPanel, CodePagePanel]
+## Project panels, in tab order ([S6] engine UM: the GBA memory settings and report after the build settings; D-36
+## package 3: the build usage and the exclusion manifest after them).
+PROJECT_PANELS = [BuildSettingsPanel, GbaMemoryPanel, BuildUsagePanel, CodePagePanel]
 ## File dialog filter.
 PROJECT_FILTER = "Project manifest (project.json *.json);;All files (*)"
 ## Width of the window when it opens, pixels.

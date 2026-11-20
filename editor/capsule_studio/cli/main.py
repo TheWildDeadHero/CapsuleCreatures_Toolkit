@@ -43,6 +43,8 @@ COMMAND_MODULES = ["assets_cmds", "sprite_cmds", "text_cmds", "world_cmds", "fie
                    "sample_cmds",
                    # D-36: a game's usage report (the engine modules and items its data uses, the link compared)
                    "usage_cmds",
+                   # D-36 package 3 step 3C: a game's build usage and its exclusion manifest
+                   "exclude_cmds",
                    # the Studio's Build and Build and Debug buttons (core.game_build)
                    "build_cmds"]
 ## Modules (relative to this package) that add actions to the `battle FILE` group (each has a
