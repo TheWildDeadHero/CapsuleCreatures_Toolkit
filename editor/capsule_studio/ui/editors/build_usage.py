@@ -60,13 +60,13 @@ class BuildUsagePanel(EditorPanel):
       ## True while widgets are being filled.
       self._loading = False
       ## What the build folder says about the game, or None.
-      self.usage: exclusion.BuildUsage | None = None
+      self.usage = None   # type: exclusion.BuildUsage | None
       ## The game's manifest as read, or None.
-      self.manifest: dict | None = None
+      self.manifest = None   # type: dict | None
       ## The module rows shown.
-      self.module_rows: list[exclusion.ModuleRow] = []
+      self.module_rows = []   # type: list[exclusion.ModuleRow]
       ## The op rows shown.
-      self.op_rows: list[exclusion.OpRow] = []
+      self.op_rows = []   # type: list[exclusion.OpRow]
 
       ## The build folder.
       self.folder = QtWidgets.QComboBox()
