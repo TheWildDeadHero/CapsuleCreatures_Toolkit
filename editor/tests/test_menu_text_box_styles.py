@@ -502,7 +502,7 @@ class GameBlockTests(BattleTestCase):
       found = game_block.sections(inventory.image_of(newer_save, self.project))
       newer = sl.assemble(found[1], found[0] + 1)
       path = self.dir / "two.sav"
-      path.write_bytes(older + bytes(len(older) % game_block.COPY_ALIGN or 0) + newer)
+      path.write_bytes(older + bytes(-len(older) % game_block.COPY_ALIGN) + newer)   # the next copy at an aligned slot
       other = inventory.new_testsave(self.project, "other")
       with other.edit("t"):
          self.assertEqual(game_block.from_image(other, path), GAME_SIZE)
